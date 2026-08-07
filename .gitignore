@@ -9,6 +9,10 @@ env/
 
 # Environment variables
 .env
+.env.*
+!.env.example
 
 # pytest cache
 .pytest_cache/
+
+.vscode/
