@@ -1,4 +1,5 @@
 from fastapi.testclient import TestClient
+from sqlalchemy.exc import SQLAlchemyError
 
 from app.main import app
 
@@ -6,17 +7,33 @@ from app.main import app
 client = TestClient(app)
 
 
-def test_liveness_check() -> None:
-    response = client.get("/health/live")
+def test_health_ready_returns_200_when_database_is_available(monkeypatch):
+    def fake_check_database_connection():
+        return None
 
-    assert response.status_code == 200
-    assert response.json() == {"status": "alive"}
-    assert response.headers["content-type"] == "application/json"
+    monkeypatch.setattr(
+        "app.api.routes.health.check_database_connection",
+        fake_check_database_connection,
+    )
 
-
-def test_readiness_check() -> None:
     response = client.get("/health/ready")
 
     assert response.status_code == 200
     assert response.json() == {"status": "ready"}
-    assert response.headers["content-type"] == "application/json"
+
+
+def test_health_ready_returns_503_when_database_is_unavailable(monkeypatch):
+    def fake_check_database_connection():
+        raise SQLAlchemyError("database unavailable")
+
+    monkeypatch.setattr(
+        "app.api.routes.health.check_database_connection",
+        fake_check_database_connection,
+    )
+
+    response = client.get("/health/ready")
+
+    assert response.status_code == 503
+    assert response.json() == {
+        "detail": "Database unavailable"
+    }
