@@ -1,5 +1,6 @@
 from pydantic import SecretStr
 from pydantic_settings import BaseSettings, SettingsConfigDict
+from sqlalchemy import URL
 
 
 class Settings(BaseSettings):
@@ -19,20 +20,16 @@ class Settings(BaseSettings):
     )
 
     @property
-    def database_url(self) -> str:
-        password = self.postgres_password.get_secret_value()
-
-        return (
-            f"postgresql+psycopg://"
-            f"{self.postgres_user}:{password}"
-            f"@{self.postgres_host}:{self.postgres_port}"
-            f"/{self.postgres_db}"
+    def database_url(self) -> URL:
+        return URL.create(
+            drivername="postgresql+psycopg",
+            username=self.postgres_user,
+            password=self.postgres_password.get_secret_value(),
+            host=self.postgres_host,
+            port=self.postgres_port,
+            database=self.postgres_db,
         )
+
     @property
     def safe_database_url(self) -> str:
-        return (
-        f"postgresql+psycopg://"
-        f"{self.postgres_user}:********"
-        f"@{self.postgres_host}:{self.postgres_port}"
-        f"/{self.postgres_db}"
-    )
+        return self.database_url.render_as_string(hide_password=True)
