@@ -11,10 +11,12 @@ def test_user_create_accepts_valid_input():
     user = UserCreate(
         email="alice@example.com",
         display_name="  Alice  ",
+        password="very-secure-password",
     )
 
-    assert str(user.email) == "alice@example.com"
+    assert user.email == "alice@example.com"
     assert user.display_name == "Alice"
+    assert user.password == "very-secure-password"
 
 
 def test_user_create_rejects_invalid_email():
@@ -77,3 +79,28 @@ def test_user_read_only_contains_public_fields():
 
     assert "password_hash" not in data
     assert "internal_note" not in data
+
+def test_user_create_accepts_valid_password():
+    data = UserCreate(
+        email="alice@example.com",
+        display_name="Alice",
+        password="very-secure-password",
+    )
+
+    assert data.password == "very-secure-password"
+
+def test_user_create_rejects_short_password():
+    with pytest.raises(ValidationError):
+        UserCreate(
+            email="alice@example.com",
+            display_name="Alice",
+            password="short",
+        )
+
+def test_user_create_rejects_too_long_password():
+    with pytest.raises(ValidationError):
+        UserCreate(
+            email="alice@example.com",
+            display_name="Alice",
+            password="a" * 129,
+        )

@@ -28,6 +28,7 @@ def test_create_user_commits_and_returns_user():
     data = UserCreate(
         email="alice@example.com",
         display_name="Alice",
+        password = "very-secure-password",
     )
 
     result = service.create_user(data)
@@ -58,6 +59,7 @@ def test_create_user_rolls_back_on_integrity_error():
     data = UserCreate(
         email="alice@example.com",
         display_name="Alice",
+        password = "very-secure-password",
     )
 
     with pytest.raises(UserAlreadyExistsError):
@@ -81,6 +83,7 @@ def test_create_user_rolls_back_on_operational_error():
     data = UserCreate(
         email="alice@example.com",
         display_name="Alice",
+        password = "very-secure-password",
     )
 
     with pytest.raises(PersistenceUnavailableError):
@@ -111,6 +114,7 @@ def test_create_user_rolls_back_when_commit_fails():
     data = UserCreate(
         email="alice@example.com",
         display_name="Alice",
+        password = "very-secure-password",
     )
 
     with pytest.raises(PersistenceUnavailableError):
@@ -134,6 +138,7 @@ def test_create_user_logs_success(caplog):
     data = UserCreate(
         email="alice@example.com",
         display_name="Alice",
+        password = "very-secure-password",
     )
 
     with caplog.at_level("INFO"):
@@ -156,6 +161,7 @@ def test_create_user_logs_conflict(caplog):
     data = UserCreate(
         email="alice@example.com",
         display_name="Alice",
+        password = "very-secure-password",
     )
 
     with caplog.at_level("WARNING"):
@@ -179,6 +185,7 @@ def test_create_user_logs_persistence_failure(caplog):
     data = UserCreate(
         email="alice@example.com",
         display_name="Alice",
+        password = "very-secure-password",
     )
 
     with caplog.at_level("ERROR"):
