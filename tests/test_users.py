@@ -39,6 +39,7 @@ def test_create_user_returns_201(monkeypatch):
         json={
             "email": "alice@example.com",
             "display_name": "Alice",
+            "password": "very-secure-password",
         },
     )
 
@@ -66,6 +67,7 @@ def test_create_user_returns_409_when_user_exists(monkeypatch):
         json={
             "email": "alice@example.com",
             "display_name": "Alice",
+            "password": "very-secure-password",
         },
     )
 
@@ -91,6 +93,7 @@ def test_create_user_returns_503_when_persistence_unavailable(
         json={
             "email": "alice@example.com",
             "display_name": "Alice",
+            "password": "very-secure-password",
         },
     )
 

@@ -4,3 +4,6 @@ class UserAlreadyExistsError(Exception):
 
 class PersistenceUnavailableError(Exception):
     pass
+
+class InvalidCredentialsError(Exception):
+    pass

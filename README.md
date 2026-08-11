@@ -70,3 +70,40 @@ Responses:
 Authentication and RBAC are not implemented yet.
 
 POST /users is currently a bootstrap registration boundary. Clients may only provide email and display_name; server-owned fields such as id, is_active, timestamps, roles, and permissions cannot be set by the request.
+
+## Authentication
+
+### Register user
+
+`POST /users`
+
+```json
+{
+  "email": "alice@example.com",
+  "display_name": "Alice",
+  "password": "very-secure-password"
+}
+Passwords are hashed before persistence. Plaintext passwords are never stored.
+
+Login
+
+POST /auth/login
+
+{
+  "email": "alice@example.com",
+  "password": "very-secure-password"
+}
+
+Successful authentication returns a short-lived Bearer access token.
+
+Current user
+
+GET /auth/me
+
+Send:
+
+Authorization: Bearer <access_token>
+
+Authentication failures return 401. An authenticated but inactive user is rejected with 403.
+
+RBAC and permissions are not implemented in this issue.

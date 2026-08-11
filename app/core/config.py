@@ -12,6 +12,10 @@ class Settings(BaseSettings):
     postgres_user: str
     postgres_password: SecretStr
 
+    jwt_secret_key: SecretStr
+    jwt_algorithm: str = "HS256"
+    access_token_expire_minutes: int = 30
+
     model_config = SettingsConfigDict(
         env_file=".env",
         env_file_encoding="utf-8",
@@ -33,3 +37,6 @@ class Settings(BaseSettings):
     @property
     def safe_database_url(self) -> str:
         return self.database_url.render_as_string(hide_password=True)
+
+
+settings = Settings()
