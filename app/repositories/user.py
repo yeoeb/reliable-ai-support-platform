@@ -44,6 +44,16 @@ class UserRepository:
         self.session.flush()
 
         return user
+    def list_all(self) -> list[User]:
+        statement = select(User).order_by(
+            User.created_at,
+            User.id,
+        )
+
+        return list(
+            self.session.scalars(statement).all()
+        )
+    
 
 
 def get_by_email(

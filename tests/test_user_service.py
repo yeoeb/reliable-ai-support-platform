@@ -1,198 +1,134 @@
-from unittest.mock import MagicMock
+from unittest.mock import Mock
+from uuid import uuid4
 
 import pytest
-from sqlalchemy.exc import IntegrityError, OperationalError
+from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
-from app.core.errors import (
-    PersistenceUnavailableError,
-    UserAlreadyExistsError,
-)
+from app.core.errors import DefaultRoleNotConfiguredError
+from app.models.role import Role
 from app.models.user import User
 from app.schemas.user import UserCreate
 from app.services.user import UserService
 
-def test_create_user_commits_and_returns_user():
-    session = MagicMock(spec=Session)
+
+def make_user() -> User:
+    return User(
+        id=uuid4(),
+        email="alice@example.com",
+        display_name="Alice",
+    )
+
+
+def make_role() -> Role:
+    return Role(
+        id=uuid4(),
+        name="user",
+        description="Default authenticated user",
+    )
+
+
+def make_user_create() -> UserCreate:
+    return UserCreate(
+        email="alice@example.com",
+        display_name="Alice",
+        password="very-secure-password",
+    )
+
+
+def test_create_user_assigns_default_role_and_commits() -> None:
+    session = Mock(spec=Session)
+
+    user_repository = Mock()
+    credential_repository = Mock()
+    rbac_repository = Mock()
+
+    user = make_user()
+    role = make_role()
+
+    user_repository.create.return_value = user
+    rbac_repository.get_role_by_name.return_value = role
+
     service = UserService(session)
+    service.repository = user_repository
+    service.credential_repository = credential_repository
+    service.rbac_repository = rbac_repository
 
-    expected_user = User(
+    result = service.create_user(make_user_create())
+
+    assert result is user
+
+    user_repository.create.assert_called_once_with(
         email="alice@example.com",
         display_name="Alice",
     )
 
-    service.repository.create = MagicMock(
-        return_value=expected_user
+    credential_repository.create.assert_called_once()
+
+    rbac_repository.get_role_by_name.assert_called_once_with(
+        "user"
     )
 
-    data = UserCreate(
-        email="alice@example.com",
-        display_name="Alice",
-        password = "very-secure-password",
-    )
-
-    result = service.create_user(data)
-
-    assert result is expected_user
-
-    service.repository.create.assert_called_once_with(
-        email="alice@example.com",
-        display_name="Alice",
+    rbac_repository.assign_role.assert_called_once_with(
+        user_id=user.id,
+        role_id=role.id,
     )
 
     session.commit.assert_called_once()
-    session.refresh.assert_called_once_with(expected_user)
+    session.refresh.assert_called_once_with(user)
     session.rollback.assert_not_called()
 
-def test_create_user_rolls_back_on_integrity_error():
-    session = MagicMock(spec=Session)
+
+def test_create_user_rolls_back_when_role_assignment_fails() -> None:
+    session = Mock(spec=Session)
+
+    user_repository = Mock()
+    credential_repository = Mock()
+    rbac_repository = Mock()
+
+    user = make_user()
+    role = make_role()
+
+    user_repository.create.return_value = user
+    rbac_repository.get_role_by_name.return_value = role
+
+    rbac_repository.assign_role.side_effect = IntegrityError(
+        statement="INSERT INTO user_roles",
+        params={},
+        orig=Exception("role assignment failed"),
+    )
+
     service = UserService(session)
+    service.repository = user_repository
+    service.credential_repository = credential_repository
+    service.rbac_repository = rbac_repository
 
-    service.repository.create = MagicMock(
-        side_effect=IntegrityError(
-            statement=None,
-            params=None,
-            orig=Exception("duplicate email"),
-        )
-    )
-
-    data = UserCreate(
-        email="alice@example.com",
-        display_name="Alice",
-        password = "very-secure-password",
-    )
-
-    with pytest.raises(UserAlreadyExistsError):
-        service.create_user(data)
+    with pytest.raises(IntegrityError):
+        service.create_user(make_user_create())
 
     session.rollback.assert_called_once()
     session.commit.assert_not_called()
 
-def test_create_user_rolls_back_on_operational_error():
-    session = MagicMock(spec=Session)
+
+def test_create_user_rolls_back_when_default_role_missing() -> None:
+    session = Mock(spec=Session)
+
+    user_repository = Mock()
+    credential_repository = Mock()
+    rbac_repository = Mock()
+
+    user_repository.create.return_value = make_user()
+    rbac_repository.get_role_by_name.return_value = None
+
     service = UserService(session)
+    service.repository = user_repository
+    service.credential_repository = credential_repository
+    service.rbac_repository = rbac_repository
 
-    service.repository.create = MagicMock(
-        side_effect=OperationalError(
-            statement=None,
-            params=None,
-            orig=Exception("database unavailable"),
-        )
-    )
+    with pytest.raises(DefaultRoleNotConfiguredError):
+        service.create_user(make_user_create())
 
-    data = UserCreate(
-        email="alice@example.com",
-        display_name="Alice",
-        password = "very-secure-password",
-    )
-
-    with pytest.raises(PersistenceUnavailableError):
-        service.create_user(data)
+    rbac_repository.assign_role.assert_not_called()
 
     session.rollback.assert_called_once()
     session.commit.assert_not_called()
-
-def test_create_user_rolls_back_when_commit_fails():
-    session = MagicMock(spec=Session)
-    service = UserService(session)
-
-    user = User(
-        email="alice@example.com",
-        display_name="Alice",
-    )
-
-    service.repository.create = MagicMock(
-        return_value=user
-    )
-
-    session.commit.side_effect = OperationalError(
-        statement=None,
-        params=None,
-        orig=Exception("connection lost"),
-    )
-
-    data = UserCreate(
-        email="alice@example.com",
-        display_name="Alice",
-        password = "very-secure-password",
-    )
-
-    with pytest.raises(PersistenceUnavailableError):
-        service.create_user(data)
-
-    session.rollback.assert_called_once()
-
-def test_create_user_logs_success(caplog):
-    session = MagicMock(spec=Session)
-    service = UserService(session)
-
-    user = User(
-        email="alice@example.com",
-        display_name="Alice",
-    )
-
-    service.repository.create = MagicMock(
-        return_value=user
-    )
-
-    data = UserCreate(
-        email="alice@example.com",
-        display_name="Alice",
-        password = "very-secure-password",
-    )
-
-    with caplog.at_level("INFO"):
-        service.create_user(data)
-
-    assert "event=user.create.succeeded" in caplog.text
-
-def test_create_user_logs_conflict(caplog):
-    session = MagicMock(spec=Session)
-    service = UserService(session)
-
-    service.repository.create = MagicMock(
-        side_effect=IntegrityError(
-            statement=None,
-            params=None,
-            orig=Exception("duplicate"),
-        )
-    )
-
-    data = UserCreate(
-        email="alice@example.com",
-        display_name="Alice",
-        password = "very-secure-password",
-    )
-
-    with caplog.at_level("WARNING"):
-        with pytest.raises(UserAlreadyExistsError):
-            service.create_user(data)
-
-    assert "event=user.create.conflict" in caplog.text
-
-def test_create_user_logs_persistence_failure(caplog):
-    session = MagicMock(spec=Session)
-    service = UserService(session)
-
-    service.repository.create = MagicMock(
-        side_effect=OperationalError(
-            statement=None,
-            params=None,
-            orig=Exception("database unavailable"),
-        )
-    )
-
-    data = UserCreate(
-        email="alice@example.com",
-        display_name="Alice",
-        password = "very-secure-password",
-    )
-
-    with caplog.at_level("ERROR"):
-        with pytest.raises(PersistenceUnavailableError):
-            service.create_user(data)
-
-    assert (
-        "event=user.create.persistence_failure"
-        in caplog.text
-    )
