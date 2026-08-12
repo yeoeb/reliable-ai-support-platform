@@ -7,3 +7,13 @@ class PersistenceUnavailableError(Exception):
 
 class InvalidCredentialsError(Exception):
     pass
+
+class DefaultRoleNotConfiguredError(Exception):
+    pass
+
+class UserNotFoundError(Exception):
+    pass
+
+
+class RoleNotFoundError(Exception):
+    pass
