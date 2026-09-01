@@ -49,6 +49,11 @@ def test_jwt_admin_claim_cannot_bypass_database_authorization(
         "RBACRepository",
         lambda session: fake_repository,
     )
+    monkeypatch.setattr(
+        authorization.AuditService,
+        "record_best_effort",
+        lambda *args, **kwargs: None,
+    )
 
     def override_db():
         yield object()
@@ -109,6 +114,11 @@ def test_jwt_rbac_manage_claim_cannot_access_admin_api(
         authorization,
         "RBACRepository",
         lambda session: fake_repository,
+    )
+    monkeypatch.setattr(
+        authorization.AuditService,
+        "record_best_effort",
+        lambda *args, **kwargs: None,
     )
 
     def override_db():

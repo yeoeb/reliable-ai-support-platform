@@ -14,6 +14,7 @@ from app.core.security import decode_access_token
 from app.db.session import get_db
 from app.models.user import User
 from app.repositories.user import get_by_id
+from app.services.audit import AuditService
 
 
 logger = logging.getLogger(__name__)
@@ -55,6 +56,14 @@ def get_current_user(
         TypeError,
     ):
         logger.info("event=auth.token.invalid")
+        AuditService(session).record_best_effort(
+            actor_user_id=None,
+            action="auth.token.invalid",
+            target_type="authentication",
+            target_id=None,
+            outcome="failure",
+            event_metadata={"reason": "invalid_token"},
+        )
 
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
@@ -68,6 +77,14 @@ def get_current_user(
     )
 
     if user is None:
+        AuditService(session).record_best_effort(
+            actor_user_id=user_id,
+            action="auth.user.invalid",
+            target_type="user",
+            target_id=str(user_id),
+            outcome="failure",
+            event_metadata={"reason": "user_not_found"},
+        )
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Invalid authentication credentials",
@@ -75,6 +92,14 @@ def get_current_user(
         )
 
     if not user.is_active:
+        AuditService(session).record_best_effort(
+            actor_user_id=user_id,
+            action="auth.user.invalid",
+            target_type="user",
+            target_id=str(user_id),
+            outcome="failure",
+            event_metadata={"reason": "user_inactive"},
+        )
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
             detail="Inactive user",

@@ -1,7 +1,7 @@
 import logging
 from uuid import UUID
 
-from sqlalchemy.exc import OperationalError
+from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.orm import Session
 
 from app.core.errors import (
@@ -11,6 +11,7 @@ from app.core.errors import (
 )
 from app.repositories.rbac import RBACRepository
 from app.repositories.user import UserRepository
+from app.services.audit import AuditService
 
 
 logger = logging.getLogger(__name__)
@@ -21,10 +22,12 @@ class RBACService:
         self.session = session
         self.rbac_repository = RBACRepository(session)
         self.user_repository = UserRepository(session)
+        self.audit_service = AuditService(session)
 
     def assign_role(
         self,
         *,
+        actor_user_id: UUID,
         user_id: UUID,
         role_name: str,
     ) -> None:
@@ -46,6 +49,18 @@ class RBACService:
                 role_id=role.id,
             )
 
+            self.audit_service.record(
+                actor_user_id=actor_user_id,
+                action="rbac.role.assign",
+                target_type="user",
+                target_id=str(user.id),
+                outcome="success",
+                event_metadata={
+                    "role": role.name,
+                    "changed": created,
+                },
+            )
+
             self.session.commit()
 
             logger.info(
@@ -63,7 +78,7 @@ class RBACService:
             self.session.rollback()
             raise
 
-        except OperationalError as exc:
+        except SQLAlchemyError as exc:
             self.session.rollback()
 
             logger.error(
@@ -78,6 +93,7 @@ class RBACService:
     def remove_role(
         self,
         *,
+        actor_user_id: UUID,
         user_id: UUID,
         role_name: str,
     ) -> None:
@@ -99,6 +115,18 @@ class RBACService:
                 role_id=role.id,
             )
 
+            self.audit_service.record(
+                actor_user_id=actor_user_id,
+                action="rbac.role.remove",
+                target_type="user",
+                target_id=str(user.id),
+                outcome="success",
+                event_metadata={
+                    "role": role.name,
+                    "changed": removed,
+                },
+            )
+
             self.session.commit()
 
             logger.info(
@@ -116,7 +144,7 @@ class RBACService:
             self.session.rollback()
             raise
 
-        except OperationalError as exc:
+        except SQLAlchemyError as exc:
             self.session.rollback()
 
             logger.error(

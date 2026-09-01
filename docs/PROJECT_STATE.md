@@ -24,6 +24,7 @@ It is intentionally concise and must stay synchronized with merged work.
 - #006 — Reliable User creation flow
 - #007 — Password hashing and JWT authentication
 - #008 — RBAC authorization and permission enforcement
+- #009 — Durable Security Audit Trail (verified; PR #38 delivery)
 
 ## Current Workflow Infrastructure
 
@@ -41,12 +42,22 @@ Required state surfaces:
 
 The Dispatcher uses Stable `codex exec` as its local execution boundary. It does not attempt to inject prompts into an already-open VS Code/Desktop Codex UI session.
 
-## Next Product Engineering Issue
+## Current Product Engineering Issue
 
-Engineering Issue ID #009 — Audit Logging
+Engineering Issue ID #009 — Durable Security Audit Trail
 
-Important: GitHub Issue/PR numbers are repository-wide platform sequence numbers.
-The GitHub tracking item for Engineering Issue ID #009 may therefore have a different numeric URL.
+- GitHub tracking Issue: #16
+- Active Branch: `feature/issue-009-audit-logging`
+- Current Checkpoint: CP6 delivery
+- CP0 Context Bootstrap: completed
+- CP1 Architecture / Plan: completed and Supervisor-approved
+- CP2 Audit implementation: completed and Supervisor-reviewed
+- CP3 verification: completed (178 backend + 1 recovery tests)
+- CP4 Security / Transaction review: completed
+- CP5 Knowledge synchronization: completed
+- Remote write Allowlist: configured for bounded Audit implementation
+
+Important: GitHub Issue/PR numbers are repository-wide platform sequence numbers and remain separate from Engineering Issue IDs.
 
 ## Planned Product Sequence
 

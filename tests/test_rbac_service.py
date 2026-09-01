@@ -32,6 +32,7 @@ def test_assign_role_commits_when_role_is_assigned() -> None:
     )
 
     service.assign_role(
+        actor_user_id=uuid4(),
         user_id=user.id,
         role_name="support_agent",
     )
@@ -65,6 +66,7 @@ def test_assign_role_still_succeeds_when_already_assigned() -> None:
     )
 
     service.assign_role(
+        actor_user_id=uuid4(),
         user_id=user.id,
         role_name="support_agent",
     )
@@ -93,6 +95,7 @@ def test_remove_role_still_succeeds_when_role_not_assigned() -> None:
     )
 
     service.remove_role(
+        actor_user_id=uuid4(),
         user_id=user.id,
         role_name="admin",
     )
@@ -112,6 +115,7 @@ def test_assign_role_rolls_back_when_user_missing() -> None:
 
     with pytest.raises(UserNotFoundError):
         service.assign_role(
+            actor_user_id=uuid4(),
             user_id=user_id,
             role_name="admin",
         )
@@ -134,6 +138,7 @@ def test_assign_role_rolls_back_when_role_missing() -> None:
 
     with pytest.raises(RoleNotFoundError):
         service.assign_role(
+            actor_user_id=uuid4(),
             user_id=user.id,
             role_name="super_admin",
         )

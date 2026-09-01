@@ -28,6 +28,7 @@ def test_assign_role_returns_204(monkeypatch) -> None:
     def fake_assign_role(
         self,
         *,
+        actor_user_id,
         user_id,
         role_name,
     ):
@@ -60,6 +61,7 @@ def test_remove_role_returns_204(monkeypatch) -> None:
     def fake_remove_role(
         self,
         *,
+        actor_user_id,
         user_id,
         role_name,
     ):
@@ -94,6 +96,7 @@ def test_assign_role_returns_404_when_user_missing(
     def fake_assign_role(
         self,
         *,
+        actor_user_id,
         user_id,
         role_name,
     ):
@@ -130,6 +133,7 @@ def test_assign_role_returns_404_when_role_missing(
     def fake_assign_role(
         self,
         *,
+        actor_user_id,
         user_id,
         role_name,
     ):

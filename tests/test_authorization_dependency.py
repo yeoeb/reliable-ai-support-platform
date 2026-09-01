@@ -6,6 +6,7 @@ import pytest
 from fastapi import HTTPException
 
 from app.api.dependencies import authorization
+from app.services.audit import AuditService
 
 
 def test_require_permission_returns_user_when_allowed(
@@ -23,6 +24,11 @@ def test_require_permission_returns_user_when_allowed(
         authorization,
         "RBACRepository",
         lambda session: repository,
+    )
+    monkeypatch.setattr(
+        AuditService,
+        "record_best_effort",
+        lambda *args, **kwargs: None,
     )
 
     dependency = authorization.require_permission(
@@ -57,6 +63,11 @@ def test_require_permission_rejects_user_without_permission(
         authorization,
         "RBACRepository",
         lambda session: repository,
+    )
+    monkeypatch.setattr(
+        AuditService,
+        "record_best_effort",
+        lambda *args, **kwargs: None,
     )
 
     dependency = authorization.require_permission(
