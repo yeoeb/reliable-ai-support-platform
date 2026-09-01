@@ -391,14 +391,25 @@ def get_issue_state(
     return value
 
 
+def _control_marker_candidates(
+    content: str,
+    key: str,
+) -> list[str]:
+    prefix = f"<!-- {key}:"
+    return [
+        line.strip()
+        for line in content.splitlines()
+        if line.strip().startswith(prefix)
+    ]
+
+
 def parse_supervisor_approval(
     content: str,
 ) -> str:
-    candidate_lines = [
-        line.strip()
-        for line in content.splitlines()
-        if SUPERVISOR_GATE_KEY in line
-    ]
+    candidate_lines = _control_marker_candidates(
+        content,
+        SUPERVISOR_GATE_KEY,
+    )
 
     if len(candidate_lines) != 1:
         raise DispatchError(
@@ -502,11 +513,10 @@ def validate_supervisor_gate(
 def parse_write_allow(
     content: str,
 ) -> list[str]:
-    candidate_lines = [
-        line.strip()
-        for line in content.splitlines()
-        if WRITE_ALLOW_KEY in line
-    ]
+    candidate_lines = _control_marker_candidates(
+        content,
+        WRITE_ALLOW_KEY,
+    )
 
     if len(candidate_lines) != 1:
         raise DispatchError(
