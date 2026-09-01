@@ -138,6 +138,8 @@ Response with Evidence
 - CP0 / CP1 / CP4 / CP5 / CP6 use `read-only`.
 - CP2 / CP3 use `workspace-write`.
 - Write Checkpoints are rejected on `main` and `develop`.
+- Write Checkpoints require a Branch name containing the matching Engineering Issue ID, such as `issue-009`.
+- CP2 requires successful CP1; later Checkpoints progress sequentially through CP3 → CP4 → CP5 → CP6.
 - Local Codex Session state is bound to the Branch where it was created.
 - The Dispatcher never uses `danger-full-access`, `--yolo`, automatic Merge, or automatic Push to `main`.
 - Chat history is never the execution Source of Truth.
