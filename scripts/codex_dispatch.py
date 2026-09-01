@@ -982,6 +982,8 @@ def run_codex(
             list(command),
             input=prompt,
             text=True,
+            encoding="utf-8",
+            errors="replace",
             capture_output=True,
             check=False,
             timeout=timeout_seconds,
