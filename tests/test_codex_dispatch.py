@@ -389,7 +389,15 @@ def test_dry_run_does_not_launch_codex_or_write_state(
     capsys,
 ):
     repo = make_repo(tmp_path)
-    context = make_context(repo)
+    context = resolve_context(
+        start=repo,
+        issue_id="009",
+        checkpoint="CP1",
+        git_runner=git_runner_for(
+            repo,
+            "develop",
+        ),
+    )
 
     def forbidden_runner(*args, **kwargs):
         raise AssertionError(
