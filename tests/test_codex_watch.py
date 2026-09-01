@@ -1,5 +1,7 @@
 from contextlib import nullcontext
 from pathlib import Path
+import subprocess
+import sys
 
 import pytest
 
@@ -124,33 +126,26 @@ def test_watcher_lock_blocks_duplicate_process(
     ).exists()
 
 
-def test_stale_watcher_lock_is_recovered(
+def test_preexisting_unlocked_lock_file_is_reusable(
     tmp_path,
-    monkeypatch,
 ):
     repo = tmp_path / "repo"
-    lock_dir = (
-        repo
-        / ".codex-dispatch"
-    )
+    lock_dir = repo / ".codex-dispatch"
     lock_dir.mkdir(parents=True)
-    lock_path = (
-        lock_dir
-        / "watch-009.lock"
-    )
+    lock_path = lock_dir / "watch-009.lock"
     lock_path.write_text(
-        "999999\n",
+        "stale-metadata\n",
         encoding="utf-8",
-    )
-
-    monkeypatch.setattr(
-        watcher,
-        "pid_is_alive",
-        lambda pid: False,
     )
 
     with watcher_lock(repo, "009"):
         assert lock_path.exists()
+        assert (
+            lock_path.read_text(
+                encoding="utf-8"
+            ).strip()
+            == str(__import__("os").getpid())
+        )
 
     assert not lock_path.exists()
 
@@ -567,3 +562,24 @@ def test_once_mode_returns_without_codex_when_idle(
         )
         == 0
     )
+
+
+
+def test_watcher_script_help_runs_directly():
+    repo_root = Path(__file__).resolve().parents[1]
+
+    result = subprocess.run(
+        [
+            sys.executable,
+            "scripts/codex_watch.py",
+            "--help",
+        ],
+        cwd=repo_root,
+        text=True,
+        capture_output=True,
+        check=False,
+    )
+
+    assert result.returncode == 0
+    assert "--issue" in result.stdout
+    assert "--once" in result.stdout
