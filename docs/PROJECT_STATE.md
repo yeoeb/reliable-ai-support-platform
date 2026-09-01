@@ -24,6 +24,7 @@ It is intentionally concise and must stay synchronized with merged work.
 - #006 — Reliable User creation flow
 - #007 — Password hashing and JWT authentication
 - #008 — RBAC authorization and permission enforcement
+- #009 — Durable Security Audit Trail (verified; PR #38 delivery)
 
 ## Current Workflow Infrastructure
 
@@ -47,10 +48,13 @@ Engineering Issue ID #009 — Durable Security Audit Trail
 
 - GitHub tracking Issue: #16
 - Active Branch: `feature/issue-009-audit-logging`
-- Current Checkpoint: CP3 authorized
+- Current Checkpoint: CP6 delivery
 - CP0 Context Bootstrap: completed
 - CP1 Architecture / Plan: completed and Supervisor-approved
 - CP2 Audit implementation: completed and Supervisor-reviewed
+- CP3 verification: completed (178 backend + 1 recovery tests)
+- CP4 Security / Transaction review: completed
+- CP5 Knowledge synchronization: completed
 - Remote write Allowlist: configured for bounded Audit implementation
 
 Important: GitHub Issue/PR numbers are repository-wide platform sequence numbers and remain separate from Engineering Issue IDs.
