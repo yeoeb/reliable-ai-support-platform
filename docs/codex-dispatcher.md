@@ -100,9 +100,16 @@ Prompt 透過 stdin 傳入，不使用 Shell command string interpolation。
 
 ## Continue CP2
 
-Supervisor 驗收 CP1 後，切到該 Issue 的 dedicated Branch，再執行：
+Supervisor 驗收 CP1 後，在同一個 Issue Branch 執行：
 
     python scripts/codex_dispatch.py --issue 009 --checkpoint CP2
+
+Dispatcher 會同時驗證：
+
+- 前一個成功 Checkpoint 必須是 CP1。
+- Branch 不能是 `main` 或 `develop`。
+- Branch 名稱必須包含 `issue-009`，避免在別的 Issue Branch 寫入。
+- Stored Session 的 Branch 必須與目前 Branch 相同。
 
 若已有 Session ID，Dispatcher 會使用：
 
@@ -135,7 +142,9 @@ Dispatcher 只保存最小 Metadata：
 - CP2 / CP3 不能跑在 main / develop。
 - Session 與建立它的 Branch 綁定。
 - Branch 不一致時必須使用 --new-session。
+- CP2 必須接在成功 CP1 後，之後依序 CP3 → CP4 → CP5 → CP6。
 - 已成功的同一 Checkpoint 不會無意重跑；要重跑必須 --force。
+- Write Checkpoint 的 Branch 名稱必須包含對應的 Engineering Issue ID。
 - 不使用 danger-full-access。
 - 不使用 --yolo。
 - 不自動 Commit、Push 或 Merge。
