@@ -72,11 +72,14 @@ CP1–CP6 必須在對應的 Engineering Issue Feature Branch 執行；CP2 / CP3
 
 ## Shared Supervisor Gate
 
-每份 Issue execution note 必須有且只能有一個：
+每份 Issue execution note 必須有且只能有兩個 Control Marker：
 
 ```md
 <!-- codex-dispatch-supervisor-approved-through: CP0 -->
+<!-- codex-dispatch-write-allow: ["app/example.py", "tests/test_*.py"] -->
 ```
+
+第二個 Marker 是 CP2/CP3 可發布檔案的 Supervisor-controlled Allowlist，採 repository-relative POSIX glob。
 
 批准規則：
 
@@ -146,6 +149,51 @@ Dispatcher 會同時驗證：
 
 Codex flags 放在 resume subcommand 前，避免 Resume 後遺失本輪 Sandbox / JSON 設定。
 
+## Safe Write Checkpoint Publication
+
+CP2 / CP3 開始前：
+
+1. Working Tree 必須乾淨。
+2. Dispatcher fetch 目前 Feature Branch。
+3. Local HEAD 必須等於 `origin/<branch>` HEAD。
+4. Remote Supervisor Gate 必須批准前一個 Checkpoint。
+5. Remote Issue Note 必須有合法 Write Allowlist。
+
+Codex 成功返回後，Dispatcher 才執行：
+
+```text
+fetch remote branch again
+        ↓
+remote HEAD still unchanged?
+        ↓
+local HEAD still unchanged?   (Codex 沒有自己 Commit)
+        ↓
+Supervisor / Write-Allow markers unchanged?
+        ↓
+changed paths all match remote Allowlist?
+        ↓
+git add -- <bounded paths>
+        ↓
+git diff --cached --check
+        ↓
+git commit -m "checkpoint(issue-NNN): CP2"
+        ↓
+git push origin HEAD:<same-feature-branch>
+```
+
+任何 Guard 失敗都不 Push。
+
+Hard-protected Control Plane 包含：
+
+- `AGENTS.md`
+- `docs/codex-dispatcher.md`
+- `scripts/codex_dispatch.py`
+- `.github/workflows/`
+- `.git/`
+- `.codex-dispatch/`
+
+即使 Supervisor Allowlist 寫得過寬，這些路徑也不能由 Write Checkpoint 自動發布。
+
 ## Local State
 
 Dispatcher 只保存最小 Metadata：
@@ -160,6 +208,7 @@ Dispatcher 只保存最小 Metadata：
 - last_checkpoint
 - last_status
 - last_returncode
+- published_commit_sha
 - updated_at
 
 不保存 Prompt、Chat transcript、Credential 或完整 Codex Output。
@@ -176,7 +225,9 @@ Dispatcher 只保存最小 Metadata：
 - Write Checkpoint 的 Branch 名稱必須包含對應的 Engineering Issue ID。
 - 不使用 danger-full-access。
 - 不使用 --yolo。
-- 不自動 Commit、Push 或 Merge。
+- Read-only Checkpoint 不自動 Commit/Push。
+- CP2/CP3 只有在 Safe Publish Guard 全通過後，Dispatcher 才 Commit 並正常 Push 到同一個 Feature Branch。
+- 不 Force Push、不 Push main/develop、不自動 Merge。
 - subprocess 使用 argv list，不使用 shell=True。
 - 每個 Checkpoint 有 Timeout，避免 Agent / MCP helper 無限卡住。
 

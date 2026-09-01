@@ -20,6 +20,7 @@ Use Engineering Issue IDs, not GitHub Issue/PR sequence numbers.
 # Engineering Issue #NNN — Title
 
 <!-- codex-dispatch-supervisor-approved-through: CP0 -->
+<!-- codex-dispatch-write-allow: ["path/to/file.py", "tests/test_*.py"] -->
 
 ## GitHub Tracking
 Repository Issue URL / number
@@ -66,6 +67,8 @@ Repository Issue URL / number
 - Do not paste full Chat transcripts.
 - Do not duplicate stable architecture documentation.
 - Keep exactly one `codex-dispatch-supervisor-approved-through` marker.
+- Keep exactly one `codex-dispatch-write-allow` JSON marker with repository-relative POSIX glob patterns.
+- The Supervisor owns both markers; the Executor must not edit them.
 - Only the Supervisor updates the approval marker after reviewing a Checkpoint.
 - The Dispatcher reads approval from `origin/<feature-branch>`, not the mutable local Working Tree.
 - Update Current State at every meaningful Checkpoint.

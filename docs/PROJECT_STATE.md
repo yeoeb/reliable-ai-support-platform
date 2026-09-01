@@ -142,6 +142,9 @@ Response with Evidence
 - CP1–CP6 require Supervisor approval from the remote Feature Branch Issue note; the previous Checkpoint must be approved before the next one starts.
 - Local Codex Session state is not progression authority; it exists for Resume and execution metadata.
 - Local Codex Session state is bound to the Branch where it was created.
+- CP2/CP3 require a clean Working Tree and synchronized Local/Remote Head before Codex starts.
+- CP2/CP3 publication is Dispatcher-owned: remote write Allowlist, unchanged control markers, fresh remote Head, and staged Diff hygiene must pass before Commit/Push.
+- The Dispatcher uses normal Feature Branch Push only; no Force Push and no Push to `main`/`develop`.
 - The Dispatcher never uses `danger-full-access`, `--yolo`, automatic Merge, or automatic Push to `main`.
 - Chat history is never the execution Source of Truth.
 
