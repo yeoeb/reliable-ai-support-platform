@@ -4,7 +4,7 @@ Production-oriented internal AI support platform built with FastAPI, PostgreSQL,
 
 The project is being developed incrementally toward a complete AI support system with RAG, controlled tool calling, human approval, evaluation, security testing, and observability.
 
-Current status: backend foundation, persistence, migrations, user creation, password hashing, and JWT authentication are implemented. RBAC and AI capabilities are still in progress or planned.
+Current status: backend foundation, persistence, migrations, user creation, password hashing, JWT authentication, and RBAC permission enforcement are implemented. AI capabilities remain planned.
 
 Why This Project
 
@@ -297,13 +297,15 @@ JWT authentication
 
 Automated regression tests
 
-In Progress
-
 RBAC authorization
 
 Permission enforcement
 
 Privilege-escalation tests
+
+In Progress
+
+Audit logging
 
 Planned AI Layer
 
