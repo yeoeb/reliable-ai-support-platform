@@ -27,15 +27,19 @@ It is intentionally concise and must stay synchronized with merged work.
 
 ## Current Workflow Infrastructure
 
-The repository is adding an AI-assisted engineering control plane so that fresh Agent sessions do not depend on Chat history.
+The repository has an AI-assisted engineering control plane so that fresh Agent sessions do not depend on Chat history.
 
-Required state files:
+Required state surfaces:
 
 - `AGENTS.md` — permanent execution rules
 - this file — project-wide state
 - GitHub Issue — per-task contract
 - `docs/issues/` — per-Issue execution snapshots when needed
 - Notion — reusable engineering knowledge only
+- `scripts/codex_dispatch.py` — local bounded Checkpoint dispatcher
+- `.codex-dispatch/` — gitignored local Codex Session metadata
+
+The Dispatcher uses Stable `codex exec` as its local execution boundary. It does not attempt to inject prompts into an already-open VS Code/Desktop Codex UI session.
 
 ## Next Product Engineering Issue
 
@@ -129,10 +133,20 @@ Audit Log
 Response with Evidence
 ```
 
+## Local Agent Execution Invariants
+
+- CP0 / CP1 / CP4 / CP5 / CP6 use `read-only`.
+- CP2 / CP3 use `workspace-write`.
+- Write Checkpoints are rejected on `main` and `develop`.
+- Write Checkpoints require a Branch name containing the matching Engineering Issue ID, such as `issue-009`.
+- CP2 requires successful CP1; later Checkpoints progress sequentially through CP3 → CP4 → CP5 → CP6.
+- Local Codex Session state is bound to the Branch where it was created.
+- The Dispatcher never uses `danger-full-access`, `--yolo`, automatic Merge, or automatic Push to `main`.
+- Chat history is never the execution Source of Truth.
+
 ## Known Documentation Debt
 
-- The README on `develop` currently describes RBAC work as still in progress even though Engineering Issue ID #008 has been implemented.
-- Workflow bootstrap must correct that stale status before #009 begins.
+No project-state documentation debt is currently recorded.
 
 ## Supervisor Rule
 

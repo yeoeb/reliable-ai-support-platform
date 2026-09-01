@@ -15,4 +15,7 @@ env/
 # pytest cache
 .pytest_cache/
 
+# Local Codex dispatcher state
+.codex-dispatch/
+
 .vscode/
