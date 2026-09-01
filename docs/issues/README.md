@@ -21,6 +21,9 @@ Use Engineering Issue IDs, not GitHub Issue/PR sequence numbers.
 
 <!-- codex-dispatch-supervisor-approved-through: CP0 -->
 <!-- codex-dispatch-write-allow: ["path/to/file.py", "tests/test_*.py"] -->
+<!-- optional, Supervisor-only when CI/Review requires bounded rework:
+codex-dispatch-supervisor-rework: {"checkpoint":"CP3","attempt":1}
+-->
 
 ## GitHub Tracking
 Repository Issue URL / number
@@ -68,7 +71,8 @@ Repository Issue URL / number
 - Do not duplicate stable architecture documentation.
 - Keep exactly one `codex-dispatch-supervisor-approved-through` marker.
 - Keep exactly one `codex-dispatch-write-allow` JSON marker with repository-relative POSIX glob patterns.
-- The Supervisor owns both markers; the Executor must not edit them.
+- The Supervisor owns the approval/write markers; the Executor must not edit them.
+- The optional `codex-dispatch-supervisor-rework` marker is also Supervisor-only and authorizes exactly one finite retry attempt for CP2/CP3.
 - Only the Supervisor updates the approval marker after reviewing a Checkpoint.
 - The Dispatcher reads approval from `origin/<feature-branch>`, not the mutable local Working Tree.
 - Update Current State at every meaningful Checkpoint.
