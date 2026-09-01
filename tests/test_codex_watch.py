@@ -583,3 +583,318 @@ def test_watcher_script_help_runs_directly():
     assert result.returncode == 0
     assert "--issue" in result.stdout
     assert "--once" in result.stdout
+
+
+
+def test_run_once_supervisor_rework_dispatches_force_with_label(
+    tmp_path,
+    monkeypatch,
+):
+    repo = tmp_path / "repo"
+    (repo / "docs" / "issues").mkdir(
+        parents=True,
+    )
+    called = []
+
+    monkeypatch.setattr(
+        watcher,
+        "get_current_branch",
+        lambda _: ISSUE_BRANCH,
+    )
+    monkeypatch.setattr(
+        watcher,
+        "fast_forward_issue_branch",
+        lambda **kwargs: None,
+    )
+    monkeypatch.setattr(
+        watcher,
+        "resolve_context",
+        lambda **kwargs: make_context(
+            repo,
+            kwargs["checkpoint"],
+        ),
+    )
+    monkeypatch.setattr(
+        watcher,
+        "fetch_remote_issue_note",
+        lambda _: (
+            "<!-- "
+            "codex-dispatch-supervisor-approved-through: "
+            "CP2 -->\n"
+            "<!-- codex-dispatch-supervisor-rework: "
+            '{"checkpoint":"CP3","attempt":1} -->'
+        ),
+    )
+    monkeypatch.setattr(
+        watcher,
+        "load_state",
+        lambda _: {
+            "issues": {
+                "009": {
+                    "last_checkpoint": "CP3",
+                    "last_status": "succeeded",
+                }
+            }
+        },
+    )
+    monkeypatch.setattr(
+        watcher,
+        "get_issue_state",
+        lambda state, issue_id: (
+            state["issues"]["009"]
+        ),
+    )
+
+    def fake_remote_checkpoint_exists(
+        **kwargs,
+    ):
+        return (
+            kwargs.get("publication_label")
+            is None
+        )
+
+    monkeypatch.setattr(
+        watcher,
+        "remote_checkpoint_exists",
+        fake_remote_checkpoint_exists,
+    )
+
+    def fake_dispatch(
+        context,
+        **kwargs,
+    ):
+        called.append(
+            (
+                context.checkpoint,
+                kwargs["force"],
+                kwargs["publication_label"],
+            )
+        )
+        return 0
+
+    monkeypatch.setattr(
+        watcher,
+        "dispatch",
+        fake_dispatch,
+    )
+
+    result = watcher.run_once(
+        repo_root=repo,
+        issue_id="009",
+        codex_bin="codex",
+        timeout_seconds=10,
+    )
+
+    assert result == 0
+    assert called == [
+        ("CP3", True, "rework-1")
+    ]
+
+
+def test_run_once_does_not_repeat_completed_rework(
+    tmp_path,
+    monkeypatch,
+):
+    repo = tmp_path / "repo"
+    (repo / "docs" / "issues").mkdir(
+        parents=True,
+    )
+
+    monkeypatch.setattr(
+        watcher,
+        "get_current_branch",
+        lambda _: ISSUE_BRANCH,
+    )
+    monkeypatch.setattr(
+        watcher,
+        "fast_forward_issue_branch",
+        lambda **kwargs: None,
+    )
+    monkeypatch.setattr(
+        watcher,
+        "resolve_context",
+        lambda **kwargs: make_context(
+            repo,
+            kwargs["checkpoint"],
+        ),
+    )
+    monkeypatch.setattr(
+        watcher,
+        "fetch_remote_issue_note",
+        lambda _: (
+            "<!-- "
+            "codex-dispatch-supervisor-approved-through: "
+            "CP2 -->\n"
+            "<!-- codex-dispatch-supervisor-rework: "
+            '{"checkpoint":"CP3","attempt":1} -->'
+        ),
+    )
+    monkeypatch.setattr(
+        watcher,
+        "load_state",
+        lambda _: {"issues": {}},
+    )
+    monkeypatch.setattr(
+        watcher,
+        "get_issue_state",
+        lambda state, issue_id: {},
+    )
+    monkeypatch.setattr(
+        watcher,
+        "remote_checkpoint_exists",
+        lambda **kwargs: (
+            kwargs.get("publication_label")
+            == "rework-1"
+        ),
+    )
+    monkeypatch.setattr(
+        watcher,
+        "dispatch",
+        lambda *args, **kwargs: pytest.fail(
+            "Completed rework must not rerun."
+        ),
+    )
+
+    assert watcher.run_once(
+        repo_root=repo,
+        issue_id="009",
+        codex_bin="codex",
+        timeout_seconds=10,
+    ) is None
+
+
+def test_run_once_rejects_rework_for_wrong_checkpoint(
+    tmp_path,
+    monkeypatch,
+):
+    repo = tmp_path / "repo"
+    (repo / "docs" / "issues").mkdir(
+        parents=True,
+    )
+
+    monkeypatch.setattr(
+        watcher,
+        "get_current_branch",
+        lambda _: ISSUE_BRANCH,
+    )
+    monkeypatch.setattr(
+        watcher,
+        "fast_forward_issue_branch",
+        lambda **kwargs: None,
+    )
+    monkeypatch.setattr(
+        watcher,
+        "resolve_context",
+        lambda **kwargs: make_context(
+            repo,
+            kwargs["checkpoint"],
+        ),
+    )
+    monkeypatch.setattr(
+        watcher,
+        "fetch_remote_issue_note",
+        lambda _: (
+            "<!-- "
+            "codex-dispatch-supervisor-approved-through: "
+            "CP2 -->\n"
+            "<!-- codex-dispatch-supervisor-rework: "
+            '{"checkpoint":"CP2","attempt":1} -->'
+        ),
+    )
+    monkeypatch.setattr(
+        watcher,
+        "load_state",
+        lambda _: {"issues": {}},
+    )
+    monkeypatch.setattr(
+        watcher,
+        "get_issue_state",
+        lambda state, issue_id: {},
+    )
+
+    with pytest.raises(
+        DispatchError,
+        match="does not match",
+    ):
+        watcher.run_once(
+            repo_root=repo,
+            issue_id="009",
+            codex_bin="codex",
+            timeout_seconds=10,
+        )
+
+
+def test_failed_rework_attempt_is_not_retried(
+    tmp_path,
+    monkeypatch,
+):
+    repo = tmp_path / "repo"
+    (repo / "docs" / "issues").mkdir(
+        parents=True,
+    )
+
+    monkeypatch.setattr(
+        watcher,
+        "get_current_branch",
+        lambda _: ISSUE_BRANCH,
+    )
+    monkeypatch.setattr(
+        watcher,
+        "fast_forward_issue_branch",
+        lambda **kwargs: None,
+    )
+    monkeypatch.setattr(
+        watcher,
+        "resolve_context",
+        lambda **kwargs: make_context(
+            repo,
+            kwargs["checkpoint"],
+        ),
+    )
+    monkeypatch.setattr(
+        watcher,
+        "fetch_remote_issue_note",
+        lambda _: (
+            "<!-- "
+            "codex-dispatch-supervisor-approved-through: "
+            "CP2 -->\n"
+            "<!-- codex-dispatch-supervisor-rework: "
+            '{"checkpoint":"CP3","attempt":1} -->'
+        ),
+    )
+    monkeypatch.setattr(
+        watcher,
+        "load_state",
+        lambda _: {
+            "issues": {
+                "009": {
+                    "last_checkpoint": "CP3",
+                    "last_status": "failed",
+                    "publication_label": "rework-1",
+                }
+            }
+        },
+    )
+    monkeypatch.setattr(
+        watcher,
+        "get_issue_state",
+        lambda state, issue_id: (
+            state["issues"]["009"]
+        ),
+    )
+    monkeypatch.setattr(
+        watcher,
+        "remote_checkpoint_exists",
+        lambda **kwargs: False,
+    )
+
+    with pytest.raises(
+        DispatchError,
+        match="new rework attempt",
+    ):
+        watcher.run_once(
+            repo_root=repo,
+            issue_id="009",
+            codex_bin="codex",
+            timeout_seconds=10,
+        )
