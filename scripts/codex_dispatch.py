@@ -21,6 +21,14 @@ CHECKPOINT_SANDBOX = {
 }
 
 WRITE_CHECKPOINTS = {"CP2", "CP3"}
+ISSUE_BRANCH_CHECKPOINTS = {
+    "CP1",
+    "CP2",
+    "CP3",
+    "CP4",
+    "CP5",
+    "CP6",
+}
 CHECKPOINT_ORDER = tuple(CHECKPOINT_SANDBOX)
 REQUIRED_SUPERVISOR_APPROVAL = {
     "CP1": "CP0",
@@ -174,20 +182,23 @@ def resolve_context(
         repo_root,
         runner=git_runner,
     )
-    if checkpoint in WRITE_CHECKPOINTS:
-        if branch in {"main", "develop"}:
-            raise DispatchError(
-                f"{checkpoint} requires a dedicated work branch; "
-                f"current branch is {branch!r}."
-            )
-
+    if checkpoint in ISSUE_BRANCH_CHECKPOINTS:
         expected_marker = f"issue-{issue_id}"
         if expected_marker not in branch.lower():
             raise DispatchError(
                 f"{checkpoint} for Engineering Issue #{issue_id} "
-                f"requires a branch containing {expected_marker!r}; "
-                f"current branch is {branch!r}."
+                f"requires a dedicated branch containing "
+                f"{expected_marker!r}; current branch is {branch!r}."
             )
+
+    if (
+        checkpoint in WRITE_CHECKPOINTS
+        and branch in {"main", "develop"}
+    ):
+        raise DispatchError(
+            f"{checkpoint} cannot write on protected "
+            f"integration branch {branch!r}."
+        )
 
     issue_note = find_issue_note(
         repo_root,
