@@ -106,6 +106,8 @@ def run_git(
         ["git", *args],
         cwd=cwd,
         text=True,
+        encoding="utf-8",
+        errors="replace",
         capture_output=True,
         check=False,
     )
@@ -114,7 +116,7 @@ def run_git(
             result.stderr or result.stdout or "Git command failed."
         ).strip()
         raise DispatchError(detail)
-    return result.stdout.strip()
+    return (result.stdout or "").strip()
 
 
 def find_repo_root(
