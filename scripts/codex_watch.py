@@ -221,6 +221,12 @@ def watcher_lock(
     locked = False
 
     try:
+        handle.seek(0, 2)
+        if handle.tell() == 0:
+            handle.write("\n")
+            handle.flush()
+        handle.seek(0)
+
         _try_lock_file(handle)
         locked = True
 
