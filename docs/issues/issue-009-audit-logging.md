@@ -2,6 +2,7 @@
 
 <!-- codex-dispatch-supervisor-approved-through: CP2 -->
 <!-- codex-dispatch-write-allow: ["app/models/audit_event.py","app/models/__init__.py","app/repositories/audit.py","app/services/audit.py","app/services/rbac.py","app/api/routes/auth.py","app/api/routes/admin.py","app/api/dependencies/auth.py","app/api/dependencies/authorization.py","migrations/versions/*audit*.py","tests/test_audit_*.py","tests/test_auth.py","tests/test_auth_dependency.py","tests/test_authorization_dependency.py","tests/test_admin_rbac.py","tests/test_rbac_service.py","tests/test_rbac_security.py","tests/test_migrations.py","docs/issues/issue-009-audit-logging.md"] -->
+<!-- codex-dispatch-supervisor-rework: {"checkpoint":"CP3","attempt":1} -->
 
 ## GitHub Tracking
 
