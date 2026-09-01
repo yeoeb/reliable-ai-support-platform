@@ -66,7 +66,7 @@ Write checkpoints also use a Supervisor-controlled path Allowlist embedded in th
 <!-- codex-dispatch-write-allow: ["app/example.py", "tests/test_example.py"] -->
 ```
 
-The Executor must not modify either control marker. It must not commit or push its own checkpoint changes; the Dispatcher owns bounded publication after validation.
+The Executor must not modify either control marker. It must not commit or push its own checkpoint changes; the Dispatcher owns bounded publication after validation.\n\nA Local Watcher may observe remote approval and automatically invoke **only CP2 / CP3**. It has no authority to approve work, choose Issues, run review/delivery checkpoints automatically, retry failures indefinitely, or Merge.
 
 ## Scope Control
 

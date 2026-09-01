@@ -37,7 +37,7 @@ Required state surfaces:
 - `docs/issues/` — per-Issue execution snapshots when needed
 - Notion — reusable engineering knowledge only
 - `scripts/codex_dispatch.py` — local bounded Checkpoint dispatcher
-- `.codex-dispatch/` — gitignored local Codex Session metadata
+- `.codex-dispatch/` — gitignored local Codex Session metadata\n- `scripts/codex_watch.py` — optional local Trigger Layer for Supervisor-authorized CP2 / CP3
 
 The Dispatcher uses Stable `codex exec` as its local execution boundary. It does not attempt to inject prompts into an already-open VS Code/Desktop Codex UI session.
 
@@ -152,7 +152,7 @@ Response with Evidence
 - CP2/CP3 publication is Dispatcher-owned: remote write Allowlist, unchanged control markers, fresh remote Head, and staged Diff hygiene must pass before Commit/Push.
 - The Dispatcher uses normal Feature Branch Push only; no Force Push and no Push to `main`/`develop`.
 - The Dispatcher never uses `danger-full-access`, `--yolo`, automatic Merge, or automatic Push to `main`.
-- Chat history is never the execution Source of Truth.
+- Watcher polling does not authorize work; it only reacts to the remote Supervisor Gate.\n- Watcher failures stop instead of automatic unbounded Retry.\n- Chat history is never the execution Source of Truth.
 
 ## Known Documentation Debt
 
