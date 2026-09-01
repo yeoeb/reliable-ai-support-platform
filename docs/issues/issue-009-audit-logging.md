@@ -1,6 +1,6 @@
 # Engineering Issue #009 — Durable Security Audit Trail
 
-<!-- codex-dispatch-supervisor-approved-through: CP2 -->
+<!-- codex-dispatch-supervisor-approved-through: CP5 -->
 <!-- codex-dispatch-write-allow: ["app/models/audit_event.py","app/models/__init__.py","app/repositories/audit.py","app/services/audit.py","app/services/rbac.py","app/api/routes/auth.py","app/api/routes/admin.py","app/api/dependencies/auth.py","app/api/dependencies/authorization.py","migrations/versions/*audit*.py","tests/test_audit_*.py","tests/test_auth.py","tests/test_auth_dependency.py","tests/test_authorization_dependency.py","tests/test_admin_rbac.py","tests/test_rbac_service.py","tests/test_rbac_security.py","tests/test_migrations.py","docs/issues/issue-009-audit-logging.md"] -->
 
 ## GitHub Tracking
@@ -334,9 +334,9 @@ Use GitHub Issue #16 as the authoritative Acceptance Criteria.
 - [x] CP0 — Context bootstrap / contradiction detection
 - [x] CP1 — Architecture + implementation plan validation
 - [x] CP2 — Bounded implementation (Supervisor-reviewed)
-- [ ] CP3 — Targeted + regression verification (authorized)
-- [ ] CP4 — Diff / security / transaction review
-- [ ] CP5 — Knowledge + documentation synchronization
+- [x] CP3 — Targeted + regression verification
+- [x] CP4 — Diff / security / transaction review
+- [x] CP5 — Knowledge + documentation synchronization
 - [ ] CP6 — PR delivery evidence
 
 ## Commands / Evidence
@@ -538,6 +538,33 @@ Boundary:
 - The fix must mock the Audit side effect while preserving the tests' original assertion that JWT role/permission claims cannot bypass database-backed authorization.
 - Draft PR #38 GitHub-hosted Backend Verification remains the acceptance gate.
 
+## Final CP3 / CP4 Evidence
+
+Final verification after the bounded RBAC security-test isolation fix and additional Security Evidence tests:
+
+```text
+Dispatcher / Control Plane: 73 passed
+Backend regression: 178 passed
+Database recovery: 1 passed
+Alembic upgrade → downgrade -1 → re-upgrade: PASS
+```
+
+CP4 findings:
+
+- No Production file outside Issue Scope.
+- `AuditRepository` exposes Create only.
+- Audit DB column `metadata` maps through Python `event_metadata`.
+- Actor Administrator identity and target User identity are distinct.
+- RBAC Role mutation + Audit insertion use one transaction / one Commit.
+- Audit persistence failure prevents unaudited privilege mutation.
+- Best-effort SQLAlchemy Audit failure rolls back its failed write and preserves intended 401 / 403.
+- Failed Login Audit excludes submitted Email/Password.
+- Invalid-token Audit explicitly excludes the raw Access Token / Authorization material.
+- JWT role/permission claims still cannot bypass database-backed RBAC.
+- Migration chain remains single-head and round-trip tested.
+
+No merge-blocking finding remains.
+
 ## Knowledge Candidates
 
 Existing Notion Knowledge already covers the Audit Logging fundamentals.
@@ -552,10 +579,21 @@ Potential additions after implementation (CP5 only):
 
 ## Current State
 
-CP0, CP1, and the bounded CP2 implementation are complete. CP3 test coverage updates are complete, but required targeted and full regression execution is blocked before collection by the missing Python base interpreter. PostgreSQL migration verification is unavailable because Docker is not installed.
+CP0–CP5 are complete.
 
-Supervisor approval marker: **CP2**.
+Final GitHub-hosted evidence on Draft PR #38:
 
-CP2 implementation has been reviewed. CP3 is authorized, but cannot be completed until the local Python environment is restored and the required suites can run.
+- Dispatcher / Control Plane: **73 passed**
+- Backend regression: **178 passed**
+- Docker Compose database recovery: **1 passed**
+- PostgreSQL 16: healthy
+- Alembic upgrade head: PASS
+- Alembic downgrade -1: PASS
+- Alembic re-upgrade head: PASS
+- Final Product Security / Transaction review: PASS
 
-Do not begin CP4 until the Supervisor reviews CP3 evidence and advances the remote approval marker.
+Supervisor approval marker: **CP5**.
+
+Next action: CP6 PR delivery and merge into `develop`.
+
+No further Product Code change is authorized unless a new verification failure is discovered.
