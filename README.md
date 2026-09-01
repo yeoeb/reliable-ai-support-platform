@@ -4,7 +4,7 @@ Production-oriented internal AI support platform built with FastAPI, PostgreSQL,
 
 The project is being developed incrementally toward a complete AI support system with RAG, controlled tool calling, human approval, evaluation, security testing, and observability.
 
-Current status: backend foundation, persistence, migrations, user creation, password hashing, JWT authentication, and RBAC permission enforcement are implemented. AI capabilities remain planned.
+Current status: backend foundation, persistence, migrations, user creation, password hashing, JWT authentication, RBAC permission enforcement, durable security audit logging, and GitHub-hosted backend verification are implemented. AI capabilities remain planned.
 
 Why This Project
 
@@ -90,6 +90,24 @@ Disabled-user enforcement
 
 Generic login failure responses
 
+Authorization & Audit
+
+Database-backed RBAC authorization
+
+Permission enforcement independent of JWT role/permission claims
+
+Durable security Audit Events
+
+Actor / target / action / outcome event structure
+
+Atomic Audit recording for RBAC privilege mutations
+
+Best-effort Audit recording for authentication / authorization failures
+
+Sensitive-data exclusion for passwords, tokens, authorization headers, and secrets
+
+Append-only application boundary for Audit records
+
 Testing
 
 pytest
@@ -145,6 +163,12 @@ pytest
 httpx
 
 Docker Compose
+
+GitHub Actions
+
+PostgreSQL-backed CI verification
+
+Alembic upgrade / downgrade regression checks
 
 Git / GitHub
 
@@ -303,9 +327,13 @@ Permission enforcement
 
 Privilege-escalation tests
 
+Durable security audit logging
+
+GitHub Actions backend verification
+
 In Progress
 
-Audit logging
+Structured logging / observability
 
 Planned AI Layer
 
@@ -323,8 +351,6 @@ Human confirmation for high-risk actions
 
 Planned Reliability & AI Safety
 
-Audit logging
-
 Structured logging / monitoring
 
 100+ LLM evaluation cases
@@ -334,8 +360,6 @@ Prompt version comparison
 Prompt injection testing
 
 AI privilege-escalation testing
-
-GitHub Actions CI
 
 Target Architecture
 
