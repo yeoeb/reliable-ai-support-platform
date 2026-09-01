@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import argparse
+from fnmatch import fnmatch
 import json
 import shutil
 import subprocess
@@ -40,6 +41,17 @@ REQUIRED_SUPERVISOR_APPROVAL = {
 }
 SUPERVISOR_GATE_KEY = (
     "codex-dispatch-supervisor-approved-through"
+)
+WRITE_ALLOW_KEY = "codex-dispatch-write-allow"
+PROTECTED_PUBLISH_PATHS = {
+    "AGENTS.md",
+    "docs/codex-dispatcher.md",
+    "scripts/codex_dispatch.py",
+}
+PROTECTED_PUBLISH_PREFIXES = (
+    ".git/",
+    ".codex-dispatch/",
+    ".github/workflows/",
 )
 STATE_DIR_NAME = ".codex-dispatch"
 STATE_FILE_NAME = "state.json"
@@ -477,6 +489,332 @@ def validate_supervisor_gate(
     return approved
 
 
+def parse_write_allow(
+    content: str,
+) -> list[str]:
+    candidate_lines = [
+        line.strip()
+        for line in content.splitlines()
+        if WRITE_ALLOW_KEY in line
+    ]
+
+    if len(candidate_lines) != 1:
+        raise DispatchError(
+            "Expected exactly one write-allow marker "
+            f"containing {WRITE_ALLOW_KEY!r}; "
+            f"found {len(candidate_lines)}."
+        )
+
+    prefix = f"<!-- {WRITE_ALLOW_KEY}:"
+    suffix = "-->"
+    line = candidate_lines[0]
+
+    if (
+        not line.startswith(prefix)
+        or not line.endswith(suffix)
+    ):
+        raise DispatchError(
+            "Write-allow marker is malformed."
+        )
+
+    payload = line[
+        len(prefix) : -len(suffix)
+    ].strip()
+
+    try:
+        value = json.loads(payload)
+    except json.JSONDecodeError as exc:
+        raise DispatchError(
+            "Write-allow marker must contain valid JSON."
+        ) from exc
+
+    if (
+        not isinstance(value, list)
+        or not value
+        or not all(
+            isinstance(item, str)
+            and item
+            for item in value
+        )
+    ):
+        raise DispatchError(
+            "Write-allow marker must be a non-empty "
+            "JSON array of strings."
+        )
+
+    patterns: list[str] = []
+    for pattern in value:
+        if (
+            "\\" in pattern
+            or pattern.startswith("/")
+            or ".." in Path(pattern).parts
+        ):
+            raise DispatchError(
+                "Write-allow patterns must be safe "
+                f"repository-relative POSIX paths: {pattern!r}."
+            )
+        patterns.append(pattern)
+
+    if len(set(patterns)) != len(patterns):
+        raise DispatchError(
+            "Write-allow marker contains duplicate patterns."
+        )
+
+    return patterns
+
+
+def ensure_clean_worktree(
+    repo_root: Path,
+    *,
+    runner: Callable[
+        ...,
+        subprocess.CompletedProcess[str],
+    ] = subprocess.run,
+) -> None:
+    status = run_git(
+        [
+            "status",
+            "--porcelain=v1",
+            "--untracked-files=all",
+        ],
+        cwd=repo_root,
+        runner=runner,
+    )
+    if status:
+        raise DispatchError(
+            "Write checkpoint requires a clean Working Tree "
+            "before Codex starts."
+        )
+
+
+def get_remote_head(
+    context: DispatchContext,
+    *,
+    runner: Callable[
+        ...,
+        subprocess.CompletedProcess[str],
+    ] = subprocess.run,
+) -> str:
+    return run_git(
+        [
+            "rev-parse",
+            f"origin/{context.branch}",
+        ],
+        cwd=context.repo_root,
+        runner=runner,
+    )
+
+
+def get_changed_paths(
+    repo_root: Path,
+    *,
+    runner: Callable[
+        ...,
+        subprocess.CompletedProcess[str],
+    ] = subprocess.run,
+) -> list[str]:
+    tracked = run_git(
+        [
+            "diff",
+            "--name-only",
+            "HEAD",
+            "--",
+        ],
+        cwd=repo_root,
+        runner=runner,
+    )
+    untracked = run_git(
+        [
+            "ls-files",
+            "--others",
+            "--exclude-standard",
+        ],
+        cwd=repo_root,
+        runner=runner,
+    )
+
+    values = []
+    for output in (tracked, untracked):
+        if output:
+            values.extend(
+                line
+                for line in output.splitlines()
+                if line
+            )
+
+    return sorted(set(values))
+
+
+def path_is_allowed(
+    path: str,
+    patterns: Sequence[str],
+) -> bool:
+    if (
+        path in PROTECTED_PUBLISH_PATHS
+        or any(
+            path.startswith(prefix)
+            for prefix in PROTECTED_PUBLISH_PREFIXES
+        )
+    ):
+        return False
+
+    return any(
+        fnmatch(path, pattern)
+        for pattern in patterns
+    )
+
+
+def validate_changed_paths(
+    paths: Sequence[str],
+    patterns: Sequence[str],
+) -> None:
+    disallowed = [
+        path
+        for path in paths
+        if not path_is_allowed(
+            path,
+            patterns,
+        )
+    ]
+    if disallowed:
+        raise DispatchError(
+            "Checkpoint changed files outside the "
+            "Supervisor-controlled write Allowlist: "
+            + ", ".join(disallowed)
+        )
+
+
+def validate_control_markers_unchanged(
+    *,
+    remote_note: str,
+    local_note: str,
+) -> None:
+    remote_approval = parse_supervisor_approval(
+        remote_note
+    )
+    local_approval = parse_supervisor_approval(
+        local_note
+    )
+    if local_approval != remote_approval:
+        raise DispatchError(
+            "Executor modified the Supervisor approval marker; "
+            "publication is blocked."
+        )
+
+    remote_allow = parse_write_allow(
+        remote_note
+    )
+    local_allow = parse_write_allow(
+        local_note
+    )
+    if local_allow != remote_allow:
+        raise DispatchError(
+            "Executor modified the write-allow marker; "
+            "publication is blocked."
+        )
+
+
+def publish_write_checkpoint(
+    context: DispatchContext,
+    *,
+    expected_remote_head: str,
+    remote_note: str,
+    patterns: Sequence[str],
+    runner: Callable[
+        ...,
+        subprocess.CompletedProcess[str],
+    ] = subprocess.run,
+) -> str | None:
+    run_git(
+        [
+            "fetch",
+            "--quiet",
+            "origin",
+            context.branch,
+        ],
+        cwd=context.repo_root,
+        runner=runner,
+    )
+    current_remote_head = get_remote_head(
+        context,
+        runner=runner,
+    )
+
+    if current_remote_head != expected_remote_head:
+        raise DispatchError(
+            "Remote Feature Branch changed during Codex "
+            "execution; refusing to publish stale work."
+        )
+
+    local_note = context.issue_note.read_text(
+        encoding="utf-8"
+    )
+    validate_control_markers_unchanged(
+        remote_note=remote_note,
+        local_note=local_note,
+    )
+
+    changed_paths = get_changed_paths(
+        context.repo_root,
+        runner=runner,
+    )
+    if not changed_paths:
+        return None
+
+    validate_changed_paths(
+        changed_paths,
+        patterns,
+    )
+
+    run_git(
+        ["diff", "--check"],
+        cwd=context.repo_root,
+        runner=runner,
+    )
+
+    run_git(
+        [
+            "add",
+            "--",
+            *changed_paths,
+        ],
+        cwd=context.repo_root,
+        runner=runner,
+    )
+
+    commit_message = (
+        f"checkpoint(issue-{context.issue_id}): "
+        f"{context.checkpoint}"
+    )
+    run_git(
+        [
+            "commit",
+            "-m",
+            commit_message,
+        ],
+        cwd=context.repo_root,
+        runner=runner,
+    )
+
+    commit_sha = run_git(
+        ["rev-parse", "HEAD"],
+        cwd=context.repo_root,
+        runner=runner,
+    )
+
+    run_git(
+        [
+            "push",
+            "origin",
+            f"HEAD:{context.branch}",
+        ],
+        cwd=context.repo_root,
+        runner=runner,
+    )
+
+    return commit_sha
+
+
 def build_codex_command(
     context: DispatchContext,
     *,
@@ -661,6 +999,21 @@ def dispatch(
         )
     )
 
+    write_patterns: list[str] | None = None
+    remote_head_before: str | None = None
+    if context.checkpoint in WRITE_CHECKPOINTS:
+        ensure_clean_worktree(
+            context.repo_root,
+            runner=git_runner,
+        )
+        write_patterns = parse_write_allow(
+            remote_note
+        )
+        remote_head_before = get_remote_head(
+            context,
+            runner=git_runner,
+        )
+
     previous_branch = previous.get(
         "branch"
     )
@@ -709,6 +1062,8 @@ def dispatch(
                     "supervisor_approved_through": (
                         supervisor_approved_through
                     ),
+                    "write_allow": write_patterns,
+                    "remote_head_before": remote_head_before,
                     "command": command,
                     "prompt": prompt,
                 },
@@ -762,6 +1117,21 @@ def dispatch(
         result.returncode,
     )
 
+    published_commit_sha: str | None = None
+    if (
+        status == "succeeded"
+        and context.checkpoint in WRITE_CHECKPOINTS
+    ):
+        assert remote_head_before is not None
+        assert write_patterns is not None
+        published_commit_sha = publish_write_checkpoint(
+            context,
+            expected_remote_head=remote_head_before,
+            remote_note=remote_note,
+            patterns=write_patterns,
+            runner=git_runner,
+        )
+
     issues = state.setdefault(
         "issues",
         {},
@@ -772,6 +1142,7 @@ def dispatch(
         "last_checkpoint": context.checkpoint,
         "last_status": status,
         "last_returncode": result.returncode,
+        "published_commit_sha": published_commit_sha,
         "updated_at": datetime.now(
             timezone.utc
         ).isoformat(),
