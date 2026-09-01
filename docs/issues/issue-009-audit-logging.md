@@ -1,6 +1,6 @@
 # Engineering Issue #009 — Durable Security Audit Trail
 
-<!-- codex-dispatch-supervisor-approved-through: CP5 -->
+<!-- codex-dispatch-supervisor-approved-through: CP6 -->
 <!-- codex-dispatch-write-allow: ["app/models/audit_event.py","app/models/__init__.py","app/repositories/audit.py","app/services/audit.py","app/services/rbac.py","app/api/routes/auth.py","app/api/routes/admin.py","app/api/dependencies/auth.py","app/api/dependencies/authorization.py","migrations/versions/*audit*.py","tests/test_audit_*.py","tests/test_auth.py","tests/test_auth_dependency.py","tests/test_authorization_dependency.py","tests/test_admin_rbac.py","tests/test_rbac_service.py","tests/test_rbac_security.py","tests/test_migrations.py","docs/issues/issue-009-audit-logging.md"] -->
 
 ## GitHub Tracking
@@ -337,7 +337,7 @@ Use GitHub Issue #16 as the authoritative Acceptance Criteria.
 - [x] CP3 — Targeted + regression verification
 - [x] CP4 — Diff / security / transaction review
 - [x] CP5 — Knowledge + documentation synchronization
-- [ ] CP6 — PR delivery evidence
+- [x] CP6 — PR delivery evidence
 
 ## Commands / Evidence
 
@@ -579,21 +579,20 @@ Potential additions after implementation (CP5 only):
 
 ## Current State
 
-CP0–CP5 are complete.
+Engineering Issue #009 is complete and verified.
 
-Final GitHub-hosted evidence on Draft PR #38:
+Final delivery evidence:
 
+- Product PR: #38
+- Final reviewed Product/Test Head before delivery docs: `bad2b65f3f8fe49aa8ead32c2a3120359be1643e`
 - Dispatcher / Control Plane: **73 passed**
 - Backend regression: **178 passed**
 - Docker Compose database recovery: **1 passed**
-- PostgreSQL 16: healthy
-- Alembic upgrade head: PASS
-- Alembic downgrade -1: PASS
-- Alembic re-upgrade head: PASS
-- Final Product Security / Transaction review: PASS
+- PostgreSQL 16 + Alembic upgrade/downgrade/re-upgrade: PASS
+- CP4 Security / Transaction review: PASS
+- CP5 Notion knowledge synchronization: complete
+- README / Project State synchronization: complete
 
-Supervisor approval marker: **CP5**.
+Supervisor approval marker: **CP6**.
 
-Next action: CP6 PR delivery and merge into `develop`.
-
-No further Product Code change is authorized unless a new verification failure is discovered.
+No known merge-blocking finding remains. PR #38 is ready for delivery into `develop`.
