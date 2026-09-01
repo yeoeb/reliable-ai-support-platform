@@ -587,6 +587,21 @@ def ensure_clean_worktree(
         )
 
 
+def get_local_head(
+    context: DispatchContext,
+    *,
+    runner: Callable[
+        ...,
+        subprocess.CompletedProcess[str],
+    ] = subprocess.run,
+) -> str:
+    return run_git(
+        ["rev-parse", "HEAD"],
+        cwd=context.repo_root,
+        runner=runner,
+    )
+
+
 def get_remote_head(
     context: DispatchContext,
     *,
@@ -746,6 +761,16 @@ def publish_write_checkpoint(
             "execution; refusing to publish stale work."
         )
 
+    local_head = get_local_head(
+        context,
+        runner=runner,
+    )
+    if local_head != expected_remote_head:
+        raise DispatchError(
+            "Local HEAD changed during Codex execution; "
+            "the Executor must not create commits directly."
+        )
+
     local_note = context.issue_note.read_text(
         encoding="utf-8"
     )
@@ -767,17 +792,17 @@ def publish_write_checkpoint(
     )
 
     run_git(
-        ["diff", "--check"],
-        cwd=context.repo_root,
-        runner=runner,
-    )
-
-    run_git(
         [
             "add",
             "--",
             *changed_paths,
         ],
+        cwd=context.repo_root,
+        runner=runner,
+    )
+
+    run_git(
+        ["diff", "--cached", "--check"],
         cwd=context.repo_root,
         runner=runner,
     )
@@ -1013,6 +1038,16 @@ def dispatch(
             context,
             runner=git_runner,
         )
+        local_head_before = get_local_head(
+            context,
+            runner=git_runner,
+        )
+        if local_head_before != remote_head_before:
+            raise DispatchError(
+                "Local Issue Branch is not synchronized with "
+                "the authoritative remote Head. Run a fast-forward "
+                "pull before starting the write checkpoint."
+            )
 
     previous_branch = previous.get(
         "branch"
