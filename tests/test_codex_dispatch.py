@@ -53,6 +53,9 @@ def remote_note(
         "<!-- "
         "codex-dispatch-supervisor-approved-through: "
         f"{approval} -->\n"
+        "<!-- codex-dispatch-write-allow: "
+        "[\"app/**/*.py\", \"tests/*.py\", "
+        "\"docs/issues/issue-009-audit-logging.md\"] -->\n"
     )
 
 
@@ -103,6 +106,41 @@ def git_runner_for(
                 command,
                 0,
                 stdout="",
+                stderr="",
+            )
+
+
+        if command[1:] == [
+            "status",
+            "--porcelain=v1",
+            "--untracked-files=all",
+        ]:
+            return subprocess.CompletedProcess(
+                command,
+                0,
+                stdout="",
+                stderr="",
+            )
+
+        if command[1:] == [
+            "rev-parse",
+            f"origin/{branch}",
+        ]:
+            return subprocess.CompletedProcess(
+                command,
+                0,
+                stdout="head-123\n",
+                stderr="",
+            )
+
+        if command[1:] == [
+            "rev-parse",
+            "HEAD",
+        ]:
+            return subprocess.CompletedProcess(
+                command,
+                0,
+                stdout="head-123\n",
                 stderr="",
             )
 

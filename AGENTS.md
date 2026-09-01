@@ -60,6 +60,14 @@ For Dispatcher-controlled work, progress authorization comes from the Supervisor
 
 The Executor must never advance this marker. Only the Supervisor may update it after reviewing the previous Checkpoint.
 
+Write checkpoints also use a Supervisor-controlled path Allowlist embedded in the remote Issue execution note:
+
+```md
+<!-- codex-dispatch-write-allow: ["app/example.py", "tests/test_example.py"] -->
+```
+
+The Executor must not modify either control marker. It must not commit or push its own checkpoint changes; the Dispatcher owns bounded publication after validation.
+
 ## Scope Control
 
 Every delegated coding task must define:

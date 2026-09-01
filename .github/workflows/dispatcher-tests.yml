@@ -5,6 +5,7 @@ on:
     paths:
       - "scripts/codex_dispatch.py"
       - "tests/test_codex_dispatch.py"
+      - "tests/test_codex_publish.py"
       - ".github/workflows/dispatcher-tests.yml"
   push:
     branches:
@@ -12,6 +13,7 @@ on:
     paths:
       - "scripts/codex_dispatch.py"
       - "tests/test_codex_dispatch.py"
+      - "tests/test_codex_publish.py"
       - ".github/workflows/dispatcher-tests.yml"
 
 permissions:
@@ -24,10 +26,10 @@ jobs:
 
     steps:
       - name: Check out repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
 
       - name: Set up Python 3.11
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@v7
         with:
           python-version: "3.11"
 
@@ -37,5 +39,9 @@ jobs:
       - name: Compile dispatcher
         run: python -m py_compile scripts/codex_dispatch.py
 
-      - name: Run dispatcher tests
-        run: python -m pytest tests/test_codex_dispatch.py -q
+      - name: Run dispatcher control-plane tests
+        run: >-
+          python -m pytest
+          tests/test_codex_dispatch.py
+          tests/test_codex_publish.py
+          -q
