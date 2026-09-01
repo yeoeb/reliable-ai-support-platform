@@ -197,6 +197,76 @@ def test_normalizes_issue_and_checkpoint():
     assert normalize_checkpoint("cp1") == "CP1"
 
 
+def test_git_capture_uses_explicit_utf8(
+    tmp_path,
+):
+    observed = {}
+
+    def runner(command, **kwargs):
+        observed.update(kwargs)
+        return subprocess.CompletedProcess(
+            command,
+            0,
+            stdout="Audit \\u2192 UTF-8",
+            stderr="",
+        )
+
+    result = dispatcher.run_git(
+        ["show", "HEAD:note.md"],
+        cwd=tmp_path,
+        runner=runner,
+    )
+
+    assert result == "Audit \\u2192 UTF-8"
+    assert observed["encoding"] == "utf-8"
+    assert observed["errors"] == "replace"
+
+
+def test_git_empty_or_missing_stdout_is_safe(
+    tmp_path,
+):
+    def runner(command, **kwargs):
+        return subprocess.CompletedProcess(
+            command,
+            0,
+            stdout=None,
+            stderr=None,
+        )
+
+    assert (
+        dispatcher.run_git(
+            ["fetch"],
+            cwd=tmp_path,
+            runner=runner,
+        )
+        == ""
+    )
+
+
+def test_codex_capture_uses_explicit_utf8():
+    observed = {}
+
+    def runner(command, **kwargs):
+        observed.update(kwargs)
+        return subprocess.CompletedProcess(
+            command,
+            0,
+            stdout='{"type":"turn.completed"}\\n',
+            stderr="",
+        )
+
+    result = dispatcher.run_codex(
+        ["codex", "exec", "--json", "-"],
+        "test prompt",
+        timeout_seconds=10,
+        runner=runner,
+    )
+
+    assert result.returncode == 0
+    assert observed["encoding"] == "utf-8"
+    assert observed["errors"] == "replace"
+
+
 def test_cp1_is_read_only_and_requires_issue_branch(
     tmp_path,
 ):
