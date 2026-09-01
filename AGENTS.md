@@ -52,6 +52,14 @@ Every engineering Issue should progress through these gates:
 
 Do not silently continue past a Checkpoint when verification fails.
 
+For Dispatcher-controlled work, progress authorization comes from the Supervisor approval marker committed on the remote Feature Branch execution note, not from local Agent/Chat state:
+
+```md
+<!-- codex-dispatch-supervisor-approved-through: CP1 -->
+```
+
+The Executor must never advance this marker. Only the Supervisor may update it after reviewing the previous Checkpoint.
+
 ## Scope Control
 
 Every delegated coding task must define:
