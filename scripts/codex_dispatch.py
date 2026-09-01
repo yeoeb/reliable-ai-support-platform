@@ -21,6 +21,13 @@ CHECKPOINT_SANDBOX = {
 }
 
 WRITE_CHECKPOINTS = {"CP2", "CP3"}
+REQUIRED_PREVIOUS_CHECKPOINT = {
+    "CP2": "CP1",
+    "CP3": "CP2",
+    "CP4": "CP3",
+    "CP5": "CP4",
+    "CP6": "CP5",
+}
 STATE_DIR_NAME = ".codex-dispatch"
 STATE_FILE_NAME = "state.json"
 
@@ -162,14 +169,20 @@ def resolve_context(
         repo_root,
         runner=git_runner,
     )
-    if (
-        checkpoint in WRITE_CHECKPOINTS
-        and branch in {"main", "develop"}
-    ):
-        raise DispatchError(
-            f"{checkpoint} requires a dedicated work branch; "
-            f"current branch is {branch!r}."
-        )
+    if checkpoint in WRITE_CHECKPOINTS:
+        if branch in {"main", "develop"}:
+            raise DispatchError(
+                f"{checkpoint} requires a dedicated work branch; "
+                f"current branch is {branch!r}."
+            )
+
+        expected_marker = f"issue-{issue_id}"
+        if expected_marker not in branch.lower():
+            raise DispatchError(
+                f"{checkpoint} for Engineering Issue #{issue_id} "
+                f"requires a branch containing {expected_marker!r}; "
+                f"current branch is {branch!r}."
+            )
 
     issue_note = find_issue_note(
         repo_root,
@@ -340,6 +353,38 @@ def get_issue_state(
     return value
 
 
+def validate_checkpoint_transition(
+    previous: dict,
+    checkpoint: str,
+    *,
+    force: bool,
+) -> None:
+    last_checkpoint = previous.get("last_checkpoint")
+    last_status = previous.get("last_status")
+
+    if (
+        force
+        and last_checkpoint == checkpoint
+    ):
+        return
+
+    required = REQUIRED_PREVIOUS_CHECKPOINT.get(
+        checkpoint
+    )
+    if required is None:
+        return
+
+    if (
+        last_checkpoint != required
+        or last_status != "succeeded"
+    ):
+        raise DispatchError(
+            f"{checkpoint} requires successful {required} first. "
+            f"Last recorded checkpoint/status: "
+            f"{last_checkpoint!r}/{last_status!r}."
+        )
+
+
 def build_codex_command(
     context: DispatchContext,
     *,
@@ -421,11 +466,10 @@ def extract_terminal_status(
     stdout: str,
     returncode: int,
 ) -> str:
-    status = (
-        "succeeded"
-        if returncode == 0
-        else "failed"
-    )
+    if returncode != 0:
+        return "failed"
+
+    status = "succeeded"
 
     for line in stdout.splitlines():
         try:
@@ -509,6 +553,12 @@ def dispatch(
             f"for Issue #{context.issue_id}. "
             "Use --force to run it again."
         )
+
+    validate_checkpoint_transition(
+        previous,
+        context.checkpoint,
+        force=force,
+    )
 
     previous_branch = previous.get(
         "branch"
