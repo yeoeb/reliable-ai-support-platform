@@ -15,6 +15,12 @@ param(
 $ErrorActionPreference = 'Stop'
 Set-StrictMode -Version Latest
 
+# Keep Python/Codex/Git text pipes independent from the Windows ANSI code page.
+$env:PYTHONUTF8 = '1'
+$env:PYTHONIOENCODING = 'utf-8'
+[Console]::InputEncoding = [System.Text.UTF8Encoding]::new($false)
+[Console]::OutputEncoding = [System.Text.UTF8Encoding]::new($false)
+
 function Require-Command {
     param(
         [Parameter(Mandatory = $true)]
