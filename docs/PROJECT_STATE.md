@@ -24,7 +24,7 @@ It is intentionally concise and must stay synchronized with merged work.
 - #006 — Reliable User creation flow
 - #007 — Password hashing and JWT authentication
 - #008 — RBAC authorization and permission enforcement
-- #009 — Durable Security Audit Trail (verified; PR #38 delivery)
+- #009 — Durable Security Audit Trail
 
 ## Current Workflow Infrastructure
 
@@ -38,24 +38,20 @@ Required state surfaces:
 - `docs/issues/` — per-Issue execution snapshots when needed
 - Notion — reusable engineering knowledge only
 - `scripts/codex_dispatch.py` — local bounded Checkpoint dispatcher
-- `.codex-dispatch/` — gitignored local Codex Session metadata\n- `scripts/codex_watch.py` — optional local Trigger Layer for Supervisor-authorized CP2 / CP3
+- `.codex-dispatch/` — gitignored local Codex Session metadata
+- `scripts/codex_watch.py` — optional local Trigger Layer for Supervisor-authorized CP2 / CP3
 
 The Dispatcher uses Stable `codex exec` as its local execution boundary. It does not attempt to inject prompts into an already-open VS Code/Desktop Codex UI session.
 
-## Current Product Engineering Issue
+## Next Product Engineering Issue
 
-Engineering Issue ID #009 — Durable Security Audit Trail
+Engineering Issue ID #010 — Structured Logging / Observability foundation
 
-- GitHub tracking Issue: #16
-- Active Branch: `feature/issue-009-audit-logging`
-- Current Checkpoint: CP6 delivery
-- CP0 Context Bootstrap: completed
-- CP1 Architecture / Plan: completed and Supervisor-approved
-- CP2 Audit implementation: completed and Supervisor-reviewed
-- CP3 verification: completed (178 backend + 1 recovery tests)
-- CP4 Security / Transaction review: completed
-- CP5 Knowledge synchronization: completed
-- Remote write Allowlist: configured for bounded Audit implementation
+- Status: not started
+- Normal base Branch: `develop`
+- Dependency baseline: Authentication, RBAC, Durable Audit Trail, and Backend Verification are complete
+
+The Supervisor must create a new GitHub tracking Issue and Execution Packet before implementation begins.
 
 Important: GitHub Issue/PR numbers are repository-wide platform sequence numbers and remain separate from Engineering Issue IDs.
 
@@ -111,6 +107,9 @@ Service Layer owns transaction boundaries.
 - Database errors are translated explicitly.
 - Alembic owns schema evolution.
 - Secrets, password hashes, access tokens, and equivalent sensitive material must not be logged.
+- Durable Audit Events use stable Actor / Action / Target / Outcome fields and an append-only application boundary.
+- RBAC privilege mutations and their Audit Events commit atomically.
+- Authentication / Authorization Audit failures use best-effort persistence and must preserve intended 401 / 403 responses.
 
 ### Planned AI Boundary
 
@@ -157,8 +156,10 @@ Response with Evidence
 - CP2/CP3 publication is Dispatcher-owned: remote write Allowlist, unchanged control markers, fresh remote Head, and staged Diff hygiene must pass before Commit/Push.
 - The Dispatcher uses normal Feature Branch Push only; no Force Push and no Push to `main`/`develop`.
 - The Dispatcher never uses `danger-full-access`, `--yolo`, automatic Merge, or automatic Push to `main`.
-- Watcher polling does not authorize work; it only reacts to the remote Supervisor Gate.\n- Watcher failures stop instead of automatic unbounded Retry.
-- Rework of an already-published CP2/CP3 requires an explicit remote Supervisor marker with a positive attempt number; each attempt has distinct remote Commit evidence and may execute once.\n- Chat history is never the execution Source of Truth.
+- Watcher polling does not authorize work; it only reacts to the remote Supervisor Gate.
+- Watcher failures stop instead of automatic unbounded Retry.
+- Rework of an already-published CP2/CP3 requires an explicit remote Supervisor marker with a positive attempt number; each attempt has distinct remote Commit evidence and may execute once.
+- Chat history is never the execution Source of Truth.
 
 ## Known Documentation Debt
 
