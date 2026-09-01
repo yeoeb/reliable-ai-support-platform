@@ -68,6 +68,14 @@ Write checkpoints also use a Supervisor-controlled path Allowlist embedded in th
 
 The Executor must not modify either control marker. It must not commit or push its own checkpoint changes; the Dispatcher owns bounded publication after validation.\n\nA Local Watcher may observe remote approval and automatically invoke **only CP2 / CP3**. It has no authority to approve work, choose Issues, run review/delivery checkpoints automatically, retry failures indefinitely, or Merge.
 
+After Review/CI finds a bounded problem in an already-published CP2/CP3, only the Supervisor may authorize a finite rework attempt with:
+
+```md
+<!-- codex-dispatch-supervisor-rework: {"checkpoint":"CP3","attempt":1} -->
+```
+
+The Executor must not add, remove, or change this marker. The same rework attempt may run at most once; another attempt requires the Supervisor to increment the attempt explicitly.
+
 ## Scope Control
 
 Every delegated coding task must define:
