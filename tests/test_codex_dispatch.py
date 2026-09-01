@@ -381,3 +381,46 @@ def test_resume_refuses_session_from_different_branch(
             codex_bin="codex",
             timeout_seconds=10,
         )
+
+
+
+def test_dry_run_does_not_launch_codex_or_write_state(
+    tmp_path,
+    capsys,
+):
+    repo = make_repo(tmp_path)
+    context = make_context(repo)
+
+    def forbidden_runner(*args, **kwargs):
+        raise AssertionError(
+            "Dry run must not launch Codex."
+        )
+
+    result = dispatch(
+        context,
+        dry_run=True,
+        force=False,
+        new_session=False,
+        codex_bin="codex",
+        timeout_seconds=10,
+        process_runner=forbidden_runner,
+    )
+
+    assert result == 0
+    assert not (
+        repo
+        / ".codex-dispatch"
+        / "state.json"
+    ).exists()
+
+    payload = json.loads(
+        capsys.readouterr().out
+    )
+    assert payload["issue_id"] == "009"
+    assert payload["checkpoint"] == "CP1"
+    assert payload["sandbox"] == "read-only"
+    assert payload["command"][:3] == [
+        "codex",
+        "exec",
+        "--json",
+    ]
