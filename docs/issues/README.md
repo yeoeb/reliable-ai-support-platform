@@ -19,6 +19,8 @@ Use Engineering Issue IDs, not GitHub Issue/PR sequence numbers.
 ```md
 # Engineering Issue #NNN — Title
 
+<!-- codex-dispatch-supervisor-approved-through: CP0 -->
+
 ## GitHub Tracking
 Repository Issue URL / number
 
@@ -63,5 +65,8 @@ Repository Issue URL / number
 - Keep the note small enough to reload cheaply.
 - Do not paste full Chat transcripts.
 - Do not duplicate stable architecture documentation.
+- Keep exactly one `codex-dispatch-supervisor-approved-through` marker.
+- Only the Supervisor updates the approval marker after reviewing a Checkpoint.
+- The Dispatcher reads approval from `origin/<feature-branch>`, not the mutable local Working Tree.
 - Update Current State at every meaningful Checkpoint.
 - At completion, preserve only decisions/evidence useful for future maintenance.
