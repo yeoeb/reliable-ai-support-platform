@@ -72,10 +72,19 @@ jobs:
       - name: Verify unknown Issue fails closed
         shell: pwsh
         run: |
-          & ./scripts/start_codex_watch.ps1 -Issue 999
-          if ($LASTEXITCODE -eq 0) {
+          $process = Start-Process pwsh -ArgumentList @(
+            '-NoProfile',
+            '-File',
+            './scripts/start_codex_watch.ps1',
+            '-Issue',
+            '999'
+          ) -Wait -PassThru -NoNewWindow
+
+          if ($process.ExitCode -eq 0) {
             throw "Unknown Issue unexpectedly succeeded."
           }
+
+          Write-Host "Unknown Issue correctly failed closed."
 
       - name: Run dispatcher control-plane tests
         run: >-
