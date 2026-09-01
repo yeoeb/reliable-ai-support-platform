@@ -441,6 +441,19 @@ def test_parse_supervisor_approval():
     )
 
 
+def test_supervisor_approval_ignores_prose_mentions():
+    content = (
+        remote_note("CP2")
+        + "\nThe `codex-dispatch-supervisor-approved-through` "
+        + "marker is controlled by the Supervisor.\n"
+    )
+
+    assert (
+        parse_supervisor_approval(content)
+        == "CP2"
+    )
+
+
 @pytest.mark.parametrize(
     "note",
     [
