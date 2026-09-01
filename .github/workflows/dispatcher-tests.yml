@@ -8,14 +8,22 @@ on:
       - "tests/test_codex_dispatch.py"
       - "tests/test_codex_watch.py"
       - "tests/test_codex_publish.py"
+      - "AGENTS.md"
+      - "docs/PROJECT_STATE.md"
+      - "docs/codex-watcher.md"
       - ".github/workflows/dispatcher-tests.yml"
   push:
     branches:
       - develop
     paths:
       - "scripts/codex_dispatch.py"
+      - "scripts/codex_watch.py"
       - "tests/test_codex_dispatch.py"
       - "tests/test_codex_publish.py"
+      - "tests/test_codex_watch.py"
+      - "AGENTS.md"
+      - "docs/PROJECT_STATE.md"
+      - "docs/codex-watcher.md"
       - ".github/workflows/dispatcher-tests.yml"
 
 permissions:
@@ -38,8 +46,11 @@ jobs:
       - name: Install test dependency
         run: python -m pip install pytest
 
-      - name: Compile dispatcher
-        run: python -m py_compile scripts/codex_dispatch.py
+      - name: Compile control-plane scripts
+        run: >-
+          python -m py_compile
+          scripts/codex_dispatch.py
+          scripts/codex_watch.py
 
       - name: Run dispatcher control-plane tests
         run: >-
