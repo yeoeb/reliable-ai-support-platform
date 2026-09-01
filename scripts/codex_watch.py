@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import argparse
 import os
+import sys
 import time
 from contextlib import contextmanager
 from pathlib import Path
@@ -419,7 +420,7 @@ def main(
     except DispatchError as exc:
         print(
             f"ERROR: {exc}",
-            file=__import__("sys").stderr,
+            file=sys.stderr,
         )
         return 2
 
