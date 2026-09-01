@@ -349,6 +349,8 @@ def test_resume_refuses_session_from_different_branch(
                     "009": {
                         "session_id": "thread-123",
                         "branch": "feature/old",
+                        "last_checkpoint": "CP1",
+                        "last_status": "succeeded",
                     }
                 }
             }
@@ -432,3 +434,66 @@ def test_dry_run_does_not_launch_codex_or_write_state(
         "exec",
         "--json",
     ]
+
+
+
+def test_cp2_rejects_branch_for_different_issue(
+    tmp_path,
+):
+    repo = make_repo(tmp_path)
+
+    with pytest.raises(
+        DispatchError,
+        match="requires a branch containing",
+    ):
+        resolve_context(
+            start=repo,
+            issue_id="009",
+            checkpoint="CP2",
+            git_runner=git_runner_for(
+                repo,
+                "feature/issue-008-rbac",
+            ),
+        )
+
+
+def test_cp2_requires_successful_cp1(
+    tmp_path,
+):
+    repo = make_repo(tmp_path)
+
+    with pytest.raises(
+        DispatchError,
+        match="requires successful CP1",
+    ):
+        dispatch(
+            make_context(
+                repo,
+                checkpoint="CP2",
+                branch=(
+                    "feature/"
+                    "issue-009-audit-logging"
+                ),
+            ),
+            dry_run=True,
+            force=False,
+            new_session=False,
+            codex_bin="codex",
+            timeout_seconds=10,
+        )
+
+
+def test_nonzero_process_exit_cannot_be_reported_success():
+    stdout = (
+        '{"type":"thread.started",'
+        '"thread_id":"thread-123"}\n'
+        '{"type":"turn.completed"}\n'
+    )
+
+    assert (
+        dispatcher.extract_terminal_status(
+            stdout,
+            1,
+        )
+        == "failed"
+    )
