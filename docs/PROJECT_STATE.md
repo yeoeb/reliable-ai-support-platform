@@ -146,7 +146,8 @@ Response with Evidence
 - CP2/CP3 publication is Dispatcher-owned: remote write Allowlist, unchanged control markers, fresh remote Head, and staged Diff hygiene must pass before Commit/Push.
 - The Dispatcher uses normal Feature Branch Push only; no Force Push and no Push to `main`/`develop`.
 - The Dispatcher never uses `danger-full-access`, `--yolo`, automatic Merge, or automatic Push to `main`.
-- Watcher polling does not authorize work; it only reacts to the remote Supervisor Gate.\n- Watcher failures stop instead of automatic unbounded Retry.\n- Chat history is never the execution Source of Truth.
+- Watcher polling does not authorize work; it only reacts to the remote Supervisor Gate.\n- Watcher failures stop instead of automatic unbounded Retry.
+- Rework of an already-published CP2/CP3 requires an explicit remote Supervisor marker with a positive attempt number; each attempt has distinct remote Commit evidence and may execute once.\n- Chat history is never the execution Source of Truth.
 
 ## Known Documentation Debt
 
