@@ -42,6 +42,7 @@ codex executable 必須在 PATH。
 2. docs/PROJECT_STATE.md
 3. exactly one docs/issues/issue-NNN-*.md
 4. current Git Branch
+5. remote Supervisor approval from `origin/<current-branch>`
 
 Issue execution note 應保持精簡，只保存：
 
@@ -67,7 +68,35 @@ Issue execution note 應保持精簡，只保存：
 | CP5 | read-only | Knowledge / Documentation analysis |
 | CP6 | read-only | Delivery evidence |
 
-CP2 / CP3 禁止直接在 main 或 develop 執行。
+CP1–CP6 必須在對應的 Engineering Issue Feature Branch 執行；CP2 / CP3 使用 `workspace-write`。
+
+## Shared Supervisor Gate
+
+每份 Issue execution note 必須有且只能有一個：
+
+```md
+<!-- codex-dispatch-supervisor-approved-through: CP0 -->
+```
+
+批准規則：
+
+- CP1 需要 Supervisor 已批准 CP0。
+- CP2 需要批准 CP1。
+- CP3 需要批准 CP2。
+- 依此類推。
+
+Dispatcher 執行前會：
+
+```text
+git fetch origin <current-feature-branch>
+git show origin/<current-feature-branch>:docs/issues/issue-NNN-*.md
+```
+
+然後從**遠端 Branch**解析批准 Marker。
+
+這代表本機 Codex 即使處於 `workspace-write` 並修改了本機 Markdown，也不能用尚未 Push 的 Working Tree 修改自行跨過下一個 Gate。
+
+`.codex-dispatch/state.json` 只保存 Session Resume 與 Execution Metadata，不再具有批准下一個 Checkpoint 的權力。
 
 ## Dry Run
 
@@ -106,10 +135,10 @@ Supervisor 驗收 CP1 後，在同一個 Issue Branch 執行：
 
 Dispatcher 會同時驗證：
 
-- 前一個成功 Checkpoint 必須是 CP1。
-- Branch 不能是 `main` 或 `develop`。
-- Branch 名稱必須包含 `issue-009`，避免在別的 Issue Branch 寫入。
+- 遠端 Feature Branch 的 Supervisor Marker 已批准到 CP1。
+- Branch 名稱必須包含 `issue-009`，避免在別的 Issue Branch 執行。
 - Stored Session 的 Branch 必須與目前 Branch 相同。
+- Local State 不得取代 Remote Supervisor Approval。
 
 若已有 Session ID，Dispatcher 會使用：
 
@@ -142,7 +171,7 @@ Dispatcher 只保存最小 Metadata：
 - CP2 / CP3 不能跑在 main / develop。
 - Session 與建立它的 Branch 綁定。
 - Branch 不一致時必須使用 --new-session。
-- CP2 必須接在成功 CP1 後，之後依序 CP3 → CP4 → CP5 → CP6。
+- Checkpoint progression 由遠端 Supervisor Approval Marker 授權；Local State 只記錄 Executor Session/Result。
 - 已成功的同一 Checkpoint 不會無意重跑；要重跑必須 --force。
 - Write Checkpoint 的 Branch 名稱必須包含對應的 Engineering Issue ID。
 - 不使用 danger-full-access。
