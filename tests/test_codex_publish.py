@@ -401,7 +401,7 @@ def test_executor_cannot_modify_write_allow_marker(
     ).read_text(encoding="utf-8")
     local = local.replace(
         '"app/*.py"',
-        '"*"',
+        '"app/audit_*.py"',
     )
     (
         repo
@@ -461,6 +461,9 @@ def test_remote_head_race_blocks_publication(
         "config",
         "user.email",
         "other@example.com",
+    )
+    (other / "tests").mkdir(
+        exist_ok=True,
     )
     (other / "tests" / "remote_change.py").write_text(
         "REMOTE = True\n",
