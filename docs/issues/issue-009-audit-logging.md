@@ -1,7 +1,7 @@
 # Engineering Issue #009 — Durable Security Audit Trail
 
 <!-- codex-dispatch-supervisor-approved-through: CP2 -->
-<!-- codex-dispatch-write-allow: ["app/models/audit_event.py","app/models/__init__.py","app/repositories/audit.py","app/services/audit.py","app/services/rbac.py","app/api/routes/auth.py","app/api/routes/admin.py","app/api/dependencies/auth.py","app/api/dependencies/authorization.py","migrations/versions/*audit*.py","tests/test_audit_*.py","tests/test_auth.py","tests/test_auth_dependency.py","tests/test_authorization_dependency.py","tests/test_admin_rbac.py","tests/test_rbac_service.py","tests/test_migrations.py","docs/issues/issue-009-audit-logging.md"] -->
+<!-- codex-dispatch-write-allow: ["app/models/audit_event.py","app/models/__init__.py","app/repositories/audit.py","app/services/audit.py","app/services/rbac.py","app/api/routes/auth.py","app/api/routes/admin.py","app/api/dependencies/auth.py","app/api/dependencies/authorization.py","migrations/versions/*audit*.py","tests/test_audit_*.py","tests/test_auth.py","tests/test_auth_dependency.py","tests/test_authorization_dependency.py","tests/test_admin_rbac.py","tests/test_rbac_service.py","tests/test_rbac_security.py","tests/test_migrations.py","docs/issues/issue-009-audit-logging.md"] -->
 
 ## GitHub Tracking
 
@@ -480,6 +480,49 @@ python -m pytest -q
 ```
 
 Both commands failed before test collection because the only available interpreter is `.venv\\Scripts\\python.exe`, whose `pyvenv.cfg` points to the missing base executable `C:\\Users\\88693\\AppData\\Local\\Microsoft\\WindowsApps\\PythonSoftwareFoundation.Python.3.11_qbz5n2kfra8p0\\python.exe`. Docker is not available, so the optional PostgreSQL migration cycle could not be run. `git diff --check` passed.
+
+## CP3 CI Evidence — First GitHub-hosted Run
+
+Draft PR #38 verified the exact Issue Branch Head `56e83d51fcddb2d943fc4948dbafa6d0a96401cf`.
+
+### PASS
+
+- Dispatcher / Watcher Control Plane: PASS
+- PostgreSQL 16 service: healthy
+- Alembic `upgrade head`: PASS
+- Docker Compose database recovery: PASS
+- 160 backend tests passed before the regression gate stopped
+
+### FAIL — bounded test-isolation regression
+
+Exactly two tests failed:
+
+- `tests/test_rbac_security.py::test_jwt_admin_claim_cannot_bypass_database_authorization`
+- `tests/test_rbac_security.py::test_jwt_rbac_manage_claim_cannot_access_admin_api`
+
+Both tests deliberately override `get_db` with `object()` because their purpose is to prove JWT role/permission claims cannot bypass database-backed authorization.
+
+The new denial Audit path now calls `AuditService(session).record_best_effort(...)`, so those fake Sessions fail with:
+
+```text
+AttributeError: 'object' object has no attribute 'add'
+```
+
+This does **not** justify weakening `AuditService` or swallowing arbitrary programming errors.
+
+### Required CP3 fix
+
+Keep the RBAC security tests focused on their original trust-boundary assertion.
+
+Preferred fix:
+
+- mock/stub `AuditService.record_best_effort` in those two tests, or provide a Session fake that satisfies the Audit contract without performing persistence.
+- do not change production Authorization semantics solely to accommodate `session=object()`.
+- preserve explicit verification that denied JWT claims still return 403 and DB-backed `has_permission` is authoritative.
+
+The remote Write Allowlist is expanded to include `tests/test_rbac_security.py`.
+
+After the fix, rerun the Draft PR Backend Verification and complete the remaining CP3 requirements, including real best-effort persistence-failure tests and sensitive-data assertions.
 
 ## Knowledge Candidates
 
