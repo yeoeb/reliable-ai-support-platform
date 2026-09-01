@@ -4,7 +4,9 @@ on:
   pull_request:
     paths:
       - "scripts/codex_dispatch.py"
+      - "scripts/codex_watch.py"
       - "tests/test_codex_dispatch.py"
+      - "tests/test_codex_watch.py"
       - "tests/test_codex_publish.py"
       - ".github/workflows/dispatcher-tests.yml"
   push:
@@ -44,4 +46,5 @@ jobs:
           python -m pytest
           tests/test_codex_dispatch.py
           tests/test_codex_publish.py
+          tests/test_codex_watch.py
           -q
