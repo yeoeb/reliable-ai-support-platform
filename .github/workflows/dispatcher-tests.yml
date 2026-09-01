@@ -5,12 +5,14 @@ on:
     paths:
       - "scripts/codex_dispatch.py"
       - "scripts/codex_watch.py"
+      - "scripts/start_codex_watch.ps1"
       - "tests/test_codex_dispatch.py"
       - "tests/test_codex_watch.py"
       - "tests/test_codex_publish.py"
       - "AGENTS.md"
       - "docs/PROJECT_STATE.md"
       - "docs/codex-watcher.md"
+      - "scripts/start_codex_watch.ps1"
       - ".github/workflows/dispatcher-tests.yml"
   push:
     branches:
@@ -51,6 +53,29 @@ jobs:
           python -m py_compile
           scripts/codex_dispatch.py
           scripts/codex_watch.py
+
+      - name: Validate Windows watcher launcher syntax
+        shell: pwsh
+        run: |
+          $tokens = $null
+          $errors = $null
+          [System.Management.Automation.Language.Parser]::ParseFile(
+            "$PWD/scripts/start_codex_watch.ps1",
+            [ref]$tokens,
+            [ref]$errors
+          ) | Out-Null
+          if ($errors.Count -gt 0) {
+            $errors | ForEach-Object { Write-Error $_.Message }
+            exit 1
+          }
+
+      - name: Verify unknown Issue fails closed
+        shell: pwsh
+        run: |
+          & ./scripts/start_codex_watch.ps1 -Issue 999
+          if ($LASTEXITCODE -eq 0) {
+            throw "Unknown Issue unexpectedly succeeded."
+          }
 
       - name: Run dispatcher control-plane tests
         run: >-
