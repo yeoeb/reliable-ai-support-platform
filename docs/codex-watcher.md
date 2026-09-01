@@ -26,3 +26,30 @@ Launcher 會：
 8. 啟動 `codex_watch.py`。
 
 Launcher 不會安裝 Windows Service、不會保存 Credential、不會 Merge/Rebase、不會 Force Push。
+
+
+## Supervisor-Authorized Rework
+
+A normal published write checkpoint is intentionally not repeated.
+
+If CI or Supervisor Review finds a bounded defect after publication, the Supervisor may add one exact optional marker to the remote Issue note:
+
+```md
+<!-- codex-dispatch-supervisor-rework: {"checkpoint":"CP3","attempt":1} -->
+```
+
+The Watcher then requires all of the following:
+
+- target is CP2 or CP3;
+- target equals the currently authorized write checkpoint;
+- `attempt` is a positive integer;
+- remote evidence `checkpoint(issue-NNN): CP3 rework-1` does not already exist;
+- the same local rework attempt has not already failed.
+
+A rework invokes Dispatcher with `force=True` **only** for that explicitly authorized checkpoint and publishes a distinct evidence Commit:
+
+```text
+checkpoint(issue-009): CP3 rework-1
+```
+
+The same marker never creates an unbounded retry loop. Another rework requires the Supervisor to change `attempt` to a new integer after reviewing the previous result.

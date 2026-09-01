@@ -15,6 +15,7 @@ from scripts.codex_dispatch import (
     normalize_checkpoint,
     normalize_issue_id,
     parse_supervisor_approval,
+    parse_supervisor_rework,
     resolve_context,
 )
 
@@ -758,3 +759,64 @@ def test_nonzero_process_exit_cannot_be_reported_success():
         )
         == "failed"
     )
+
+
+
+def test_parse_supervisor_rework_absent_is_none():
+    assert parse_supervisor_rework(
+        remote_note("CP2")
+    ) is None
+
+
+def test_parse_supervisor_rework_valid():
+    note = (
+        remote_note("CP2")
+        + '<!-- codex-dispatch-supervisor-rework: '
+        '{"checkpoint":"CP3","attempt":1} -->\n'
+    )
+
+    assert parse_supervisor_rework(note) == (
+        "CP3",
+        1,
+    )
+
+
+@pytest.mark.parametrize(
+    "marker",
+    [
+        '<!-- codex-dispatch-supervisor-rework: not-json -->',
+        '<!-- codex-dispatch-supervisor-rework: '
+        '{"checkpoint":"CP1","attempt":1} -->',
+        '<!-- codex-dispatch-supervisor-rework: '
+        '{"checkpoint":"CP3","attempt":0} -->',
+        '<!-- codex-dispatch-supervisor-rework: '
+        '{"checkpoint":"CP3","attempt":true} -->',
+        '<!-- codex-dispatch-supervisor-rework: '
+        '{"checkpoint":"CP3","attempt":1,"extra":1} -->',
+    ],
+)
+def test_invalid_supervisor_rework_fails_closed(
+    marker,
+):
+    with pytest.raises(DispatchError):
+        parse_supervisor_rework(
+            remote_note("CP2")
+            + marker
+            + "\n"
+        )
+
+
+def test_duplicate_supervisor_rework_markers_fail_closed():
+    note = (
+        remote_note("CP2")
+        + '<!-- codex-dispatch-supervisor-rework: '
+        '{"checkpoint":"CP3","attempt":1} -->\n'
+        + '<!-- codex-dispatch-supervisor-rework: '
+        '{"checkpoint":"CP3","attempt":2} -->\n'
+    )
+
+    with pytest.raises(
+        DispatchError,
+        match="at most one",
+    ):
+        parse_supervisor_rework(note)

@@ -43,6 +43,7 @@ SUPERVISOR_GATE_KEY = (
     "codex-dispatch-supervisor-approved-through"
 )
 WRITE_ALLOW_KEY = "codex-dispatch-write-allow"
+SUPERVISOR_REWORK_KEY = "codex-dispatch-supervisor-rework"
 PROTECTED_PUBLISH_PATHS = {
     ".gitignore",
     "AGENTS.md",
@@ -510,6 +511,81 @@ def validate_supervisor_gate(
     return approved
 
 
+def parse_supervisor_rework(
+    content: str,
+) -> tuple[str, int] | None:
+    candidate_lines = _control_marker_candidates(
+        content,
+        SUPERVISOR_REWORK_KEY,
+    )
+
+    if len(candidate_lines) > 1:
+        raise DispatchError(
+            "Expected at most one Supervisor rework marker "
+            f"containing {SUPERVISOR_REWORK_KEY!r}; "
+            f"found {len(candidate_lines)}."
+        )
+
+    if not candidate_lines:
+        return None
+
+    prefix = f"<!-- {SUPERVISOR_REWORK_KEY}:"
+    suffix = "-->"
+    line = candidate_lines[0]
+
+    if (
+        not line.startswith(prefix)
+        or not line.endswith(suffix)
+    ):
+        raise DispatchError(
+            "Supervisor rework marker is malformed."
+        )
+
+    payload = line[
+        len(prefix) : -len(suffix)
+    ].strip()
+
+    try:
+        value = json.loads(payload)
+    except json.JSONDecodeError as exc:
+        raise DispatchError(
+            "Supervisor rework marker must contain valid JSON."
+        ) from exc
+
+    if (
+        not isinstance(value, dict)
+        or set(value) != {"checkpoint", "attempt"}
+    ):
+        raise DispatchError(
+            "Supervisor rework marker must contain exactly "
+            "'checkpoint' and 'attempt'."
+        )
+
+    try:
+        checkpoint = normalize_checkpoint(
+            str(value["checkpoint"])
+        )
+    except DispatchError as exc:
+        raise DispatchError(
+            "Supervisor rework marker contains "
+            "an invalid checkpoint."
+        ) from exc
+
+    attempt = value["attempt"]
+    if (
+        checkpoint not in WRITE_CHECKPOINTS
+        or isinstance(attempt, bool)
+        or not isinstance(attempt, int)
+        or attempt <= 0
+    ):
+        raise DispatchError(
+            "Supervisor rework must target CP2/CP3 "
+            "with a positive integer attempt."
+        )
+
+    return checkpoint, attempt
+
+
 def parse_write_allow(
     content: str,
 ) -> list[str]:
@@ -754,6 +830,18 @@ def validate_control_markers_unchanged(
             "publication is blocked."
         )
 
+    remote_rework = parse_supervisor_rework(
+        remote_note
+    )
+    local_rework = parse_supervisor_rework(
+        local_note
+    )
+    if local_rework != remote_rework:
+        raise DispatchError(
+            "Executor modified the Supervisor rework marker; "
+            "publication is blocked."
+        )
+
 
 def publish_write_checkpoint(
     context: DispatchContext,
@@ -761,6 +849,7 @@ def publish_write_checkpoint(
     expected_remote_head: str,
     remote_note: str,
     patterns: Sequence[str],
+    publication_label: str | None = None,
     runner: Callable[
         ...,
         subprocess.CompletedProcess[str],
@@ -844,6 +933,8 @@ def publish_write_checkpoint(
         f"checkpoint(issue-{context.issue_id}): "
         f"{context.checkpoint}"
     )
+    if publication_label:
+        commit_message += f" {publication_label}"
     run_git(
         [
             "commit",
@@ -1022,6 +1113,7 @@ def dispatch(
         ...,
         subprocess.CompletedProcess[str],
     ] = subprocess.run,
+    publication_label: str | None = None,
 ) -> int:
     state = load_state(
         context.repo_root
@@ -1134,6 +1226,7 @@ def dispatch(
                     ),
                     "write_allow": write_patterns,
                     "remote_head_before": remote_head_before,
+                    "publication_label": publication_label,
                     "command": command,
                     "prompt": prompt,
                 },
@@ -1199,6 +1292,7 @@ def dispatch(
             expected_remote_head=remote_head_before,
             remote_note=remote_note,
             patterns=write_patterns,
+            publication_label=publication_label,
             runner=git_runner,
         )
 
@@ -1213,6 +1307,7 @@ def dispatch(
         "last_status": status,
         "last_returncode": result.returncode,
         "published_commit_sha": published_commit_sha,
+        "publication_label": publication_label,
         "updated_at": datetime.now(
             timezone.utc
         ).isoformat(),
