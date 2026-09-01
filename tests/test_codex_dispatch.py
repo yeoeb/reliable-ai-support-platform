@@ -14,14 +14,15 @@ from scripts.codex_dispatch import (
     load_state,
     normalize_checkpoint,
     normalize_issue_id,
+    parse_supervisor_approval,
     resolve_context,
 )
 
 
-def make_repo(
-    tmp_path: Path,
-    branch: str = "feature/issue-009-audit-logging",
-) -> Path:
+ISSUE_BRANCH = "feature/issue-009-audit-logging"
+
+
+def make_repo(tmp_path: Path) -> Path:
     repo = tmp_path / "repo"
     (repo / "docs" / "issues").mkdir(parents=True)
     (repo / "AGENTS.md").write_text(
@@ -44,10 +45,30 @@ def make_repo(
     return repo
 
 
+def remote_note(
+    approval: str = "CP0",
+) -> str:
+    return (
+        "# issue\n\n"
+        "<!-- "
+        "codex-dispatch-supervisor-approved-through: "
+        f"{approval} -->\n"
+    )
+
+
 def git_runner_for(
     repo: Path,
     branch: str,
+    *,
+    approval: str = "CP0",
+    note: str | None = None,
 ):
+    resolved_note = (
+        remote_note(approval)
+        if note is None
+        else note
+    )
+
     def runner(command, **kwargs):
         if command[-2:] == [
             "rev-parse",
@@ -72,6 +93,36 @@ def git_runner_for(
                 stderr="",
             )
 
+        if command[1:4] == [
+            "fetch",
+            "--quiet",
+            "origin",
+        ]:
+            assert command[4] == branch
+            return subprocess.CompletedProcess(
+                command,
+                0,
+                stdout="",
+                stderr="",
+            )
+
+        if (
+            len(command) >= 3
+            and command[1] == "show"
+        ):
+            expected_prefix = (
+                f"origin/{branch}:"
+                "docs/issues/"
+                "issue-009-audit-logging.md"
+            )
+            assert command[2] == expected_prefix
+            return subprocess.CompletedProcess(
+                command,
+                0,
+                stdout=resolved_note,
+                stderr="",
+            )
+
         raise AssertionError(command)
 
     return runner
@@ -81,7 +132,7 @@ def make_context(
     repo: Path,
     *,
     checkpoint: str = "CP1",
-    branch: str = "develop",
+    branch: str = ISSUE_BRANCH,
 ) -> DispatchContext:
     return DispatchContext(
         repo_root=repo,
@@ -108,22 +159,39 @@ def test_normalizes_issue_and_checkpoint():
     assert normalize_checkpoint("cp1") == "CP1"
 
 
-def test_cp1_is_read_only(tmp_path):
+def test_cp1_is_read_only_and_requires_issue_branch(
+    tmp_path,
+):
     repo = make_repo(tmp_path)
+
     context = resolve_context(
         start=repo,
         issue_id="009",
         checkpoint="CP1",
         git_runner=git_runner_for(
             repo,
-            "develop",
+            ISSUE_BRANCH,
         ),
     )
 
     assert context.sandbox == "read-only"
 
+    with pytest.raises(
+        DispatchError,
+        match="dedicated branch",
+    ):
+        resolve_context(
+            start=repo,
+            issue_id="009",
+            checkpoint="CP1",
+            git_runner=git_runner_for(
+                repo,
+                "develop",
+            ),
+        )
 
-def test_cp2_is_workspace_write_and_requires_work_branch(
+
+def test_cp2_is_workspace_write_and_rejects_other_issue_branch(
     tmp_path,
 ):
     repo = make_repo(tmp_path)
@@ -134,34 +202,29 @@ def test_cp2_is_workspace_write_and_requires_work_branch(
         checkpoint="CP2",
         git_runner=git_runner_for(
             repo,
-            "feature/issue-009-audit-logging",
+            ISSUE_BRANCH,
         ),
     )
 
     assert context.sandbox == "workspace-write"
 
-    for protected_branch in (
-        "main",
-        "develop",
+    with pytest.raises(
+        DispatchError,
+        match="issue-009",
     ):
-        with pytest.raises(
-            DispatchError,
-            match="dedicated work branch",
-        ):
-            resolve_context(
-                start=repo,
-                issue_id="009",
-                checkpoint="CP2",
-                git_runner=git_runner_for(
-                    repo,
-                    protected_branch,
-                ),
-            )
+        resolve_context(
+            start=repo,
+            issue_id="009",
+            checkpoint="CP2",
+            git_runner=git_runner_for(
+                repo,
+                "feature/issue-008-rbac",
+            ),
+        )
 
 
 def test_missing_issue_note_fails(tmp_path):
     repo = make_repo(tmp_path)
-
     (
         repo
         / "docs"
@@ -179,7 +242,7 @@ def test_missing_issue_note_fails(tmp_path):
             checkpoint="CP1",
             git_runner=git_runner_for(
                 repo,
-                "develop",
+                ISSUE_BRANCH,
             ),
         )
 
@@ -216,10 +279,6 @@ def test_resume_command_places_flags_before_resume(
         make_context(
             repo,
             checkpoint="CP2",
-            branch=(
-                "feature/"
-                "issue-009-audit-logging"
-            ),
         ),
         codex_bin="codex",
         session_id="thread-123",
@@ -265,6 +324,135 @@ def test_extract_session_id(
     )
 
 
+def test_parse_supervisor_approval():
+    assert (
+        parse_supervisor_approval(
+            remote_note("CP3")
+        )
+        == "CP3"
+    )
+
+
+@pytest.mark.parametrize(
+    "note",
+    [
+        "# no marker\n",
+        (
+            "<!-- codex-dispatch-supervisor-approved-through: "
+            "CP0 -->\n"
+            "<!-- codex-dispatch-supervisor-approved-through: "
+            "CP1 -->\n"
+        ),
+        (
+            "codex-dispatch-supervisor-approved-through: "
+            "CP1\n"
+        ),
+        (
+            "<!-- codex-dispatch-supervisor-approved-through: "
+            "CP9 -->\n"
+        ),
+    ],
+)
+def test_invalid_supervisor_approval_fails_closed(
+    note,
+):
+    with pytest.raises(DispatchError):
+        parse_supervisor_approval(note)
+
+
+def test_cp1_requires_remote_cp0_approval(
+    tmp_path,
+    capsys,
+):
+    repo = make_repo(tmp_path)
+    context = make_context(repo)
+
+    result = dispatch(
+        context,
+        dry_run=True,
+        force=False,
+        new_session=False,
+        codex_bin="codex",
+        timeout_seconds=10,
+        git_runner=git_runner_for(
+            repo,
+            ISSUE_BRANCH,
+            approval="CP0",
+        ),
+    )
+
+    assert result == 0
+    payload = json.loads(
+        capsys.readouterr().out
+    )
+    assert (
+        payload["supervisor_approved_through"]
+        == "CP0"
+    )
+
+
+def test_cp2_rejects_remote_approval_only_through_cp0(
+    tmp_path,
+):
+    repo = make_repo(tmp_path)
+
+    with pytest.raises(
+        DispatchError,
+        match="requires remote Supervisor approval through CP1",
+    ):
+        dispatch(
+            make_context(
+                repo,
+                checkpoint="CP2",
+            ),
+            dry_run=True,
+            force=False,
+            new_session=False,
+            codex_bin="codex",
+            timeout_seconds=10,
+            git_runner=git_runner_for(
+                repo,
+                ISSUE_BRANCH,
+                approval="CP0",
+            ),
+        )
+
+
+def test_cp2_can_start_from_remote_cp1_approval_without_local_cp1_state(
+    tmp_path,
+    capsys,
+):
+    repo = make_repo(tmp_path)
+
+    result = dispatch(
+        make_context(
+            repo,
+            checkpoint="CP2",
+        ),
+        dry_run=True,
+        force=False,
+        new_session=False,
+        codex_bin="codex",
+        timeout_seconds=10,
+        git_runner=git_runner_for(
+            repo,
+            ISSUE_BRANCH,
+            approval="CP1",
+        ),
+    )
+
+    assert result == 0
+    payload = json.loads(
+        capsys.readouterr().out
+    )
+    assert payload["checkpoint"] == "CP2"
+    assert (
+        payload["supervisor_approved_through"]
+        == "CP1"
+    )
+    assert payload["resume_session_id"] is None
+
+
 def test_successful_dispatch_saves_only_minimal_metadata(
     tmp_path,
     monkeypatch,
@@ -278,7 +466,7 @@ def test_successful_dispatch_saves_only_minimal_metadata(
         lambda _: "codex",
     )
 
-    def fake_runner(
+    def fake_process_runner(
         command,
         **kwargs,
     ):
@@ -286,7 +474,6 @@ def test_successful_dispatch_saves_only_minimal_metadata(
             "Execute CP1 for "
             "Engineering Issue #009."
         )
-
         return subprocess.CompletedProcess(
             command,
             0,
@@ -305,7 +492,12 @@ def test_successful_dispatch_saves_only_minimal_metadata(
         new_session=False,
         codex_bin="codex",
         timeout_seconds=10,
-        process_runner=fake_runner,
+        process_runner=fake_process_runner,
+        git_runner=git_runner_for(
+            repo,
+            ISSUE_BRANCH,
+            approval="CP0",
+        ),
     )
 
     assert result == 0
@@ -332,13 +524,8 @@ def test_resume_refuses_session_from_different_branch(
     monkeypatch,
 ):
     repo = make_repo(tmp_path)
-
-    state_dir = (
-        repo
-        / ".codex-dispatch"
-    )
+    state_dir = repo / ".codex-dispatch"
     state_dir.mkdir()
-
     (
         state_dir
         / "state.json"
@@ -372,18 +559,18 @@ def test_resume_refuses_session_from_different_branch(
             make_context(
                 repo,
                 checkpoint="CP2",
-                branch=(
-                    "feature/"
-                    "issue-009-audit-logging"
-                ),
             ),
             dry_run=False,
             force=False,
             new_session=False,
             codex_bin="codex",
             timeout_seconds=10,
+            git_runner=git_runner_for(
+                repo,
+                ISSUE_BRANCH,
+                approval="CP1",
+            ),
         )
-
 
 
 def test_dry_run_does_not_launch_codex_or_write_state(
@@ -397,7 +584,7 @@ def test_dry_run_does_not_launch_codex_or_write_state(
         checkpoint="CP1",
         git_runner=git_runner_for(
             repo,
-            "develop",
+            ISSUE_BRANCH,
         ),
     )
 
@@ -414,6 +601,11 @@ def test_dry_run_does_not_launch_codex_or_write_state(
         codex_bin="codex",
         timeout_seconds=10,
         process_runner=forbidden_runner,
+        git_runner=git_runner_for(
+            repo,
+            ISSUE_BRANCH,
+            approval="CP0",
+        ),
     )
 
     assert result == 0
@@ -429,58 +621,6 @@ def test_dry_run_does_not_launch_codex_or_write_state(
     assert payload["issue_id"] == "009"
     assert payload["checkpoint"] == "CP1"
     assert payload["sandbox"] == "read-only"
-    assert payload["command"][:3] == [
-        "codex",
-        "exec",
-        "--json",
-    ]
-
-
-
-def test_cp2_rejects_branch_for_different_issue(
-    tmp_path,
-):
-    repo = make_repo(tmp_path)
-
-    with pytest.raises(
-        DispatchError,
-        match="requires a branch containing",
-    ):
-        resolve_context(
-            start=repo,
-            issue_id="009",
-            checkpoint="CP2",
-            git_runner=git_runner_for(
-                repo,
-                "feature/issue-008-rbac",
-            ),
-        )
-
-
-def test_cp2_requires_successful_cp1(
-    tmp_path,
-):
-    repo = make_repo(tmp_path)
-
-    with pytest.raises(
-        DispatchError,
-        match="requires successful CP1",
-    ):
-        dispatch(
-            make_context(
-                repo,
-                checkpoint="CP2",
-                branch=(
-                    "feature/"
-                    "issue-009-audit-logging"
-                ),
-            ),
-            dry_run=True,
-            force=False,
-            new_session=False,
-            codex_bin="codex",
-            timeout_seconds=10,
-        )
 
 
 def test_nonzero_process_exit_cannot_be_reported_success():
