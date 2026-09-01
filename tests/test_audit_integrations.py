@@ -18,6 +18,21 @@ from app.services.rbac import RBACService
 client = TestClient(app)
 
 
+class FailingAuditSession:
+    def __init__(self, failure: Exception) -> None:
+        self.failure = failure
+        self.rollback = MagicMock()
+
+    def add(self, event) -> None:
+        pass
+
+    def flush(self) -> None:
+        raise self.failure
+
+    def commit(self) -> None:
+        raise self.failure
+
+
 def test_failed_login_records_only_generic_metadata(monkeypatch) -> None:
     records: list[dict] = []
 
@@ -45,45 +60,78 @@ def test_failed_login_records_only_generic_metadata(monkeypatch) -> None:
         "outcome": "failure",
         "event_metadata": {"reason": "invalid_credentials"},
     }]
-    assert "secret-password" not in str(records)
-    assert "alice@example.com" not in str(records)
+    serialized_records = str(records)
+    for sensitive_value in (
+        "secret-password",
+        "alice@example.com",
+        "untrusted-token",
+        "Bearer",
+        "password_hash",
+        "jwt-secret",
+        "arbitrary-request-body",
+    ):
+        assert sensitive_value not in serialized_records
 
 
-def test_invalid_token_audit_failure_preserves_401(monkeypatch) -> None:
+def test_login_success_records_authenticated_user(monkeypatch) -> None:
+    user = SimpleNamespace(id=uuid4(), is_active=True)
+    records: list[dict] = []
+    monkeypatch.setattr("app.api.routes.auth.authenticate_user", lambda *args, **kwargs: user)
+    monkeypatch.setattr(
+        AuditService,
+        "record_best_effort",
+        lambda self, **kwargs: records.append(kwargs),
+    )
+
+    response = client.post(
+        "/auth/login",
+        json={"email": "alice@example.com", "password": "secret-password"},
+    )
+
+    assert response.status_code == 200
+    assert records == [{
+        "actor_user_id": user.id,
+        "action": "auth.login",
+        "target_type": "user",
+        "target_id": str(user.id),
+        "outcome": "success",
+        "event_metadata": {},
+    }]
+
+
+def test_invalid_token_persistence_failure_preserves_401(monkeypatch) -> None:
     monkeypatch.setattr(
         auth,
         "decode_access_token",
         lambda token: (_ for _ in ()).throw(jwt.InvalidTokenError()),
     )
-    monkeypatch.setattr(
-        AuditService,
-        "record_best_effort",
-        lambda *args, **kwargs: None,
-    )
+    session = FailingAuditSession(OperationalError("insert", {}, Exception()))
 
     with pytest.raises(HTTPException) as exc_info:
         auth.get_current_user(
             credentials=SimpleNamespace(credentials="untrusted-token"),
-            session=object(),
+            session=session,
         )
 
     assert exc_info.value.status_code == 401
+    session.rollback.assert_called_once()
 
 
-def test_permission_denial_audit_failure_preserves_403(monkeypatch) -> None:
+def test_permission_denial_persistence_failure_preserves_403(monkeypatch) -> None:
     user = SimpleNamespace(id=uuid4(), is_active=True)
     repository = MagicMock()
     repository.has_permission.return_value = False
     monkeypatch.setattr(authorization, "RBACRepository", lambda session: repository)
-    monkeypatch.setattr(AuditService, "record_best_effort", lambda *args, **kwargs: None)
+    session = FailingAuditSession(OperationalError("insert", {}, Exception()))
 
     with pytest.raises(HTTPException) as exc_info:
         authorization.require_permission("rbac:manage")(
             current_user=user,
-            session=object(),
+            session=session,
         )
 
     assert exc_info.value.status_code == 403
+    session.rollback.assert_called_once()
 
 
 def test_rbac_audit_failure_rolls_back_role_mutation() -> None:
@@ -107,3 +155,59 @@ def test_rbac_audit_failure_rolls_back_role_mutation() -> None:
 
     session.commit.assert_not_called()
     session.rollback.assert_called_once()
+
+
+def test_rbac_assign_records_actor_target_role_and_change() -> None:
+    session = MagicMock()
+    service = RBACService(session)
+    actor_user_id = uuid4()
+    user = SimpleNamespace(id=uuid4())
+    role = SimpleNamespace(id=uuid4(), name="admin")
+    service.user_repository.get_by_id = MagicMock(return_value=user)
+    service.rbac_repository.get_role_by_name = MagicMock(return_value=role)
+    service.rbac_repository.assign_role = MagicMock(return_value=True)
+    service.audit_service.record = MagicMock()
+
+    service.assign_role(
+        actor_user_id=actor_user_id,
+        user_id=user.id,
+        role_name=role.name,
+    )
+
+    service.audit_service.record.assert_called_once_with(
+        actor_user_id=actor_user_id,
+        action="rbac.role.assign",
+        target_type="user",
+        target_id=str(user.id),
+        outcome="success",
+        event_metadata={"role": "admin", "changed": True},
+    )
+    session.commit.assert_called_once()
+
+
+def test_rbac_remove_records_actor_target_role_and_no_change() -> None:
+    session = MagicMock()
+    service = RBACService(session)
+    actor_user_id = uuid4()
+    user = SimpleNamespace(id=uuid4())
+    role = SimpleNamespace(id=uuid4(), name="admin")
+    service.user_repository.get_by_id = MagicMock(return_value=user)
+    service.rbac_repository.get_role_by_name = MagicMock(return_value=role)
+    service.rbac_repository.remove_role = MagicMock(return_value=False)
+    service.audit_service.record = MagicMock()
+
+    service.remove_role(
+        actor_user_id=actor_user_id,
+        user_id=user.id,
+        role_name=role.name,
+    )
+
+    service.audit_service.record.assert_called_once_with(
+        actor_user_id=actor_user_id,
+        action="rbac.role.remove",
+        target_type="user",
+        target_id=str(user.id),
+        outcome="success",
+        event_metadata={"role": "admin", "changed": False},
+    )
+    session.commit.assert_called_once()

@@ -463,6 +463,24 @@ CP3 may fix only in-scope Product/Test files already covered by the Remote Write
 
 Do not mark CP4 complete.
 
+### CP3 Verification Evidence
+
+In-scope test coverage was updated to:
+
+- mock the Audit path in the existing Authorization-denial regression test;
+- exercise the real best-effort Audit service with a SQLAlchemy flush failure while preserving the original `401` and `403` responses and rolling back;
+- assert Login success and RBAC assign/remove Audit payloads, including actor, target, role, outcome, and `changed` state;
+- assert JSONB/non-null model metadata and sensitive-data exclusion from failed-login Audit payloads.
+
+Required commands attempted:
+
+```powershell
+python -m pytest -q tests/test_audit_model.py tests/test_audit_repository.py tests/test_audit_service.py tests/test_audit_integrations.py tests/test_auth.py tests/test_auth_dependency.py tests/test_authorization_dependency.py tests/test_admin_rbac.py tests/test_rbac_service.py tests/test_migrations.py
+python -m pytest -q
+```
+
+Both commands failed before test collection because the only available interpreter is `.venv\\Scripts\\python.exe`, whose `pyvenv.cfg` points to the missing base executable `C:\\Users\\88693\\AppData\\Local\\Microsoft\\WindowsApps\\PythonSoftwareFoundation.Python.3.11_qbz5n2kfra8p0\\python.exe`. Docker is not available, so the optional PostgreSQL migration cycle could not be run. `git diff --check` passed.
+
 ## Knowledge Candidates
 
 Existing Notion Knowledge already covers the Audit Logging fundamentals.
@@ -477,10 +495,10 @@ Potential additions after implementation (CP5 only):
 
 ## Current State
 
-CP0, CP1, and the bounded CP2 implementation are complete. Targeted verification is pending restoration of the local Python environment and Supervisor review.
+CP0, CP1, and the bounded CP2 implementation are complete. CP3 test coverage updates are complete, but required targeted and full regression execution is blocked before collection by the missing Python base interpreter. PostgreSQL migration verification is unavailable because Docker is not installed.
 
 Supervisor approval marker: **CP2**.
 
-CP2 implementation has been reviewed. CP3 is now authorized with the explicit verification/fix requirements above.
+CP2 implementation has been reviewed. CP3 is authorized, but cannot be completed until the local Python environment is restored and the required suites can run.
 
 Do not begin CP4 until the Supervisor reviews CP3 evidence and advances the remote approval marker.

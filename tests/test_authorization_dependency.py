@@ -64,6 +64,11 @@ def test_require_permission_rejects_user_without_permission(
         "RBACRepository",
         lambda session: repository,
     )
+    monkeypatch.setattr(
+        AuditService,
+        "record_best_effort",
+        lambda *args, **kwargs: None,
+    )
 
     dependency = authorization.require_permission(
         "rbac:manage"

@@ -1,5 +1,6 @@
 from app.db.base import Base
 from app.models import AuditEvent
+from sqlalchemy.dialects.postgresql import JSONB
 
 
 def test_audit_event_table_schema() -> None:
@@ -19,6 +20,8 @@ def test_audit_event_table_schema() -> None:
     assert not table.foreign_keys
     assert table.c.id.primary_key is True
     assert table.c.actor_user_id.nullable is True
+    assert table.c.metadata.nullable is False
+    assert isinstance(table.c.metadata.type, JSONB)
 
 
 def test_audit_event_uses_non_reserved_python_metadata_attribute() -> None:
