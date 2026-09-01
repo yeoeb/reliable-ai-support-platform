@@ -44,15 +44,23 @@ SUPERVISOR_GATE_KEY = (
 )
 WRITE_ALLOW_KEY = "codex-dispatch-write-allow"
 PROTECTED_PUBLISH_PATHS = {
+    ".gitignore",
     "AGENTS.md",
+    "docs/PROJECT_STATE.md",
     "docs/codex-dispatcher.md",
+    "docs/issues/README.md",
     "scripts/codex_dispatch.py",
 }
 PROTECTED_PUBLISH_PREFIXES = (
     ".git/",
     ".codex-dispatch/",
-    ".github/workflows/",
+    ".github/",
 )
+OVERBROAD_WRITE_PATTERNS = {
+    "*",
+    "**",
+    "**/*",
+}
 STATE_DIR_NAME = ".codex-dispatch"
 STATE_FILE_NAME = "state.json"
 
@@ -544,6 +552,12 @@ def parse_write_allow(
 
     patterns: list[str] = []
     for pattern in value:
+        if pattern in OVERBROAD_WRITE_PATTERNS:
+            raise DispatchError(
+                "Write-allow marker contains an overbroad "
+                f"pattern: {pattern!r}."
+            )
+
         if (
             "\\" in pattern
             or pattern.startswith("/")
@@ -771,9 +785,16 @@ def publish_write_checkpoint(
             "the Executor must not create commits directly."
         )
 
-    local_note = context.issue_note.read_text(
-        encoding="utf-8"
-    )
+    try:
+        local_note = context.issue_note.read_text(
+            encoding="utf-8"
+        )
+    except OSError as exc:
+        raise DispatchError(
+            "Local Issue execution note is missing or unreadable; "
+            "publication is blocked."
+        ) from exc
+
     validate_control_markers_unchanged(
         remote_note=remote_note,
         local_note=local_note,
