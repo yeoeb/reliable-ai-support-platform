@@ -41,12 +41,16 @@ Required state surfaces:
 
 The Dispatcher uses Stable `codex exec` as its local execution boundary. It does not attempt to inject prompts into an already-open VS Code/Desktop Codex UI session.
 
-## Next Product Engineering Issue
+## Current Product Engineering Issue
 
-Engineering Issue ID #009 — Audit Logging
+Engineering Issue ID #009 — Durable Security Audit Trail
 
-Important: GitHub Issue/PR numbers are repository-wide platform sequence numbers.
-The GitHub tracking item for Engineering Issue ID #009 may therefore have a different numeric URL.
+- GitHub tracking Issue: #16
+- Active Branch: `feature/issue-009-audit-logging`
+- Current Checkpoint: CP1 pending
+- CP0 Context Bootstrap: completed
+
+Important: GitHub Issue/PR numbers are repository-wide platform sequence numbers and remain separate from Engineering Issue IDs.
 
 ## Planned Product Sequence
 
