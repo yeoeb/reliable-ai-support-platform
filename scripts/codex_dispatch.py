@@ -21,13 +21,18 @@ CHECKPOINT_SANDBOX = {
 }
 
 WRITE_CHECKPOINTS = {"CP2", "CP3"}
-REQUIRED_PREVIOUS_CHECKPOINT = {
+CHECKPOINT_ORDER = tuple(CHECKPOINT_SANDBOX)
+REQUIRED_SUPERVISOR_APPROVAL = {
+    "CP1": "CP0",
     "CP2": "CP1",
     "CP3": "CP2",
     "CP4": "CP3",
     "CP5": "CP4",
     "CP6": "CP5",
 }
+SUPERVISOR_GATE_KEY = (
+    "codex-dispatch-supervisor-approved-through"
+)
 STATE_DIR_NAME = ".codex-dispatch"
 STATE_FILE_NAME = "state.json"
 
@@ -353,36 +358,112 @@ def get_issue_state(
     return value
 
 
-def validate_checkpoint_transition(
-    previous: dict,
-    checkpoint: str,
-    *,
-    force: bool,
-) -> None:
-    last_checkpoint = previous.get("last_checkpoint")
-    last_status = previous.get("last_status")
+def parse_supervisor_approval(
+    content: str,
+) -> str:
+    candidate_lines = [
+        line.strip()
+        for line in content.splitlines()
+        if SUPERVISOR_GATE_KEY in line
+    ]
+
+    if len(candidate_lines) != 1:
+        raise DispatchError(
+            "Expected exactly one Supervisor approval marker "
+            f"containing {SUPERVISOR_GATE_KEY!r}; "
+            f"found {len(candidate_lines)}."
+        )
+
+    prefix = f"<!-- {SUPERVISOR_GATE_KEY}:"
+    suffix = "-->"
+    line = candidate_lines[0]
 
     if (
-        force
-        and last_checkpoint == checkpoint
-    ):
-        return
-
-    required = REQUIRED_PREVIOUS_CHECKPOINT.get(
-        checkpoint
-    )
-    if required is None:
-        return
-
-    if (
-        last_checkpoint != required
-        or last_status != "succeeded"
+        not line.startswith(prefix)
+        or not line.endswith(suffix)
     ):
         raise DispatchError(
-            f"{checkpoint} requires successful {required} first. "
-            f"Last recorded checkpoint/status: "
-            f"{last_checkpoint!r}/{last_status!r}."
+            "Supervisor approval marker is malformed."
         )
+
+    value = line[
+        len(prefix) : -len(suffix)
+    ].strip()
+
+    try:
+        return normalize_checkpoint(value)
+    except DispatchError as exc:
+        raise DispatchError(
+            "Supervisor approval marker contains "
+            f"an invalid checkpoint: {value!r}."
+        ) from exc
+
+
+def fetch_remote_issue_note(
+    context: DispatchContext,
+    *,
+    runner: Callable[
+        ...,
+        subprocess.CompletedProcess[str],
+    ] = subprocess.run,
+) -> str:
+    relative_path = context.issue_note.relative_to(
+        context.repo_root
+    ).as_posix()
+
+    run_git(
+        [
+            "fetch",
+            "--quiet",
+            "origin",
+            context.branch,
+        ],
+        cwd=context.repo_root,
+        runner=runner,
+    )
+
+    return run_git(
+        [
+            "show",
+            (
+                f"origin/{context.branch}:"
+                f"{relative_path}"
+            ),
+        ],
+        cwd=context.repo_root,
+        runner=runner,
+    )
+
+
+def validate_supervisor_gate(
+    context: DispatchContext,
+    remote_note: str,
+) -> str:
+    approved = parse_supervisor_approval(
+        remote_note
+    )
+    required = REQUIRED_SUPERVISOR_APPROVAL.get(
+        context.checkpoint
+    )
+
+    if required is None:
+        return approved
+
+    approved_index = CHECKPOINT_ORDER.index(
+        approved
+    )
+    required_index = CHECKPOINT_ORDER.index(
+        required
+    )
+
+    if approved_index < required_index:
+        raise DispatchError(
+            f"{context.checkpoint} requires remote "
+            f"Supervisor approval through {required}; "
+            f"remote approval is only through {approved}."
+        )
+
+    return approved
 
 
 def build_codex_command(
@@ -528,6 +609,10 @@ def dispatch(
         ...,
         subprocess.CompletedProcess[str],
     ] = subprocess.run,
+    git_runner: Callable[
+        ...,
+        subprocess.CompletedProcess[str],
+    ] = subprocess.run,
 ) -> int:
     state = load_state(
         context.repo_root
@@ -554,10 +639,15 @@ def dispatch(
             "Use --force to run it again."
         )
 
-    validate_checkpoint_transition(
-        previous,
-        context.checkpoint,
-        force=force,
+    remote_note = fetch_remote_issue_note(
+        context,
+        runner=git_runner,
+    )
+    supervisor_approved_through = (
+        validate_supervisor_gate(
+            context,
+            remote_note,
+        )
     )
 
     previous_branch = previous.get(
@@ -605,6 +695,9 @@ def dispatch(
                         )
                     ),
                     "resume_session_id": session_id,
+                    "supervisor_approved_through": (
+                        supervisor_approved_through
+                    ),
                     "command": command,
                     "prompt": prompt,
                 },
