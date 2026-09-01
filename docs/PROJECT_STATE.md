@@ -47,9 +47,10 @@ Engineering Issue ID #009 — Durable Security Audit Trail
 
 - GitHub tracking Issue: #16
 - Active Branch: `feature/issue-009-audit-logging`
-- Current Checkpoint: CP2 authorized
+- Current Checkpoint: CP3 authorized
 - CP0 Context Bootstrap: completed
 - CP1 Architecture / Plan: completed and Supervisor-approved
+- CP2 Audit implementation: completed and Supervisor-reviewed
 - Remote write Allowlist: configured for bounded Audit implementation
 
 Important: GitHub Issue/PR numbers are repository-wide platform sequence numbers and remain separate from Engineering Issue IDs.
