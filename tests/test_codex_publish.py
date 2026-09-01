@@ -213,6 +213,10 @@ def test_write_checkpoint_requires_clean_worktree(
             "<!-- codex-dispatch-write-allow: "
             '["app\\*.py"] -->\n'
         ),
+        (
+            "<!-- codex-dispatch-write-allow: "
+            '["*"] -->\n'
+        ),
     ],
 )
 def test_invalid_write_allow_fails_closed(
@@ -305,7 +309,7 @@ def test_protected_control_plane_path_is_blocked_even_by_broad_pattern(
     repo, _ = make_repo(tmp_path)
     context = make_context(repo)
     before = remote_head(repo)
-    note = issue_note(patterns=["*"])
+    note = issue_note(patterns=["AGENTS.md"])
     (
         repo
         / ISSUE_NOTE
