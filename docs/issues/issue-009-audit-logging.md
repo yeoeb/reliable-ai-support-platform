@@ -1,6 +1,6 @@
 # Engineering Issue #009 — Durable Security Audit Trail
 
-<!-- codex-dispatch-supervisor-approved-through: CP1 -->
+<!-- codex-dispatch-supervisor-approved-through: CP2 -->
 <!-- codex-dispatch-write-allow: ["app/models/audit_event.py","app/models/__init__.py","app/repositories/audit.py","app/services/audit.py","app/services/rbac.py","app/api/routes/auth.py","app/api/routes/admin.py","app/api/dependencies/auth.py","app/api/dependencies/authorization.py","migrations/versions/*audit*.py","tests/test_audit_*.py","tests/test_auth.py","tests/test_auth_dependency.py","tests/test_authorization_dependency.py","tests/test_admin_rbac.py","tests/test_rbac_service.py","tests/test_migrations.py","docs/issues/issue-009-audit-logging.md"] -->
 
 ## GitHub Tracking
@@ -333,8 +333,8 @@ Use GitHub Issue #16 as the authoritative Acceptance Criteria.
 
 - [x] CP0 — Context bootstrap / contradiction detection
 - [x] CP1 — Architecture + implementation plan validation
-- [x] CP2 — Bounded implementation (awaiting Supervisor review)
-- [ ] CP3 — Targeted + regression verification
+- [x] CP2 — Bounded implementation (Supervisor-reviewed)
+- [ ] CP3 — Targeted + regression verification (authorized)
 - [ ] CP4 — Diff / security / transaction review
 - [ ] CP5 — Knowledge + documentation synchronization
 - [ ] CP6 — PR delivery evidence
@@ -387,6 +387,82 @@ pytest -q tests/test_audit_model.py tests/test_audit_repository.py tests/test_au
 
 The command did not reach test collection because the configured virtual-environment launcher reports that its Python 3.11 base executable is missing. This is a local environment blocker; CP3 has not started.
 
+## Supervisor CP2 Review
+
+Status: **approved to enter CP3 with required verification fixes**
+
+### Architecture findings
+
+PASS:
+
+- `AuditEvent` uses Python attribute `event_metadata` mapped to DB column `metadata`, avoiding SQLAlchemy Declarative `metadata` collision.
+- `actor_user_id` is a durable UUID value without a cascading Foreign Key, preserving Audit history.
+- `AuditRepository.create()` performs add + flush only; it does not own Commit.
+- RBAC role mutation and Audit insertion share one SQLAlchemy transaction and one Commit.
+- Audit persistence failure during RBAC mutation rolls back and translates to `PersistenceUnavailableError`.
+- Login failure does not persist submitted Email or Password.
+- Login success records the authenticated User ID.
+- Authorization denial records User + Permission without Tokens/Headers.
+- Migration chain is linear: `372ee... → 1042... → 9f3c...`.
+
+### CP3 must resolve / prove
+
+1. **Regression test fix**
+   - Existing `test_require_permission_rejects_user_without_permission` passes `session=object()` and does not mock the new Audit path.
+   - Update the test so the expected 403 is testing Authorization behavior rather than failing on an invalid fake Session.
+
+2. **Real best-effort failure tests**
+   - Current tests named `invalid_token_audit_failure_preserves_401` and `permission_denial_audit_failure_preserves_403` replace `record_best_effort` with a no-op.
+   - That does not simulate persistence failure.
+   - Replace/add tests that exercise the real `AuditService.record_best_effort()` while `flush` or `commit` raises a SQLAlchemy persistence exception, then prove the original 401/403 still wins and Rollback occurs.
+
+3. **Audit event coverage assertions**
+   - Add explicit assertions for Login success Audit payload.
+   - Add explicit assertions for RBAC assign/remove Audit payload including:
+     - actor User ID
+     - target User ID
+     - role
+     - outcome
+     - `changed=true/false`
+
+4. **Migration / schema verification**
+   - Run the existing Alembic single-head tests.
+   - If PostgreSQL/Docker is available, run real `upgrade → downgrade -1 → upgrade` and record evidence.
+   - Verify `audit_events.metadata` is JSONB and non-null and Model/Migration remain aligned.
+
+5. **Sensitive-data negative verification**
+   - Assert Audit payloads never contain submitted Password, failed-login Email, Access Token, Authorization Header, Password Hash, JWT Secret, or arbitrary Request body.
+
+### CP3 command policy
+
+Do **not** use the broken `pytest.exe` launcher first.
+
+Use the Python interpreter that successfully launches the Watcher/Codex process:
+
+```powershell
+python -m pytest -q tests/test_audit_model.py tests/test_audit_repository.py tests/test_audit_service.py tests/test_audit_integrations.py tests/test_auth.py tests/test_auth_dependency.py tests/test_authorization_dependency.py tests/test_admin_rbac.py tests/test_rbac_service.py tests/test_migrations.py
+```
+
+Then:
+
+```powershell
+python -m pytest -q
+```
+
+If `python -m pytest` cannot import pytest, report the exact interpreter path and dependency error. Do not silently install or mutate unrelated environment configuration unless required by the Issue contract.
+
+For PostgreSQL migration evidence when the local Docker stack is available:
+
+```powershell
+alembic upgrade head
+alembic downgrade -1
+alembic upgrade head
+```
+
+CP3 may fix only in-scope Product/Test files already covered by the Remote Write Allowlist.
+
+Do not mark CP4 complete.
+
 ## Knowledge Candidates
 
 Existing Notion Knowledge already covers the Audit Logging fundamentals.
@@ -403,8 +479,8 @@ Potential additions after implementation (CP5 only):
 
 CP0, CP1, and the bounded CP2 implementation are complete. Targeted verification is pending restoration of the local Python environment and Supervisor review.
 
-Supervisor approval marker: **CP1**.
+Supervisor approval marker: **CP2**.
 
-Next authorized action: Supervisor review of CP2 evidence; CP3 remains unauthorized.
+CP2 implementation has been reviewed. CP3 is now authorized with the explicit verification/fix requirements above.
 
-Do not begin CP3 until the Supervisor reviews CP2 evidence and advances the remote approval marker.
+Do not begin CP4 until the Supervisor reviews CP3 evidence and advances the remote approval marker.
