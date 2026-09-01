@@ -64,8 +64,6 @@ def test_failed_login_records_only_generic_metadata(monkeypatch) -> None:
     for sensitive_value in (
         "secret-password",
         "alice@example.com",
-        "untrusted-token",
-        "Bearer",
         "password_hash",
         "jwt-secret",
         "arbitrary-request-body",
@@ -97,6 +95,42 @@ def test_login_success_records_authenticated_user(monkeypatch) -> None:
         "outcome": "success",
         "event_metadata": {},
     }]
+
+
+def test_invalid_token_audit_excludes_raw_token(monkeypatch) -> None:
+    records: list[dict] = []
+    raw_token = "sensitive-raw-access-token"
+
+    monkeypatch.setattr(
+        auth,
+        "decode_access_token",
+        lambda token: (_ for _ in ()).throw(jwt.InvalidTokenError()),
+    )
+    monkeypatch.setattr(
+        AuditService,
+        "record_best_effort",
+        lambda self, **kwargs: records.append(kwargs),
+    )
+
+    with pytest.raises(HTTPException) as exc_info:
+        auth.get_current_user(
+            credentials=SimpleNamespace(credentials=raw_token),
+            session=object(),
+        )
+
+    assert exc_info.value.status_code == 401
+    assert records == [{
+        "actor_user_id": None,
+        "action": "auth.token.invalid",
+        "target_type": "authentication",
+        "target_id": None,
+        "outcome": "failure",
+        "event_metadata": {"reason": "invalid_token"},
+    }]
+    serialized_records = str(records)
+    assert raw_token not in serialized_records
+    assert "Authorization" not in serialized_records
+    assert "Bearer" not in serialized_records
 
 
 def test_invalid_token_persistence_failure_preserves_401(monkeypatch) -> None:
@@ -148,6 +182,29 @@ def test_rbac_audit_failure_rolls_back_role_mutation() -> None:
 
     with pytest.raises(PersistenceUnavailableError):
         service.assign_role(
+            actor_user_id=uuid4(),
+            user_id=user.id,
+            role_name=role.name,
+        )
+
+    session.commit.assert_not_called()
+    session.rollback.assert_called_once()
+
+
+def test_rbac_remove_audit_failure_rolls_back_role_mutation() -> None:
+    session = MagicMock()
+    service = RBACService(session)
+    user = SimpleNamespace(id=uuid4())
+    role = SimpleNamespace(id=uuid4(), name="admin")
+    service.user_repository.get_by_id = MagicMock(return_value=user)
+    service.rbac_repository.get_role_by_name = MagicMock(return_value=role)
+    service.rbac_repository.remove_role = MagicMock(return_value=True)
+    service.audit_service.record = MagicMock(
+        side_effect=OperationalError("insert", {}, Exception())
+    )
+
+    with pytest.raises(PersistenceUnavailableError):
+        service.remove_role(
             actor_user_id=uuid4(),
             user_id=user.id,
             role_name=role.name,
