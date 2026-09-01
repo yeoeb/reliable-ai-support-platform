@@ -171,6 +171,20 @@ def remote_note(repo: Path) -> str:
     )
 
 
+def test_write_allow_ignores_prose_mentions():
+    content = (
+        issue_note()
+        + "\nThe machine-readable `codex-dispatch-write-allow` "
+        + "marker above is intentionally bounded.\n"
+    )
+
+    assert parse_write_allow(content) == [
+        "app/*.py",
+        "tests/*.py",
+        ISSUE_NOTE,
+    ]
+
+
 def test_write_checkpoint_requires_clean_worktree(
     tmp_path,
 ):
