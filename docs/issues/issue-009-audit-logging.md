@@ -1,6 +1,7 @@
 # Engineering Issue #009 — Durable Security Audit Trail
 
 <!-- codex-dispatch-supervisor-approved-through: CP1 -->
+<!-- codex-dispatch-write-allow: ["app/models/audit_event.py","app/models/__init__.py","app/repositories/audit.py","app/services/audit.py","app/services/rbac.py","app/api/routes/auth.py","app/api/routes/admin.py","app/api/dependencies/auth.py","app/api/dependencies/authorization.py","migrations/versions/*audit*.py","tests/test_audit_*.py","tests/test_auth.py","tests/test_auth_dependency.py","tests/test_authorization_dependency.py","tests/test_admin_rbac.py","tests/test_rbac_service.py","tests/test_migrations.py","docs/issues/issue-009-audit-logging.md"] -->
 
 ## GitHub Tracking
 
@@ -300,6 +301,12 @@ Failed Login metadata should use a generic reason such as `invalid_credentials`.
 - `README.md` only if completion status requires synchronization
 
 Additional Production files require Scope expansion.
+
+### Dispatcher Publish Allowlist
+
+The machine-readable `codex-dispatch-write-allow` marker above is intentionally narrower than the conceptual Allowed Write Set.
+
+Notably, `migrations/env.py`, `docs/PROJECT_STATE.md`, and `README.md` are **not** authorized for automatic CP2 publication. If Codex proves one is necessary, it must stop and report the blocker so the Supervisor can explicitly expand the remote Allowlist.
 
 ## Out of Scope
 
