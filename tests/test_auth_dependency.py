@@ -7,6 +7,7 @@ from fastapi import HTTPException
 from fastapi.security import HTTPAuthorizationCredentials
 
 from app.api.dependencies import auth
+from app.services.audit import AuditService
 
 
 def make_credentials(
@@ -69,6 +70,7 @@ def test_get_current_user_rejects_invalid_token(
         "decode_access_token",
         raise_invalid_token,
     )
+    monkeypatch.setattr(AuditService, "record_best_effort", lambda *args, **kwargs: None)
 
     with pytest.raises(HTTPException) as exc_info:
         auth.get_current_user(
@@ -87,6 +89,7 @@ def test_get_current_user_rejects_invalid_subject(
         "decode_access_token",
         lambda token: {"sub": "not-a-uuid"},
     )
+    monkeypatch.setattr(AuditService, "record_best_effort", lambda *args, **kwargs: None)
 
     with pytest.raises(HTTPException) as exc_info:
         auth.get_current_user(
@@ -107,6 +110,7 @@ def test_get_current_user_rejects_unknown_user(
         "decode_access_token",
         lambda token: {"sub": str(user_id)},
     )
+    monkeypatch.setattr(AuditService, "record_best_effort", lambda *args, **kwargs: None)
 
     monkeypatch.setattr(
         auth,
@@ -138,6 +142,7 @@ def test_get_current_user_rejects_inactive_user(
         "decode_access_token",
         lambda token: {"sub": str(user_id)},
     )
+    monkeypatch.setattr(AuditService, "record_best_effort", lambda *args, **kwargs: None)
 
     monkeypatch.setattr(
         auth,

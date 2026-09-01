@@ -31,7 +31,7 @@ require_rbac_manage = require_permission("rbac:manage")
 def assign_user_role(
     user_id: UUID,
     role_name: str,
-    _current_user: Annotated[
+    current_user: Annotated[
         User,
         Depends(require_rbac_manage),
     ],
@@ -44,6 +44,7 @@ def assign_user_role(
 
     try:
         service.assign_role(
+            actor_user_id=current_user.id,
             user_id=user_id,
             role_name=role_name,
         )
@@ -78,7 +79,7 @@ def assign_user_role(
 def remove_user_role(
     user_id: UUID,
     role_name: str,
-    _current_user: Annotated[
+    current_user: Annotated[
         User,
         Depends(require_rbac_manage),
     ],
@@ -91,6 +92,7 @@ def remove_user_role(
 
     try:
         service.remove_role(
+            actor_user_id=current_user.id,
             user_id=user_id,
             role_name=role_name,
         )

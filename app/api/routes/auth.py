@@ -7,6 +7,7 @@ from app.core.security import create_access_token
 from app.db.session import get_db
 from app.schemas.auth import LoginRequest, TokenResponse
 from app.services.auth import authenticate_user
+from app.services.audit import AuditService
 from typing import Annotated
 
 from app.api.dependencies.auth import get_current_user
@@ -34,6 +35,14 @@ def login(
             password=payload.password,
         )
     except InvalidCredentialsError as exc:
+        AuditService(session).record_best_effort(
+            actor_user_id=None,
+            action="auth.login",
+            target_type="authentication",
+            target_id=None,
+            outcome="failure",
+            event_metadata={"reason": "invalid_credentials"},
+        )
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Invalid credentials",
@@ -41,6 +50,15 @@ def login(
         ) from exc
 
     access_token = create_access_token(user.id)
+
+    AuditService(session).record_best_effort(
+        actor_user_id=user.id,
+        action="auth.login",
+        target_type="user",
+        target_id=str(user.id),
+        outcome="success",
+        event_metadata={},
+    )
 
     return TokenResponse(
         access_token=access_token,

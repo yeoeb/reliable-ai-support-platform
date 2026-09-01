@@ -9,6 +9,7 @@ from app.api.dependencies.auth import get_current_user
 from app.db.session import get_db
 from app.models.user import User
 from app.repositories.rbac import RBACRepository
+from app.services.audit import AuditService
 
 
 logger = logging.getLogger(__name__)
@@ -38,6 +39,14 @@ def require_permission(
                 "user_id=%s permission=%s",
                 current_user.id,
                 permission_name,
+            )
+            AuditService(session).record_best_effort(
+                actor_user_id=current_user.id,
+                action="authorization.permission.denied",
+                target_type="permission",
+                target_id=permission_name,
+                outcome="denied",
+                event_metadata={"permission": permission_name},
             )
 
             raise HTTPException(

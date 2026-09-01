@@ -9,6 +9,7 @@ from datetime import datetime, timezone
 from types import SimpleNamespace
 
 from app.api.dependencies.auth import get_current_user
+from app.services.audit import AuditService
 
 client = TestClient(app)
 
@@ -29,6 +30,7 @@ def test_login_returns_access_token(monkeypatch) -> None:
         "app.api.routes.auth.authenticate_user",
         fake_authenticate_user,
     )
+    monkeypatch.setattr(AuditService, "record_best_effort", lambda *args, **kwargs: None)
 
     response = client.post(
         "/auth/login",
@@ -59,6 +61,7 @@ def test_login_returns_401_for_invalid_credentials(
         "app.api.routes.auth.authenticate_user",
         fake_authenticate_user,
     )
+    monkeypatch.setattr(AuditService, "record_best_effort", lambda *args, **kwargs: None)
 
     response = client.post(
         "/auth/login",
@@ -86,6 +89,7 @@ def test_login_does_not_leak_internal_details(
         "app.api.routes.auth.authenticate_user",
         fake_authenticate_user,
     )
+    monkeypatch.setattr(AuditService, "record_best_effort", lambda *args, **kwargs: None)
 
     response = client.post(
         "/auth/login",

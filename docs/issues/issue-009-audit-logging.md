@@ -333,7 +333,7 @@ Use GitHub Issue #16 as the authoritative Acceptance Criteria.
 
 - [x] CP0 — Context bootstrap / contradiction detection
 - [x] CP1 — Architecture + implementation plan validation
-- [ ] CP2 — Bounded implementation
+- [x] CP2 — Bounded implementation (awaiting Supervisor review)
 - [ ] CP3 — Targeted + regression verification
 - [ ] CP4 — Diff / security / transaction review
 - [ ] CP5 — Knowledge + documentation synchronization
@@ -370,6 +370,23 @@ The remote Supervisor Marker is now approved through CP1, so CP2 is authorized.
 
 CP2 uses `workspace-write` and must stop before CP3.
 
+### CP2 Implementation Evidence
+
+Implemented the approved bounded slices:
+
+- `AuditEvent` persistence model, export, migration, and focused tests.
+- Audit repository/service with transaction-participating and best-effort semantics.
+- Atomic RBAC role-mutation audit insertion with acting-administrator identity.
+- Best-effort login, invalid-token/user, and permission-denial audit recording.
+
+Focused test command attempted:
+
+```powershell
+pytest -q tests/test_audit_model.py tests/test_audit_repository.py tests/test_audit_service.py tests/test_audit_integrations.py tests/test_auth.py tests/test_auth_dependency.py tests/test_authorization_dependency.py tests/test_admin_rbac.py tests/test_rbac_service.py tests/test_migrations.py
+```
+
+The command did not reach test collection because the configured virtual-environment launcher reports that its Python 3.11 base executable is missing. This is a local environment blocker; CP3 has not started.
+
 ## Knowledge Candidates
 
 Existing Notion Knowledge already covers the Audit Logging fundamentals.
@@ -384,10 +401,10 @@ Potential additions after implementation (CP5 only):
 
 ## Current State
 
-CP0 and CP1 are complete.
+CP0, CP1, and the bounded CP2 implementation are complete. Targeted verification is pending restoration of the local Python environment and Supervisor review.
 
 Supervisor approval marker: **CP1**.
 
-Next authorized action: Dispatcher CP2 on `feature/issue-009-audit-logging`.
+Next authorized action: Supervisor review of CP2 evidence; CP3 remains unauthorized.
 
 Do not begin CP3 until the Supervisor reviews CP2 evidence and advances the remote approval marker.
