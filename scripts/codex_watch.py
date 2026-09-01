@@ -8,20 +8,36 @@ from contextlib import contextmanager
 from pathlib import Path
 from typing import Iterator, Sequence
 
-from scripts.codex_dispatch import (
-    DispatchError,
-    dispatch,
-    ensure_clean_worktree,
-    fetch_remote_issue_note,
-    find_repo_root,
-    get_current_branch,
-    get_issue_state,
-    load_state,
-    normalize_issue_id,
-    parse_supervisor_approval,
-    resolve_context,
-    run_git,
-)
+if __package__:
+    from .codex_dispatch import (
+        DispatchError,
+        dispatch,
+        ensure_clean_worktree,
+        fetch_remote_issue_note,
+        find_repo_root,
+        get_current_branch,
+        get_issue_state,
+        load_state,
+        normalize_issue_id,
+        parse_supervisor_approval,
+        resolve_context,
+        run_git,
+    )
+else:
+    from codex_dispatch import (
+        DispatchError,
+        dispatch,
+        ensure_clean_worktree,
+        fetch_remote_issue_note,
+        find_repo_root,
+        get_current_branch,
+        get_issue_state,
+        load_state,
+        normalize_issue_id,
+        parse_supervisor_approval,
+        resolve_context,
+        run_git,
+    )
 
 
 MIN_POLL_SECONDS = 5
@@ -126,20 +142,61 @@ def fast_forward_issue_branch(
     )
 
 
-def pid_is_alive(pid: int) -> bool:
-    if pid <= 0:
-        return False
-
+def _try_lock_file(handle) -> None:
     try:
-        os.kill(pid, 0)
-    except ProcessLookupError:
-        return False
-    except PermissionError:
-        return True
-    except OSError:
-        return False
+        if os.name == "nt":
+            import msvcrt
 
-    return True
+            handle.seek(0)
+            try:
+                msvcrt.locking(
+                    handle.fileno(),
+                    msvcrt.LK_NBLCK,
+                    1,
+                )
+            except OSError as exc:
+                raise DispatchError(
+                    "Another Watcher already owns this "
+                    "Engineering Issue."
+                ) from exc
+        else:
+            import fcntl
+
+            try:
+                fcntl.flock(
+                    handle.fileno(),
+                    fcntl.LOCK_EX
+                    | fcntl.LOCK_NB,
+                )
+            except OSError as exc:
+                raise DispatchError(
+                    "Another Watcher already owns this "
+                    "Engineering Issue."
+                ) from exc
+    except ImportError as exc:
+        raise DispatchError(
+            "This platform does not provide the required "
+            "Watcher file-lock primitive."
+        ) from exc
+
+
+def _unlock_file(handle) -> None:
+    if os.name == "nt":
+        import msvcrt
+
+        handle.seek(0)
+        msvcrt.locking(
+            handle.fileno(),
+            msvcrt.LK_UNLCK,
+            1,
+        )
+    else:
+        import fcntl
+
+        fcntl.flock(
+            handle.fileno(),
+            fcntl.LOCK_UN,
+        )
 
 
 @contextmanager
@@ -157,69 +214,38 @@ def watcher_lock(
         / f"watch-{issue_id}.lock"
     )
 
-    while True:
-        try:
-            fd = os.open(
-                lock_path,
-                os.O_CREAT
-                | os.O_EXCL
-                | os.O_WRONLY,
-            )
-        except FileExistsError:
+    handle = lock_path.open(
+        "a+",
+        encoding="utf-8",
+    )
+    locked = False
+
+    try:
+        _try_lock_file(handle)
+        locked = True
+
+        handle.seek(0)
+        handle.truncate()
+        handle.write(str(os.getpid()))
+        handle.write("\n")
+        handle.flush()
+
+        yield
+
+    finally:
+        if locked:
             try:
-                raw = lock_path.read_text(
-                    encoding="utf-8"
-                ).strip()
-                owner_pid = int(raw)
-            except (
-                OSError,
-                ValueError,
-            ):
-                raise DispatchError(
-                    "Watcher lock exists but cannot be "
-                    f"validated: {lock_path}"
-                ) from None
+                _unlock_file(handle)
+            except OSError:
+                pass
 
-            if pid_is_alive(owner_pid):
-                raise DispatchError(
-                    "Another Watcher already owns "
-                    f"Engineering Issue #{issue_id} "
-                    f"(pid={owner_pid})."
-                )
+        handle.close()
 
-            try:
-                lock_path.unlink()
-            except OSError as exc:
-                raise DispatchError(
-                    "Stale Watcher lock could not be "
-                    f"removed: {lock_path}"
-                ) from exc
-            continue
-
-        try:
-            with os.fdopen(
-                fd,
-                "w",
-                encoding="utf-8",
-            ) as handle:
-                handle.write(str(os.getpid()))
-                handle.write("\n")
-            break
-        except Exception:
+        if locked:
             try:
                 lock_path.unlink()
             except OSError:
                 pass
-            raise
-
-    try:
-        yield
-    finally:
-        try:
-            lock_path.unlink()
-        except FileNotFoundError:
-            pass
-
 
 def run_once(
     *,
