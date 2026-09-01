@@ -20,6 +20,7 @@ if __package__:
         load_state,
         normalize_issue_id,
         parse_supervisor_approval,
+        parse_supervisor_rework,
         resolve_context,
         run_git,
     )
@@ -35,6 +36,7 @@ else:
         load_state,
         normalize_issue_id,
         parse_supervisor_approval,
+        parse_supervisor_rework,
         resolve_context,
         run_git,
     )
@@ -50,11 +52,15 @@ APPROVAL_TO_WRITE_CHECKPOINT = {
 def checkpoint_commit_message(
     issue_id: str,
     checkpoint: str,
+    publication_label: str | None = None,
 ) -> str:
-    return (
+    message = (
         f"checkpoint(issue-{issue_id}): "
         f"{checkpoint}"
     )
+    if publication_label:
+        message += f" {publication_label}"
+    return message
 
 
 def remote_checkpoint_exists(
@@ -63,6 +69,7 @@ def remote_checkpoint_exists(
     branch: str,
     issue_id: str,
     checkpoint: str,
+    publication_label: str | None = None,
 ) -> bool:
     subjects = run_git(
         [
@@ -78,6 +85,7 @@ def remote_checkpoint_exists(
     expected = checkpoint_commit_message(
         issue_id,
         checkpoint,
+        publication_label,
     )
     return expected in subjects
 
@@ -300,19 +308,66 @@ def run_once(
         state,
         issue_id,
     )
-    already_published = remote_checkpoint_exists(
-        repo_root=repo_root,
-        branch=branch,
-        issue_id=issue_id,
-        checkpoint=candidate,
+
+    rework = parse_supervisor_rework(
+        remote_note
     )
-    checkpoint = next_write_checkpoint(
-        approved_through=approved,
-        issue_state=issue_state,
-        remote_checkpoint_done=already_published,
-    )
-    if checkpoint is None:
-        return None
+    publication_label: str | None = None
+    force = False
+
+    if rework is not None:
+        rework_checkpoint, attempt = rework
+
+        if rework_checkpoint != candidate:
+            raise DispatchError(
+                "Supervisor rework checkpoint does not match "
+                f"the currently authorized write checkpoint "
+                f"{candidate}; got {rework_checkpoint}."
+            )
+
+        publication_label = f"rework-{attempt}"
+
+        rework_published = remote_checkpoint_exists(
+            repo_root=repo_root,
+            branch=branch,
+            issue_id=issue_id,
+            checkpoint=candidate,
+            publication_label=publication_label,
+        )
+        if rework_published:
+            return None
+
+        if (
+            issue_state.get("last_checkpoint")
+            == candidate
+            and issue_state.get("publication_label")
+            == publication_label
+            and issue_state.get("last_status")
+            == "failed"
+        ):
+            raise DispatchError(
+                f"{candidate} {publication_label} previously failed. "
+                "Supervisor must authorize a new rework attempt; "
+                "Watcher will not retry automatically."
+            )
+
+        checkpoint = candidate
+        force = True
+
+    else:
+        already_published = remote_checkpoint_exists(
+            repo_root=repo_root,
+            branch=branch,
+            issue_id=issue_id,
+            checkpoint=candidate,
+        )
+        checkpoint = next_write_checkpoint(
+            approved_through=approved,
+            issue_state=issue_state,
+            remote_checkpoint_done=already_published,
+        )
+        if checkpoint is None:
+            return None
 
     context = resolve_context(
         start=repo_root,
@@ -323,10 +378,11 @@ def run_once(
     result = dispatch(
         context,
         dry_run=False,
-        force=False,
+        force=force,
         new_session=False,
         codex_bin=codex_bin,
         timeout_seconds=timeout_seconds,
+        publication_label=publication_label,
     )
     if result != 0:
         raise DispatchError(

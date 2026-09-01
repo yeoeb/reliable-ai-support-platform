@@ -10,6 +10,7 @@ from scripts.codex_dispatch import (
     ensure_clean_worktree,
     parse_write_allow,
     publish_write_checkpoint,
+    validate_control_markers_unchanged,
 )
 
 
@@ -558,3 +559,56 @@ def test_no_changes_returns_none_without_push(
 
     assert result is None
     assert remote_head(repo) == before
+
+
+
+def test_rework_publication_uses_attempt_commit_label(
+    tmp_path,
+):
+    repo, _ = make_repo(tmp_path)
+    context = make_context(repo)
+    before = remote_head(repo)
+    note = remote_note(repo)
+
+    (repo / "app" / "audit_event.py").write_text(
+        "AUDIT = True\n",
+        encoding="utf-8",
+    )
+
+    commit_sha = publish_write_checkpoint(
+        context,
+        expected_remote_head=before,
+        remote_note=note,
+        patterns=parse_write_allow(note),
+        publication_label="rework-1",
+    )
+
+    assert commit_sha
+    assert run_git(
+        repo,
+        "log",
+        "-1",
+        "--pretty=%s",
+    ) == "checkpoint(issue-009): CP2 rework-1"
+
+
+def test_executor_cannot_modify_supervisor_rework_marker():
+    base = issue_note()
+    remote = (
+        base
+        + '<!-- codex-dispatch-supervisor-rework: '
+        '{"checkpoint":"CP2","attempt":1} -->\n'
+    )
+    local = remote.replace(
+        '"attempt":1',
+        '"attempt":2',
+    )
+
+    with pytest.raises(
+        DispatchError,
+        match="Supervisor rework marker",
+    ):
+        validate_control_markers_unchanged(
+            remote_note=remote,
+            local_note=local,
+        )
