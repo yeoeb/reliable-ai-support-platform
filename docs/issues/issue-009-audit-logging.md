@@ -2,7 +2,6 @@
 
 <!-- codex-dispatch-supervisor-approved-through: CP2 -->
 <!-- codex-dispatch-write-allow: ["app/models/audit_event.py","app/models/__init__.py","app/repositories/audit.py","app/services/audit.py","app/services/rbac.py","app/api/routes/auth.py","app/api/routes/admin.py","app/api/dependencies/auth.py","app/api/dependencies/authorization.py","migrations/versions/*audit*.py","tests/test_audit_*.py","tests/test_auth.py","tests/test_auth_dependency.py","tests/test_authorization_dependency.py","tests/test_admin_rbac.py","tests/test_rbac_service.py","tests/test_rbac_security.py","tests/test_migrations.py","docs/issues/issue-009-audit-logging.md"] -->
-<!-- codex-dispatch-supervisor-rework: {"checkpoint":"CP3","attempt":1} -->
 
 ## GitHub Tracking
 
@@ -524,6 +523,20 @@ Preferred fix:
 The remote Write Allowlist is expanded to include `tests/test_rbac_security.py`.
 
 After the fix, rerun the Draft PR Backend Verification and complete the remaining CP3 requirements, including real best-effort persistence-failure tests and sensitive-data assertions.
+
+## Supervisor Intervention — CP3 test isolation
+
+The authorized `CP3 rework-1` was not consumed by a running Local Watcher.
+
+To avoid blocking the Issue on local process availability, the Supervisor disarmed the unused rework marker and applied only the two CI-proven test-isolation fixes directly.
+
+Boundary:
+
+- Production Audit code is unchanged.
+- Authorization / RBAC semantics are unchanged.
+- Only `tests/test_rbac_security.py` may change in this intervention.
+- The fix must mock the Audit side effect while preserving the tests' original assertion that JWT role/permission claims cannot bypass database-backed authorization.
+- Draft PR #38 GitHub-hosted Backend Verification remains the acceptance gate.
 
 ## Knowledge Candidates
 
