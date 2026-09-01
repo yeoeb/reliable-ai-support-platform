@@ -1,5 +1,7 @@
 # Engineering Issue #009 — Durable Security Audit Trail
 
+<!-- codex-dispatch-supervisor-approved-through: CP1 -->
+
 ## GitHub Tracking
 
 - GitHub Issue: #16
@@ -78,9 +80,9 @@ No contradiction was found between `AGENTS.md`, `PROJECT_STATE.md`, merged Authe
 
 ## CP1 — Architecture / Plan Validation
 
-Status: **next**
+Status: **completed and approved by Supervisor**
 
-Supervisor proposal for Codex to validate, not blindly accept:
+The following plan is the approved CP2 contract:
 
 ### Data Model
 
@@ -119,6 +121,36 @@ Suggested Outcomes:
 - `success`
 - `failure`
 - `denied`
+
+### Service / Repository Boundary
+
+Approved shape:
+
+```text
+AuditRepository.create(...)
+    ↓
+session.add(AuditEvent)
+session.flush()
+    ↓
+NO commit inside Repository
+```
+
+`AuditService` exposes two semantics:
+
+1. **Transaction-participating insert**
+   - adds/flushed Audit Event
+   - does not commit
+   - caller owns the surrounding transaction
+   - used by RBAC privilege mutation
+
+2. **Best-effort record**
+   - adds/flushed Audit Event
+   - commits its own request-scoped Audit write
+   - on SQLAlchemy persistence failure: rollback + Application Log
+   - does not re-raise into the original `401/403` path
+   - used by Login/Auth/Authorization failure paths
+
+Do not hide Commit inside `AuditRepository`.
 
 ### RBAC Transaction Policy
 
@@ -159,6 +191,66 @@ Audit failure?
 ```
 
 Do not let Audit persistence failure replace the intended security response with an unrelated `500`.
+
+### Integration Points
+
+Approved integration:
+
+- `app/api/routes/auth.py::login`
+  - successful Login → `auth.login / success`, actor = authenticated User ID
+  - invalid credentials → `auth.login / failure`, actor = null, generic reason only
+- `app/api/dependencies/auth.py::get_current_user`
+  - invalid/expired Token → `auth.token.invalid / failure`, actor = null
+  - decoded Token pointing to missing/inactive User → `auth.user.invalid`, stable User UUID may be used
+  - missing Authorization header is not required to be audited in #009
+- `app/api/dependencies/authorization.py::require_permission`
+  - denied Permission → `authorization.permission.denied / denied`
+- `app/api/routes/admin.py`
+  - pass acting Administrator User ID into `RBACService`
+- `app/services/rbac.py`
+  - UserRole mutation + Audit Event + one Commit
+
+### Model / Migration Details
+
+- No Foreign Key from `audit_events.actor_user_id` to `users.id` in #009; preserve historical identifier even if User lifecycle changes later.
+- `target_id` remains String so later Tool / Document / Ticket targets can reuse the same table.
+- PostgreSQL `JSONB` is acceptable because this Project already targets PostgreSQL.
+- Python ORM attribute: `event_metadata`; DB column: `metadata`.
+- Import `AuditEvent` from `app/models/__init__.py`; `migrations/env.py` should only change if Alembic metadata discovery actually requires it.
+- Repository exposes Create only.
+
+### CP2 Ordered Implementation Slices
+
+Codex may implement these in one CP2 Turn, but must preserve this order:
+
+1. **Persistence foundation**
+   - `AuditEvent` ORM Model
+   - Model export
+   - Alembic migration
+   - Model / migration tests
+
+2. **Audit boundary**
+   - `AuditRepository.create`
+   - `AuditService` transaction-participating + best-effort semantics
+   - focused Unit Tests
+
+3. **RBAC atomic integration**
+   - actor User ID passed from Admin routes
+   - Role assignment/removal + Audit in one Transaction
+   - rollback behavior tests
+
+4. **Authentication / Authorization best-effort integration**
+   - Login success/failure
+   - invalid Token / invalid User
+   - Permission denied
+   - preserve existing 401/403 semantics
+   - sensitive-data negative tests
+
+5. **Documentation state**
+   - update this Execution Note only with actual CP2 evidence/current state
+   - do not mark CP3/CP4 complete
+
+If any slice requires a Production file outside Allowed Write Set, stop and report the Scope expansion instead of silently editing it.
 
 ### Sensitive Data Policy
 
@@ -233,7 +325,7 @@ Use GitHub Issue #16 as the authoritative Acceptance Criteria.
 ## Checkpoints
 
 - [x] CP0 — Context bootstrap / contradiction detection
-- [ ] CP1 — Architecture + implementation plan validation
+- [x] CP1 — Architecture + implementation plan validation
 - [ ] CP2 — Bounded implementation
 - [ ] CP3 — Targeted + regression verification
 - [ ] CP4 — Diff / security / transaction review
@@ -248,20 +340,28 @@ Repository state inspected from current `develop`.
 
 No Product Code modified.
 
-### CP1 — First real Dispatcher command
+### CP1
 
-From the local Repository after fetching the new Branch:
+Supervisor performed the Architecture / Scope / Transaction review against the current GitHub Branch and approved CP1 without requiring a separate Local Codex planning Turn.
+
+This is intentionally allowed: Supervisor approval is the progression authority, while Local Codex State is only execution/session metadata.
+
+### CP2 — First Product Code Dispatcher command
+
+After synchronizing the local Branch:
 
 ```powershell
 git fetch origin
 git switch feature/issue-009-audit-logging
 git pull --ff-only origin feature/issue-009-audit-logging
 
-python scripts/codex_dispatch.py --issue 009 --checkpoint CP1 --dry-run
-python scripts/codex_dispatch.py --issue 009 --checkpoint CP1
+python scripts/codex_dispatch.py --issue 009 --checkpoint CP2 --dry-run
+python scripts/codex_dispatch.py --issue 009 --checkpoint CP2
 ```
 
-CP1 is `read-only` and must stop after returning the validated plan.
+The remote Supervisor Marker is now approved through CP1, so CP2 is authorized.
+
+CP2 uses `workspace-write` and must stop before CP3.
 
 ## Knowledge Candidates
 
@@ -277,8 +377,10 @@ Potential additions after implementation (CP5 only):
 
 ## Current State
 
-CP0 is complete.
+CP0 and CP1 are complete.
 
-Next action: run Dispatcher CP1 on `feature/issue-009-audit-logging`.
+Supervisor approval marker: **CP1**.
 
-Do **not** begin CP2 until the Supervisor reviews the CP1 result.
+Next authorized action: Dispatcher CP2 on `feature/issue-009-audit-logging`.
+
+Do not begin CP3 until the Supervisor reviews CP2 evidence and advances the remote approval marker.
