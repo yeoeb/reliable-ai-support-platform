@@ -5,6 +5,8 @@ on:
     paths:
       - "scripts/codex_dispatch.py"
       - "tests/test_codex_dispatch.py"
+      - "tests/test_codex_publish.py"
+      - "tests/test_codex_publish.py"
       - ".github/workflows/dispatcher-tests.yml"
   push:
     branches:
@@ -37,5 +39,9 @@ jobs:
       - name: Compile dispatcher
         run: python -m py_compile scripts/codex_dispatch.py
 
-      - name: Run dispatcher tests
-        run: python -m pytest tests/test_codex_dispatch.py -q
+      - name: Run dispatcher control-plane tests
+        run: >-
+          python -m pytest
+          tests/test_codex_dispatch.py
+          tests/test_codex_publish.py
+          -q
