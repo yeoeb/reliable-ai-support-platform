@@ -16,10 +16,18 @@ def get_module():
     return revision.module
 
 
-def test_retrieval_migration_is_linear_head() -> None:
+def test_retrieval_migration_remains_in_linear_history() -> None:
     script = ScriptDirectory.from_config(Config(str(ALEMBIC_INI)))
-    assert script.get_heads() == [EXPECTED_REVISION]
-    assert get_module().down_revision == "b72a4c5d6e81"
+    revision = script.get_revision(EXPECTED_REVISION)
+
+    assert revision is not None
+    assert revision.down_revision == "b72a4c5d6e81"
+
+    revisions = {
+        item.revision
+        for item in script.walk_revisions()
+    }
+    assert EXPECTED_REVISION in revisions
 
 
 def test_upgrade_adds_btree_index_and_support_admin_permission(

@@ -48,17 +48,25 @@ Required state surfaces:
 
 The Dispatcher uses Stable `codex exec` as its local execution boundary. It does not attempt to inject prompts into an already-open VS Code/Desktop Codex UI session.
 
-## Next Product Engineering Issue
+## Current Product Engineering Issue
 
 Engineering Issue ID #015 — Controlled Tool Calling foundation
 
-- Status: not started
-- Normal base Branch: `develop`
-- Dependency baseline: Grounded RAG, exact Retrieval, RBAC, durable Audit, Structured Logging, and Backend Verification are complete
-- Model output is not authorization: any Tool Request must pass a server-owned Tool Registry, parameter validation, and permission checks before execution
-- Arbitrary shell/code/database execution is not implied by Tool Calling
-- High-risk Human Approval remains a separate #016 boundary
-- Product boundary must be defined by a new GitHub tracking Issue and CP0/CP1 before implementation begins
+- GitHub tracking Issue: #69
+- Active Branch: `feature/issue-015-controlled-tool-calling`
+- CP0 Context Bootstrap: completed
+- CP1 Architecture / Plan: completed and Supervisor-approved
+- CP2 bounded implementation: completed through Supervisor fallback and reviewed
+- CP3 Verification: completed after one bounded test-maintenance fix
+- CP4 Security / Authorization Review: completed
+- CP5 Knowledge / Documentation: completed
+- Current Checkpoint: CP6 final exact-Head verification
+- V1 Tool: `platform_readiness` only
+- V1 Tool risk: read-only
+- V1 Tool execution bound: maximum one Tool per request
+- New permission: `system:read` for support_agent/admin
+- Human Approval / mutating Tools: explicitly deferred to #016
+- Remote write Allowlist: configured
 
 Important: GitHub Issue/PR numbers are repository-wide platform sequence numbers and remain separate from Engineering Issue IDs.
 
