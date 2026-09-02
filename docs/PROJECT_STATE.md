@@ -58,7 +58,8 @@ Engineering Issue ID #017 — Offline LLM Evaluation foundation
 - Active Branch: `feature/issue-017-llm-evaluation`
 - CP0 Evaluation Surface Discovery: completed
 - CP1 Offline Evaluation Architecture: completed and Supervisor-approved
-- Current Checkpoint: CP2 authorized
+- CP2 offline evaluation implementation: completed through bounded Supervisor fallback and reviewed
+- Current Checkpoint: CP3 authorized
 - V1 evaluation surfaces: Grounded RAG + Tool Choice
 - V1 execution mode: deterministic offline scorer only
 - Live OpenAI calls in CI: forbidden
