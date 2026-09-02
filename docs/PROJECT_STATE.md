@@ -36,6 +36,7 @@ It is intentionally concise and must stay synchronized with merged work.
 - #018 — AI Security Regression foundation
 - #019 — Operational Metrics / Monitoring foundation
 - #020 — CI / Release Hardening foundation
+- #021 — First Hardened Release Promotion
 
 ## Current Workflow Infrastructure
 
@@ -54,24 +55,49 @@ Required state surfaces:
 
 The Dispatcher uses Stable `codex exec` as its local execution boundary. It does not attempt to inject prompts into an already-open VS Code/Desktop Codex UI session.
 
+## Current Stable Release State
+
+Repository version `0.1.0` completed its first hardened `develop → main` promotion.
+
+Release evidence:
+
+- Engineering Issue #021 / GitHub Issue #94: completed
+- Release PR #95: merged
+- frozen develop Head: `595a45f33a0b7cb1453695dc6f7bdb6ed3d8eccc`
+- frozen candidate tree: `1b3e3f59dbc142df96913f8f512fc839c88bc0ea`
+- Release Verification run `33652934391`: PASS
+- Backend regression: 482 passed
+- database recovery: PASS
+- Dispatcher regression: 87 passed
+- main release merge: `5428d31108fd908ab3b8d2d657a1db4915fccdd7`
+- main merge tree equals the frozen candidate tree
+- main-only release history is content-neutral
+- no Git tag / GitHub Release / production deployment was performed
+
+External platform-control debt remains:
+
+- main Branch Protection: disabled
+- develop Branch Protection: disabled
+- repository Rulesets: none
+
 ## Next Product Engineering Issue
 
-Engineering Issue ID #021 — First Hardened Release Promotion
+Engineering Issue ID #022 — Expanded LLM Evaluation Suite / Prompt Comparison
 
 - Status: not started
-- Normal source/target: `develop → main`
-- Dependency baseline: #020 Release Verification, exact-source reusable Backend/Dispatcher CI, version checks, and ancestry reconciliation are complete
-- The first hardened release must use a Pull Request from develop to main and pass the new Release Verification gate
-- The Release PR must use a merge commit, not squash/rebase
-- Release verification is repository promotion evidence only; Git tag/GitHub Release publication and production deployment remain separate operations
-- Current main/develop Branch Protection/Rulesets remain disabled and must not be described as enforced
-- The release candidate version remains `0.1.0` unless a dedicated version-change decision is made before opening the Release PR
+- Normal base Branch: `develop`
+- Dependency baseline: #017 Offline LLM Evaluation, #018 AI Security Regression, and #021 first hardened Release are complete
+- V1 should expand the small deterministic synthetic Eval corpus toward a substantially broader regression suite
+- Prompt/version comparison should remain deterministic and offline by default
+- Evaluation must continue to separate aggregate quality thresholds from explicit Safety violations
+- Normal CI must not require live OpenAI calls, Tool execution, Approval execution, or production data
+- Exact scope, dataset growth target, scorer/reporting changes, and write set require fresh CP0/CP1 before implementation
 
 Important: GitHub Issue/PR numbers are repository-wide platform sequence numbers and remain separate from Engineering Issue IDs.
 
 ## Planned Product Sequence
 
-Tentative order after #020:
+Tentative order after #021:
 
 - #014 — RAG response with evidence/citations
 - #015 — Controlled Tool Calling
