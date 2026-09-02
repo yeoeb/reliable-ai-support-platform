@@ -355,13 +355,11 @@ Sensitive log-field redaction
 
 GitHub Actions backend verification
 
-In Progress
-
-Knowledge ingestion / RAG foundation
-
-Planned AI Layer
+Next
 
 Knowledge ingestion
+
+Planned AI Layer
 
 Embeddings
 
