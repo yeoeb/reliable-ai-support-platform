@@ -46,26 +46,12 @@ function Invoke-Git {
 }
 
 $issueId = '{0:D3}' -f [int]$Issue
-
-$branchByIssue = @{
-    '009' = 'feature/issue-009-audit-logging'
-}
-
-if (-not $branchByIssue.ContainsKey($issueId)) {
-    throw (
-        "No explicit Branch mapping exists for Engineering Issue #$issueId. " +
-        "Refusing to guess a Branch."
-    )
-}
-
-$targetBranch = $branchByIssue[$issueId]
 $repoRoot = (Resolve-Path (Join-Path $PSScriptRoot '..')).Path
 
 Push-Location $repoRoot
 try {
     Require-Command 'git'
     Require-Command 'python'
-    Require-Command 'codex'
 
     $resolvedRoot = (& git rev-parse --show-toplevel).Trim()
     if ($LASTEXITCODE -ne 0 -or -not $resolvedRoot) {
@@ -92,6 +78,36 @@ try {
             'changes before starting the Watcher.'
         )
     }
+
+    $resolverPath = Join-Path $repoRoot 'scripts/resolve_issue_branch.py'
+    $targetBranch = (& python $resolverPath --issue $issueId --remote origin)
+
+    if ($LASTEXITCODE -ne 0) {
+        throw (
+            "Unable to resolve a unique remote Feature Branch " +
+            "for Engineering Issue #$issueId."
+        )
+    }
+
+    if ($targetBranch -is [array]) {
+        if ($targetBranch.Count -ne 1) {
+            throw (
+                "Branch resolver returned more than one output line for " +
+                "Engineering Issue #$issueId."
+            )
+        }
+        $targetBranch = $targetBranch[0]
+    }
+
+    $targetBranch = ([string]$targetBranch).Trim()
+    if (-not $targetBranch) {
+        throw (
+            "Branch resolver returned an empty Branch for " +
+            "Engineering Issue #$issueId."
+        )
+    }
+
+    Require-Command 'codex'
 
     Write-Host "Engineering Issue : #$issueId"
     Write-Host "Target Branch     : $targetBranch"
