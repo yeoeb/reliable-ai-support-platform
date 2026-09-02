@@ -1,6 +1,9 @@
 from fastapi import FastAPI
 
-from app.api.middleware.request_logging import RequestLoggingMiddleware
+from app.api.middleware.request_logging import (
+    RequestLoggingMiddleware,
+    unhandled_exception_response,
+)
 from app.api.routes.admin import router as admin_router
 from app.api.routes.auth import router as auth_router
 from app.api.routes.health import router as health_router
@@ -18,6 +21,10 @@ app = FastAPI(
 )
 
 app.add_middleware(RequestLoggingMiddleware)
+app.add_exception_handler(
+    Exception,
+    unhandled_exception_response,
+)
 
 app.include_router(health_router)
 app.include_router(users_router)
