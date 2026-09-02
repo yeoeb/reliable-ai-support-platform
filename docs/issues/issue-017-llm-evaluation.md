@@ -548,3 +548,43 @@ Remote Supervisor approval: **CP1**.
 Next authorized action: **CP2** on `feature/issue-017-llm-evaluation`.
 
 Full regression remains CP3.
+
+
+## Supervisor Fallback Execution
+
+The remote CP2 gate remained authorized but no Local Watcher/Codex checkpoint was published.
+
+A bounded Supervisor fallback is being used on the Feature Branch.
+
+Preserved controls:
+
+- all Product/Test writes remain inside the existing machine Allowlist;
+- no fake `checkpoint(issue-017): CP2` commit is created;
+- no GitHub workflow file is modified;
+- no live OpenAI call, database call, Tool execution, or Approval execution is added;
+- CP3 full regression remains mandatory;
+- CP4 Evaluation validity / safety review remains mandatory;
+- CP6 exact-Head delivery remains mandatory.
+
+### Fallback CP2 content
+
+Implemented:
+
+- stable public Prompt IDs and SHA-256 fingerprints without Prompt text changes;
+- strict suite/case/result/report schemas;
+- 1 MiB file and 1000-record JSONL bounds;
+- suite-child path containment;
+- duplicate/missing/unknown Case/Result rejection;
+- prompt fingerprint drift rejection;
+- deterministic RAG scorer;
+- deterministic Tool-choice scorer;
+- safety-violation accounting;
+- deterministic JSON CLI output and 0/1/2 exit contract;
+- 12 synthetic committed seed Cases;
+- deterministic baseline fixture;
+- README explicitly stating the baseline is not a live-model score;
+- focused positive and negative tests.
+
+Focused tests are authored but have not been represented as executed by the Supervisor fallback environment.
+
+Remote approval remains CP1 until CP2 review is complete.
