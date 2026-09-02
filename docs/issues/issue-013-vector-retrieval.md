@@ -1,6 +1,6 @@
 # Engineering Issue #013 — Exact Vector Retrieval Foundation
 
-<!-- codex-dispatch-supervisor-approved-through: CP2 -->
+<!-- codex-dispatch-supervisor-approved-through: CP4 -->
 <!-- codex-dispatch-write-allow: ["app/core/errors.py","app/schemas/retrieval.py","app/repositories/retrieval.py","app/services/retrieval.py","app/api/routes/retrieval.py","app/main.py","migrations/versions/*retrieval*.py","tests/test_retrieval_schema.py","tests/test_retrieval_repository.py","tests/test_retrieval_service.py","tests/test_retrieval_api.py","tests/test_retrieval_migration.py","tests/integration/test_vector_retrieval.py","tests/test_embedding_migration.py","tests/test_migrations.py","docs/issues/issue-013-vector-retrieval.md"] -->
 
 ## GitHub Tracking
@@ -485,8 +485,8 @@ Supervisor-controlled:
 - [x] CP0 — Context bootstrap / contradiction detection
 - [x] CP1 — Architecture + Scope validation
 - [x] CP2 — Bounded implementation
-- [ ] CP3 — Targeted + full verification
-- [ ] CP4 — Security / retrieval review
+- [x] CP3 — Targeted + full verification
+- [x] CP4 — Security / retrieval review
 - [ ] CP5 — Knowledge + documentation sync
 - [ ] CP6 — PR delivery evidence
 
@@ -542,6 +542,61 @@ python -m pytest -q
 
 GitHub-hosted pgvector PostgreSQL remains authoritative.
 
+## CP3 Verification Evidence
+
+Final reviewed Product/Test Head after CP4 hardening:
+
+`5b48e61c27f1085f2409270290a1f4f4aabd92c7`
+
+GitHub-hosted exact-head verification:
+
+```text
+Backend regression: 344 passed
+Database recovery:   1 passed
+Control Plane:      87 passed
+PostgreSQL + pgvector extension: PASS
+Alembic upgrade head:            PASS
+Alembic downgrade -1:            PASS
+Alembic re-upgrade head:         PASS
+```
+
+The first CP3 run reached **342 passed / 1 failed**.
+
+The only failure was integration-test setup ordering: KnowledgeChunk children were flushed before their KnowledgeDocument parent because the test did not establish an ORM relationship dependency. The test fixture now explicitly flushes the parent Document before adding child Chunks. Product Model/Repository behavior was not weakened.
+
+## CP4 Security / Retrieval Review
+
+Status: **PASS**
+
+Review findings:
+
+- raw Retrieval is protected by dedicated `knowledge:read`;
+- migration grants it only to `support_agent` and `admin`;
+- default `user` is not granted raw chunk access;
+- query raw length is bounded before trimming;
+- query is sent to the existing EmbeddingProvider boundary only when search is invoked;
+- query text and query vector are not persisted;
+- OpenAI/API-provider failures map to generic 503 through existing domain errors;
+- current `embedding_config_hash` filters out historical embedding configurations;
+- exact pgvector cosine distance is used;
+- threshold is applied as `distance <= 1 - min_similarity` before LIMIT;
+- ordering is cosine distance ASC then Chunk UUID ASC;
+- repository returns provenance + chunk content and never vector data;
+- empty result sets are successful;
+- best-effort read Audit excludes query/content/source/vector/API-key data;
+- runtime logs exclude query/content/source/vector/API-key data;
+- no HNSW, IVFFlat, ANN, reranking, LLM, or RAG execution path exists;
+- the only new index is a normal B-tree on `embedding_config_hash`.
+
+### CP4 hardening
+
+Two correctness boundaries were corrected:
+
+1. **RBAC transaction before Provider wait** — the authorization dependency performs a DB permission read using the same request Session. RetrievalService now explicitly closes that read transaction with `session.rollback()` before waiting on the external Embedding Provider.
+2. **Zero query vector** — cosine similarity is undefined for an all-zero query vector. RetrievalService now rejects zero-norm Provider output as `InvalidEmbeddingProviderResponseError` before any search query.
+
+No merge-blocking finding remains.
+
 ## CP4 Review Focus
 
 - query/API key/vector leakage
@@ -568,26 +623,20 @@ Deduplicate in CP5:
 
 ## Current State
 
-CP0–CP2 are complete.
+CP0–CP4 are complete.
 
-Implemented Product/Test boundary:
+Final reviewed Product/Test Head:
 
-- dedicated `knowledge:read` permission for support_agent/admin
-- normal B-tree index on embedding_config_hash only
-- bounded retrieval query schema
-- current-config hash filtering
-- exact pgvector cosine search
-- deterministic distance + chunk UUID ordering
-- provenance join to KnowledgeDocument
-- provider-independent query-vector validation
-- explicit request-Session rollback before external Provider wait
-- best-effort read Audit
-- safe runtime logging
-- support/admin-only Retrieval API
-- real pgvector integration coverage
+- `5b48e61c27f1085f2409270290a1f4f4aabd92c7`
+- Backend regression: **344 passed**
+- Database recovery: **1 passed**
+- Dispatcher / Branch Resolver: **87 passed**
+- PostgreSQL + pgvector: PASS
+- Alembic upgrade/downgrade/re-upgrade: PASS
+- CP4 Security / Retrieval Review: PASS
 
-Supervisor approval marker: **CP2**.
+Supervisor approval marker: **CP4**.
 
-Next action: CP3 exact-head GitHub-hosted verification.
+Next action: CP5 Knowledge / Documentation synchronization.
 
-No ANN index or RAG/LLM path is authorized.
+No further Product Code change is authorized unless a new verification failure is discovered.
