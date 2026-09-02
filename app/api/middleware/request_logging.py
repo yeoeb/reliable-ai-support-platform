@@ -39,6 +39,30 @@ class RequestLoggingMiddleware:
         self.app = app
         self.metrics = metrics
 
+    def _record_http_metric(
+        self,
+        *,
+        method: object,
+        route: object,
+        status_code: object,
+        duration_seconds: float,
+    ) -> None:
+        try:
+            self.metrics.record_http(
+                method=method,
+                route=route,
+                status_code=status_code,
+                duration_seconds=duration_seconds,
+            )
+        except Exception:
+            logger.warning(
+                "HTTP metrics recording failed",
+                extra={
+                    "event": "metrics.record.failed",
+                    "metric_category": "http",
+                },
+            )
+
     async def __call__(
         self,
         scope: Scope,
@@ -98,7 +122,7 @@ class RequestLoggingMiddleware:
                     "exception_type": type(exc).__name__,
                 },
             )
-            self.metrics.record_http(
+            self._record_http_metric(
                 method=scope.get("method"),
                 route=route,
                 status_code=status_code,
@@ -121,7 +145,7 @@ class RequestLoggingMiddleware:
                     "duration_ms": round(duration_ms, 3),
                 },
             )
-            self.metrics.record_http(
+            self._record_http_metric(
                 method=scope.get("method"),
                 route=route,
                 status_code=status_code,

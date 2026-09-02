@@ -104,14 +104,14 @@ class AgentService:
                 )
             return self._record_result(
                 AgentRunResult(
-                status="completed",
-                approval_id=None,
-                answer=choice.answer.strip(),
-                tool_used=None,
-                tool_status=None,
-                model=choice.model,
-                input_tokens=choice.input_tokens,
-                output_tokens=choice.output_tokens,
+                    status="completed",
+                    approval_id=None,
+                    answer=choice.answer.strip(),
+                    tool_used=None,
+                    tool_status=None,
+                    model=choice.model,
+                    input_tokens=choice.input_tokens,
+                    output_tokens=choice.output_tokens,
                 )
             )
 
@@ -127,14 +127,14 @@ class AgentService:
             )
             return self._record_result(
                 AgentRunResult(
-                status="approval_required",
-                approval_id=approval.id,
-                answer="Human approval required.",
-                tool_used=choice.tool_call.name,
-                tool_status="approval_required",
-                model=choice.model,
-                input_tokens=choice.input_tokens,
-                output_tokens=choice.output_tokens,
+                    status="approval_required",
+                    approval_id=approval.id,
+                    answer="Human approval required.",
+                    tool_used=choice.tool_call.name,
+                    tool_status="approval_required",
+                    model=choice.model,
+                    input_tokens=choice.input_tokens,
+                    output_tokens=choice.output_tokens,
                 )
             )
 
@@ -151,19 +151,19 @@ class AgentService:
         )
         return self._record_result(
             AgentRunResult(
-            status="completed",
-            approval_id=None,
-            answer=final.answer,
-            tool_used=choice.tool_call.name,
-            tool_status=result["status"],
-            model=final.model,
-            input_tokens=(
-                choice.input_tokens
-                + final.input_tokens
-            ),
-            output_tokens=(
-                choice.output_tokens
-                + final.output_tokens
-            ),
+                status="completed",
+                approval_id=None,
+                answer=final.answer,
+                tool_used=choice.tool_call.name,
+                tool_status=result["status"],
+                model=final.model,
+                input_tokens=(
+                    choice.input_tokens
+                    + final.input_tokens
+                ),
+                output_tokens=(
+                    choice.output_tokens
+                    + final.output_tokens
+                ),
             )
         )
