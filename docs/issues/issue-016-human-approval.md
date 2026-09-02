@@ -405,7 +405,22 @@ Exclude:
 - arbitrary unvalidated args
 - arbitrary output
 
-### CP2 Ordered Slices
+### Supervisor Fallback Execution
+
+The authorized CP2 gate was not consumed by a running Local Watcher/Codex Executor.
+
+The Supervisor is performing a bounded fallback implementation on the Feature Branch.
+
+This does not bypass:
+- the machine Write Allowlist;
+- CP3 exact-head verification;
+- CP4 concurrency / authorization / transaction review;
+- CP5 Knowledge Capture;
+- CP6 Delivery Gate.
+
+Branch history must not be represented as a Codex-generated checkpoint unless the Dispatcher actually produced it.
+
+## CP2 Ordered Slices
 
 CP2 is deliberately bounded.
 
