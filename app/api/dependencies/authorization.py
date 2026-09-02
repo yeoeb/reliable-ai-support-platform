@@ -1,0 +1,61 @@
+import logging
+from collections.abc import Callable
+from typing import Annotated
+
+from fastapi import Depends, HTTPException, status
+from sqlalchemy.orm import Session
+
+from app.api.dependencies.auth import get_current_user
+from app.db.session import get_db
+from app.models.user import User
+from app.repositories.rbac import RBACRepository
+from app.services.audit import AuditService
+
+
+logger = logging.getLogger(__name__)
+
+
+def require_permission(
+    permission_name: str,
+) -> Callable[..., User]:
+    def dependency(
+        current_user: Annotated[
+            User,
+            Depends(get_current_user),
+        ],
+        session: Annotated[
+            Session,
+            Depends(get_db),
+        ],
+    ) -> User:
+        repository = RBACRepository(session)
+
+        if not repository.has_permission(
+            current_user.id,
+            permission_name,
+        ):
+            logger.info(
+                "Authorization denied",
+                extra={
+                    "event": "authorization.denied",
+                    "user_id": str(current_user.id),
+                    "permission": permission_name,
+                },
+            )
+            AuditService(session).record_best_effort(
+                actor_user_id=current_user.id,
+                action="authorization.permission.denied",
+                target_type="permission",
+                target_id=permission_name,
+                outcome="denied",
+                event_metadata={"permission": permission_name},
+            )
+
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="Forbidden",
+            )
+
+        return current_user
+
+    return dependency

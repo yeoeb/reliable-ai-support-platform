@@ -4,7 +4,7 @@ Production-oriented internal AI support platform built with FastAPI, PostgreSQL,
 
 The project is being developed incrementally toward a complete AI support system with RAG, controlled tool calling, human approval, evaluation, security testing, and observability.
 
-Current status: backend foundation, persistence, migrations, user creation, password hashing, and JWT authentication are implemented. RBAC and AI capabilities are still in progress or planned.
+Current status: backend foundation, persistence, migrations, authentication, database-backed RBAC, durable security audit logging, structured request-correlated logging, bounded knowledge ingestion, deterministic chunking, OpenAI embedding integration behind an explicit provider boundary, pgvector vector persistence, authorized exact vector retrieval, grounded RAG answer generation with server-validated evidence citations, controlled Tool Calling, durable Human Approval for a fixed higher-risk action, deterministic offline LLM Evaluation, and GitHub-hosted backend verification are implemented.
 
 Why This Project
 
@@ -90,6 +90,212 @@ Disabled-user enforcement
 
 Generic login failure responses
 
+Authorization & Audit
+
+Database-backed RBAC authorization
+
+Permission enforcement independent of JWT role/permission claims
+
+Durable security Audit Events
+
+Actor / target / action / outcome event structure
+
+Atomic Audit recording for RBAC privilege mutations
+
+Best-effort Audit recording for authentication / authorization failures
+
+Sensitive-data exclusion for passwords, tokens, authorization headers, and secrets
+
+Append-only application boundary for Audit records
+
+Observability
+
+Structured one-line JSON application logs
+
+Server-generated per-request UUID correlation
+
+Request-scoped ContextVar propagation
+
+X-Request-ID response header
+
+HTTP request completion / failure events
+
+Route-template logging instead of arbitrary raw paths
+
+Sensitive structured-field redaction
+
+Runtime Application Logs kept separate from durable Audit Events
+
+Knowledge Ingestion
+
+Admin-only text / Markdown ingestion with dedicated knowledge:manage permission
+
+Deterministic newline normalization and SHA-256 content hashing
+
+Provenance through bounded source_name metadata
+
+Idempotent source_name + content_hash persistence
+
+Database Unique Constraint concurrency backstop
+
+Atomic KnowledgeDocument + Audit Event transaction
+
+Untrusted-document boundary during ingestion: no file execution, remote fetch, retrieval, or LLM instruction execution
+
+Embedding Pipeline
+
+Deterministic char-v1 chunking with bounded chunk size and overlap
+
+Stable embedding configuration hash for reproducible/idempotent processing
+
+SDK-independent EmbeddingProvider boundary with OpenAI adapter
+
+text-embedding-3-small with explicit 1536-dimensional output validation
+
+Bounded provider batches and malformed-response fail-closed validation
+
+pgvector PostgreSQL storage using vector(1536)
+
+External provider wait occurs outside the initial DB read transaction
+
+Post-provider DB re-check and Unique Constraint concurrency backstop
+
+Atomic KnowledgeChunk + Audit Event persistence
+
+No chunk text, vectors, API key, or raw provider response in API/Audit/runtime logs
+
+No HNSW/IVFFlat/similarity query in this milestone
+
+Exact Vector Retrieval
+
+Dedicated `knowledge:read` permission for support_agent and admin
+
+Bounded search query with top_k and minimum similarity validation
+
+Ephemeral query embedding through the existing EmbeddingProvider boundary
+
+Shared request DB read transaction closed before external query-embedding wait
+
+Exact pgvector cosine-distance search over the current embedding configuration
+
+Similarity threshold applied before LIMIT
+
+Deterministic distance + Chunk UUID ordering
+
+KnowledgeDocument provenance joined into retrieval results
+
+Best-effort read Audit and safe structured retrieval logs
+
+Retrieved chunk content returned as untrusted evidence without exposing vectors
+
+No HNSW/IVFFlat/ANN or reranking in this milestone
+
+Grounded RAG
+
+POST /knowledge/answer reuses the existing knowledge:read and RetrievalService boundaries
+
+Zero Retrieval results return deterministic insufficient_evidence without calling the generation model
+
+Explicit GroundedAnswerProvider boundary with OpenAI Responses API adapter
+
+Strict JSON Schema Structured Output for answerability / answer / cited source IDs
+
+Server-assigned S1 / S2 / ... evidence IDs with fail-closed unknown citation validation
+
+Final citation provenance reconstructed by the server from authoritative Retrieval results
+
+Retrieved KnowledgeChunk content treated as untrusted evidence, never as policy or tool instruction
+
+No Tool Calling, hosted tools, Web Search, or File Search in the RAG milestone
+
+Shared request DB transaction closed before external generation-provider wait
+
+Raw question, generated answer, chunk content, vectors, API keys, and raw Provider responses excluded from Audit/runtime logs
+
+Durable Human Approval
+
+Server-owned approval_required Tool risk separate from read_only execution
+
+Fixed higher-risk grant_support_agent_role(user_id) action with no model-controlled role_name
+
+Durable ApprovalRequest storing exact canonical validated Tool name + arguments
+
+15-minute pending Approval expiry
+
+Admin-only approval:decide permission kept separate from rbac:manage action permission
+
+Human inspect / approve / reject API
+
+SELECT ... FOR UPDATE row locking for one-time decisions
+
+Approval-time re-check of approver permission and original requester action permission
+
+Transaction-participating RBAC mutation with one atomic Approval + RBAC + Audit commit
+
+Real two-Session PostgreSQL concurrency test proving one execute + one conflict
+
+V1 self-approval allowed; four-eyes separation is explicitly not claimed
+
+Offline LLM Evaluation
+
+Versioned synthetic Eval suite for Grounded RAG and Tool-choice normalized outputs
+
+Strict Case / Result reconciliation prevents missing or silently dropped Cases
+
+Stable Prompt IDs + SHA-256 fingerprints detect Prompt drift
+
+Deterministic RAG metrics cover answerability, citation integrity, required citation coverage, and coarse answer fragments
+
+Deterministic Tool metrics cover direct/tool decision, exact Tool name, exact arguments, and unauthorized Tool selection
+
+Safety violations are gated separately from aggregate case pass rate
+
+Committed v1 corpus contains 12 synthetic Cases
+
+Committed baseline fixture requires 100% case pass rate and zero Safety violations
+
+Baseline fixture is scorer test data, not a measured live-model score
+
+CLI distinguishes quality regression from malformed Eval input with exit codes 0 / 1 / 2
+
+Normal CI performs no live OpenAI call, Product DB mutation, Tool execution, or Approval execution
+
+AI Security Regression
+
+Cross-layer adversarial regression treats LLM / RAG / Tool / Approval inputs as untrusted
+
+security-v1 adds 16 synthetic Prompt Injection, Citation Forgery, Tool Hallucination, Privilege Escalation, and Approval-bypass cases
+
+Negative tests assert both fail-closed behavior and absence of unauthorized side effects
+
+Hallucinated Tool names fail before execution / Approval / finalization
+
+Strict Tool arguments reject shell-command and role_name=admin injection before execution or persistence
+
+Persisted Approval Tool-name / argument tampering is revalidated before execution
+
+Security fixtures never execute arbitrary shell, SQL, attacker HTTP, eval/exec, or live OpenAI calls
+
+Operational Metrics
+
+GET /metrics exposes only reviewed application metrics from a dedicated custom CollectorRegistry
+
+HTTP request totals use method, server-owned route template, and status class only
+
+HTTP latency uses method and route template with explicit bounded Histogram buckets
+
+RAG metrics expose grounded / insufficient_evidence / provider_failure outcomes
+
+Agent metrics expose completed / approval_required outcomes
+
+LLM token totals use only operation and input/output direction
+
+Request/User/Approval/Document/Chunk IDs, raw paths, prompts, answers, Tool arguments, model names, provider IDs, tokens, and secrets are forbidden as metric labels
+
+Metrics recording is best-effort and cannot change Product request semantics
+
+The /metrics scrape endpoint is hidden from OpenAPI, has no Product JWT/DB/OpenAI dependency, excludes self-scrape traffic from Product HTTP metrics, and should be network-restricted in production
+
 Testing
 
 pytest
@@ -122,13 +328,23 @@ Pydantic
 
 Database
 
-PostgreSQL
+PostgreSQL + pgvector
 
 SQLAlchemy 2.x
 
 Psycopg 3
 
 Alembic
+
+AI Integration
+
+OpenAI Embeddings API
+
+OpenAI Responses API for grounded generation
+
+text-embedding-3-small
+
+EmbeddingProvider and GroundedAnswerProvider Protocol / Adapter boundaries
 
 Security
 
@@ -145,6 +361,12 @@ pytest
 httpx
 
 Docker Compose
+
+GitHub Actions
+
+PostgreSQL-backed CI verification
+
+Alembic upgrade / downgrade regression checks
 
 Git / GitHub
 
@@ -169,6 +391,8 @@ python -m pip install -r requirements/dev.txt
 Copy-Item .env.example .env
 
 Fill in the local PostgreSQL and JWT settings in .env.
+
+OPENAI_API_KEY is optional for normal application startup. It is required when embeddings, grounded RAG generation, or controlled Tool Calling must call the real OpenAI provider.
 
 5. Start PostgreSQL
 
@@ -230,6 +454,58 @@ token expiration
 protected current-user lookup
 
 invalid / expired token rejection
+
+Knowledge Administration
+
+POST /admin/knowledge/documents
+
+POST /admin/knowledge/documents/{document_id}/embeddings
+
+Both endpoints require the database-backed `knowledge:manage` permission.
+
+Knowledge ingestion accepts bounded text / Markdown and returns metadata without echoing document content.
+
+Embedding creation uses deterministic chunking, an explicit OpenAI provider boundary, and pgvector vector(1536) persistence. Existing complete embeddings return idempotently without calling the provider again.
+
+Knowledge Retrieval
+
+POST /knowledge/search
+
+This endpoint requires the database-backed `knowledge:read` permission.
+
+V1 grants raw internal Retrieval to `support_agent` and `admin`, not the default `user` role.
+
+Search uses exact pgvector cosine distance over the current embedding configuration, applies a bounded similarity threshold / top_k, joins KnowledgeDocument provenance, and returns chunk content as untrusted evidence without returning stored vectors.
+
+Grounded RAG Answer
+
+POST /knowledge/answer
+
+This endpoint requires the same database-backed `knowledge:read` permission as raw Retrieval.
+
+The server retrieves bounded evidence, assigns deterministic source IDs such as `S1`, calls the generation Provider without enabling tools, validates every returned citation ID against the retrieved set, and reconstructs final citation provenance from authoritative Retrieval rows.
+
+If Retrieval returns no evidence, generation is skipped and the API returns `insufficient_evidence`. Retrieved content remains untrusted data and cannot grant instruction, policy, or tool-execution authority.
+
+Controlled Tool Calling API
+
+POST /agent/run
+
+The endpoint requires authentication. The server filters available Tool definitions using current database-backed permissions and validates model-proposed arguments against server-owned schemas.
+
+Read-only `platform_readiness` still executes immediately after a current permission re-check.
+
+The fixed higher-risk `grant_support_agent_role(user_id)` proposal never executes in the model request. It creates a durable pending Approval and returns `status=approval_required` with an approval ID. The model cannot provide a role name or approve its own action.
+
+Human Approval endpoints:
+
+GET /approvals/{approval_id}
+
+POST /approvals/{approval_id}/approve
+
+POST /approvals/{approval_id}/reject
+
+Approval decisions require the admin-only `approval:decide` permission, lock the exact Approval row, re-check current permissions, and atomically commit the fixed support_agent mutation with durable Audit evidence.
 
 Reliability & Security Principles
 
@@ -297,43 +573,113 @@ JWT authentication
 
 Automated regression tests
 
-In Progress
-
 RBAC authorization
 
 Permission enforcement
 
 Privilege-escalation tests
 
-Planned AI Layer
+Durable security audit logging
 
-Knowledge ingestion
+Structured JSON runtime logging
 
-Embeddings
+Server-generated Request ID correlation
 
-RAG with source citations
+Sensitive log-field redaction
 
-Agent tool calling
+GitHub Actions backend verification
 
-Tool parameter validation
+Knowledge ingestion foundation
 
-Human confirmation for high-risk actions
+Embedding pipeline foundation
+
+Deterministic chunking and configuration identity
+
+OpenAI embedding provider boundary
+
+pgvector vector(1536) persistence
+
+Exact vector retrieval foundation
+
+knowledge:read least-privilege retrieval access
+
+Current-config cosine search with provenance
+
+Grounded RAG response with evidence / citations
+
+Server-owned citation validation
+
+Zero-evidence generation bypass
+
+Controlled read-only Tool Calling
+
+Server-owned Tool Registry and strict argument validation
+
+Execution-time database-backed permission re-check
+
+Single-Tool execution bound with no Tool access during finalization
+
+Durable Human Approval for higher-risk Tool actions
+
+Exact action binding and 15-minute approval expiry
+
+Row-locked one-time decision with approval-time permission re-check
+
+Atomic support_agent mutation + Approval / RBAC Audit transaction
+
+Offline LLM Evaluation foundation
+
+Versioned RAG / Tool-choice Eval corpus
+
+Prompt fingerprint regression guard
+
+Deterministic Safety / threshold gate
+
+AI Security Regression foundation
+
+Cross-layer Prompt Injection / Citation / Tool / Approval adversarial regression
+
+No-side-effect assertions for rejected hostile AI-controlled input
+
+16-case synthetic security-v1 Eval corpus
+
+Operational Metrics / Monitoring foundation
+
+Custom Prometheus CollectorRegistry
+
+Low-cardinality HTTP request / latency metrics
+
+Bounded RAG / Agent outcome and aggregate token metrics
+
+Best-effort telemetry failure boundary
+
+CI / Release Hardening foundation
+
+Reusable Backend / Dispatcher GitHub Actions verification
+
+Exact PR Head verification for Feature and Release candidates
+
+Release Verification gate for same-repository develop → main promotion
+
+Main-only content drift detection through merge-base comparison
+
+Project / FastAPI version consistency and existing-version-tag rejection
+
+Documented Branch Protection gap: main/develop protections are not currently enforced by repository settings
+
+Release Verification is repository promotion evidence, not production deployment
+
+Next
+
+First hardened develop → main release promotion using Release Verification
 
 Planned Reliability & AI Safety
 
-Audit logging
-
-Structured logging / monitoring
+Metrics / distributed tracing / external log aggregation
 
 100+ LLM evaluation cases
 
 Prompt version comparison
-
-Prompt injection testing
-
-AI privilege-escalation testing
-
-GitHub Actions CI
 
 Target Architecture
 

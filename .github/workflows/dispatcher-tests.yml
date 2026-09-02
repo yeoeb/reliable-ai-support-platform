@@ -1,0 +1,115 @@
+name: Dispatcher Tests
+
+on:
+  workflow_call:
+  pull_request:
+    branches:
+      - develop
+    paths:
+      - "scripts/codex_dispatch.py"
+      - "scripts/codex_watch.py"
+      - "scripts/resolve_issue_branch.py"
+      - "scripts/start_codex_watch.ps1"
+      - "tests/test_codex_dispatch.py"
+      - "tests/test_codex_watch.py"
+      - "tests/test_codex_publish.py"
+      - "tests/test_resolve_issue_branch.py"
+      - "AGENTS.md"
+      - "docs/PROJECT_STATE.md"
+      - "docs/codex-watcher.md"
+      - ".github/workflows/dispatcher-tests.yml"
+  push:
+    branches:
+      - develop
+    paths:
+      - "scripts/codex_dispatch.py"
+      - "scripts/codex_watch.py"
+      - "scripts/resolve_issue_branch.py"
+      - "scripts/start_codex_watch.ps1"
+      - "tests/test_codex_dispatch.py"
+      - "tests/test_codex_publish.py"
+      - "tests/test_codex_watch.py"
+      - "tests/test_resolve_issue_branch.py"
+      - "AGENTS.md"
+      - "docs/PROJECT_STATE.md"
+      - "docs/codex-watcher.md"
+      - ".github/workflows/dispatcher-tests.yml"
+
+concurrency:
+  group: dispatcher-tests-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  dispatcher-tests:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Check out exact verification source
+        uses: actions/checkout@v7
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+
+      - name: Set up Python 3.11
+        uses: actions/setup-python@v7
+        with:
+          python-version: "3.11"
+
+      - name: Install test dependency
+        run: python -m pip install pytest
+
+      - name: Compile control-plane scripts
+        run: >-
+          python -m py_compile
+          scripts/codex_dispatch.py
+          scripts/codex_watch.py
+          scripts/resolve_issue_branch.py
+
+      - name: Validate Windows watcher launcher syntax
+        shell: pwsh
+        run: |
+          $tokens = $null
+          $errors = $null
+          [System.Management.Automation.Language.Parser]::ParseFile(
+            "$PWD/scripts/start_codex_watch.ps1",
+            [ref]$tokens,
+            [ref]$errors
+          ) | Out-Null
+          if ($errors.Count -gt 0) {
+            $errors | ForEach-Object { Write-Error $_.Message }
+            exit 1
+          }
+
+      - name: Verify known Issue resolves uniquely
+        run: |
+          branch="$(python scripts/resolve_issue_branch.py --issue 009)"
+          test "$branch" = "feature/issue-009-audit-logging"
+
+      - name: Verify unknown Issue fails closed
+        shell: pwsh
+        run: |
+          $process = Start-Process pwsh -ArgumentList @(
+            '-NoProfile',
+            '-File',
+            './scripts/start_codex_watch.ps1',
+            '-Issue',
+            '999'
+          ) -Wait -PassThru -NoNewWindow
+
+          if ($process.ExitCode -eq 0) {
+            throw "Unknown Issue unexpectedly succeeded."
+          }
+
+          Write-Host "Unknown Issue correctly failed closed."
+
+      - name: Run dispatcher control-plane tests
+        run: >-
+          python -m pytest
+          tests/test_codex_dispatch.py
+          tests/test_codex_publish.py
+          tests/test_codex_watch.py
+          tests/test_resolve_issue_branch.py
+          -q

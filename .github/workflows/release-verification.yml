@@ -1,0 +1,61 @@
+name: Release Verification
+
+on:
+  pull_request:
+    branches:
+      - main
+
+concurrency:
+  group: release-verification-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  release-contract:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+
+    env:
+      RELEASE_BASE_REF: ${{ github.event.pull_request.base.ref }}
+      RELEASE_HEAD_REF: ${{ github.event.pull_request.head.ref }}
+      RELEASE_BASE_REPOSITORY: ${{ github.event.pull_request.base.repo.full_name }}
+      RELEASE_HEAD_REPOSITORY: ${{ github.event.pull_request.head.repo.full_name }}
+      RELEASE_HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+
+    steps:
+      - name: Check out exact release candidate
+        uses: actions/checkout@v7
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+          fetch-depth: 0
+
+      - name: Fetch release refs and tags
+        run: >-
+          git fetch origin
+          main:refs/remotes/origin/main
+          develop:refs/remotes/origin/develop
+          --tags
+
+      - name: Set up Python 3.11
+        uses: actions/setup-python@v7
+        with:
+          python-version: "3.11"
+
+      - name: Verify release contract
+        run: >-
+          python scripts/verify_release_candidate.py
+          --base-ref "$RELEASE_BASE_REF"
+          --head-ref "$RELEASE_HEAD_REF"
+          --base-repository "$RELEASE_BASE_REPOSITORY"
+          --head-repository "$RELEASE_HEAD_REPOSITORY"
+          --expected-head-sha "$RELEASE_HEAD_SHA"
+
+  backend-verification:
+    needs: release-contract
+    uses: ./.github/workflows/backend-tests.yml
+
+  dispatcher-verification:
+    needs: release-contract
+    uses: ./.github/workflows/dispatcher-tests.yml

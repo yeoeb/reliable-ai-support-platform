@@ -60,3 +60,25 @@ def test_get_by_email_returns_none_when_user_does_not_exist():
     result = repository.get_by_email("missing@example.com")
 
     assert result is None
+
+def test_list_all_returns_users() -> None:
+    session = MagicMock()
+
+    alice = object()
+    bob = object()
+
+    session.scalars.return_value.all.return_value = [
+        alice,
+        bob,
+    ]
+
+    repository = UserRepository(session)
+
+    result = repository.list_all()
+
+    assert result == [
+        alice,
+        bob,
+    ]
+
+    session.scalars.assert_called_once()
