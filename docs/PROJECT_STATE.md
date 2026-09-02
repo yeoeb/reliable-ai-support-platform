@@ -49,18 +49,23 @@ Required state surfaces:
 
 The Dispatcher uses Stable `codex exec` as its local execution boundary. It does not attempt to inject prompts into an already-open VS Code/Desktop Codex UI session.
 
-## Next Product Engineering Issue
+## Current Product Engineering Issue
 
-Engineering Issue ID #016 — Human Approval for higher-risk Tool actions
+Engineering Issue ID #016 — Durable Human Approval for higher-risk Tool actions
 
-- Status: not started
-- Normal base Branch: `develop`
-- Dependency baseline: Controlled Tool Calling, database-backed RBAC, durable Audit, Structured Logging, and exact-Head verification are complete
-- Approval must be server-owned and bound to an exact pending action; model output alone cannot approve execution
-- Approval state must survive request boundaries so confirmation cannot depend on one in-memory model turn
-- Execution must re-check current permission and approval state before the higher-risk action runs
-- V1 should introduce one bounded demonstrator action rather than a broad action catalog
-- Product boundary must be defined by a new GitHub tracking Issue and CP0/CP1 before implementation begins
+- GitHub tracking Issue: #73
+- Active Branch: `feature/issue-016-human-approval`
+- CP0 Context Bootstrap: completed
+- CP1 Durable Approval Architecture: completed and Supervisor-approved
+- Current Checkpoint: CP2 authorized
+- V1 higher-risk Tool: `grant_support_agent_role(user_id)`
+- Fixed role: `support_agent`; model cannot choose arbitrary/admin role
+- Approval state: durable PostgreSQL record with expiry and one-time row-locked decision
+- Approval permission: `approval:decide` admin-only
+- Action permission remains `rbac:manage`
+- Approve path must atomically commit Approval state + RBAC mutation + Audits
+- Mandatory four-eyes distinct approver: deferred, not claimed
+- Remote write Allowlist: configured
 
 Important: GitHub Issue/PR numbers are repository-wide platform sequence numbers and remain separate from Engineering Issue IDs.
 
