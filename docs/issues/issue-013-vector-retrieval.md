@@ -1,6 +1,6 @@
 # Engineering Issue #013 — Exact Vector Retrieval Foundation
 
-<!-- codex-dispatch-supervisor-approved-through: CP4 -->
+<!-- codex-dispatch-supervisor-approved-through: CP6 -->
 <!-- codex-dispatch-write-allow: ["app/core/errors.py","app/schemas/retrieval.py","app/repositories/retrieval.py","app/services/retrieval.py","app/api/routes/retrieval.py","app/main.py","migrations/versions/*retrieval*.py","tests/test_retrieval_schema.py","tests/test_retrieval_repository.py","tests/test_retrieval_service.py","tests/test_retrieval_api.py","tests/test_retrieval_migration.py","tests/integration/test_vector_retrieval.py","tests/test_embedding_migration.py","tests/test_migrations.py","docs/issues/issue-013-vector-retrieval.md"] -->
 
 ## GitHub Tracking
@@ -487,8 +487,8 @@ Supervisor-controlled:
 - [x] CP2 — Bounded implementation
 - [x] CP3 — Targeted + full verification
 - [x] CP4 — Security / retrieval review
-- [ ] CP5 — Knowledge + documentation sync
-- [ ] CP6 — PR delivery evidence
+- [x] CP5 — Knowledge + documentation sync
+- [x] CP6 — PR delivery evidence
 
 ## Supervisor Fallback Execution
 
@@ -610,6 +610,34 @@ No merge-blocking finding remains.
 - no ANN index
 - no RAG/LLM execution path
 
+## CP5 Knowledge / Documentation
+
+Notion deduplication was completed before writing.
+
+Existing Glossary / Embedding / Audit pages already define individual terms and adjacent boundaries, so #013 does not create separate duplicate pages for Cosine Similarity, Audit, or Vector Search vocabulary.
+
+Created one deeper reusable Engineering Encyclopedia entry:
+
+**Exact Vector Retrieval：Cosine Distance、Config Consistency、Read Boundary 與 Untrusted Context**
+
+Created one linked project Work Log:
+
+**Issue #013 — Exact Vector Retrieval Foundation**
+
+Reusable concepts captured:
+
+- Exact Vector Search is the correctness baseline before ANN optimization.
+- Cosine Distance and Cosine Similarity are distinct; V1 exposes `similarity = 1 - distance`.
+- Similarity threshold must be translated into a distance predicate before LIMIT.
+- Stable tie-breaking improves Regression Test and Evaluation reproducibility.
+- Retrieval must filter the current `embedding_config_hash` and must not mix historical vector configurations.
+- Query Embeddings are ephemeral and must remain outside persistence/logging/Audit content.
+- Zero-norm query vectors fail closed because cosine similarity is undefined.
+- A prior RBAC DB read may already have opened the shared request Session transaction, so the read transaction must be explicitly closed before external Provider wait.
+- `knowledge:read` is separate from `knowledge:manage` to preserve least privilege.
+- High-frequency reads may use best-effort Audit when a failed Audit write should not turn a valid read into an outage.
+- Retrieved Chunk content remains untrusted context and must not become an authorization/tool-execution instruction.
+
 ## Knowledge Candidates
 
 Deduplicate in CP5:
@@ -623,20 +651,24 @@ Deduplicate in CP5:
 
 ## Current State
 
-CP0–CP4 are complete.
+Engineering Issue #013 is complete and ready for Delivery.
 
-Final reviewed Product/Test Head:
+Final reviewed Product/Test Head before CP5 documentation:
 
 - `5b48e61c27f1085f2409270290a1f4f4aabd92c7`
 - Backend regression: **344 passed**
 - Database recovery: **1 passed**
 - Dispatcher / Branch Resolver: **87 passed**
-- PostgreSQL + pgvector: PASS
+- PostgreSQL + pgvector extension: PASS
 - Alembic upgrade/downgrade/re-upgrade: PASS
 - CP4 Security / Retrieval Review: PASS
+- CP5 Notion Knowledge Capture: complete
+- README / Project State synchronization: complete
 
-Supervisor approval marker: **CP4**.
+Supervisor approval marker: **CP6**.
 
-Next action: CP5 Knowledge / Documentation synchronization.
+Per the repository Final CI policy, this execution note will not be changed after the final exact-Head verification. Final CI SHA / run / test evidence must be recorded in the Pull Request / GitHub Issue comments without mutating the verified Branch Head.
 
-No further Product Code change is authorized unless a new verification failure is discovered.
+The final Delivery PR must pass exact-Head GitHub-hosted verification before Merge.
+
+No known merge-blocking finding remains.
