@@ -46,15 +46,18 @@ Required state surfaces:
 
 The Dispatcher uses Stable `codex exec` as its local execution boundary. It does not attempt to inject prompts into an already-open VS Code/Desktop Codex UI session.
 
-## Next Product Engineering Issue
+## Current Product Engineering Issue
 
 Engineering Issue ID #013 — Retrieval / Vector Search foundation
 
-- Status: not started
-- Normal base Branch: `develop`
-- Dependency baseline: Knowledge Ingestion, Embedding Pipeline, pgvector storage, RBAC, Audit, Structured Logging, and Backend Verification are complete
-- Input boundary: persisted KnowledgeChunk rows with vector(1536)
-- Product boundary must be defined by a new GitHub tracking Issue and CP0/CP1 before implementation
+- GitHub tracking Issue: #60
+- Active Branch: `feature/issue-013-vector-retrieval`
+- Current Checkpoint: CP2 authorized
+- CP0 Context Bootstrap: completed
+- CP1 Architecture / Scope: completed and Supervisor-approved
+- CP2 implementation: pending Executor
+- Product boundary: exact cosine retrieval over current embedding config; HNSW/IVFFlat/RAG remain deferred
+- Access boundary: raw retrieval results require `knowledge:read` and are intended for support_agent/admin only
 
 Important: GitHub Issue/PR numbers are repository-wide platform sequence numbers and remain separate from Engineering Issue IDs.
 
