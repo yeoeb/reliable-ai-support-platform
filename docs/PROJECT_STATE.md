@@ -43,15 +43,19 @@ Required state surfaces:
 
 The Dispatcher uses Stable `codex exec` as its local execution boundary. It does not attempt to inject prompts into an already-open VS Code/Desktop Codex UI session.
 
-## Next Product Engineering Issue
+## Current Product Engineering Issue
 
 Engineering Issue ID #010 — Structured Logging / Observability foundation
 
-- Status: not started
-- Normal base Branch: `develop`
-- Dependency baseline: Authentication, RBAC, Durable Audit Trail, and Backend Verification are complete
+- GitHub tracking Issue: #44
+- Active Branch: `feature/issue-010-structured-logging`
+- Current Checkpoint: CP2 authorized
+- CP0 Context Bootstrap: completed
+- CP1 Architecture / Scope: completed and Supervisor-approved
+- CP2 implementation: pending Executor
+- Product boundary: runtime Application Logs remain separate from durable Audit Events
 
-The Supervisor must create a new GitHub tracking Issue and Execution Packet before implementation begins.
+Branch resolution is now remote and fail-closed: the Watcher launcher accepts exactly one `feature/issue-NNN-*` branch for the requested Engineering Issue.
 
 Important: GitHub Issue/PR numbers are repository-wide platform sequence numbers and remain separate from Engineering Issue IDs.
 
