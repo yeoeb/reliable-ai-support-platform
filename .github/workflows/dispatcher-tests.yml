@@ -32,6 +32,10 @@ on:
       - "docs/codex-watcher.md"
       - ".github/workflows/dispatcher-tests.yml"
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
 permissions:
   contents: read
 

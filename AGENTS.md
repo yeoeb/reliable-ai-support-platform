@@ -66,7 +66,9 @@ Write checkpoints also use a Supervisor-controlled path Allowlist embedded in th
 <!-- codex-dispatch-write-allow: ["app/example.py", "tests/test_example.py"] -->
 ```
 
-The Executor must not modify either control marker. It must not commit or push its own checkpoint changes; the Dispatcher owns bounded publication after validation.\n\nA Local Watcher may observe remote approval and automatically invoke **only CP2 / CP3**. It has no authority to approve work, choose Issues, run review/delivery checkpoints automatically, retry failures indefinitely, or Merge.
+The Executor must not modify either control marker. It must not commit or push its own checkpoint changes; the Dispatcher owns bounded publication after validation.
+
+A Local Watcher may observe remote approval and automatically invoke **only CP2 / CP3**. It has no authority to approve work, choose Issues, run review/delivery checkpoints automatically, retry failures indefinitely, or Merge.
 
 After Review/CI finds a bounded problem in an already-published CP2/CP3, only the Supervisor may authorize a finite rework attempt with:
 
@@ -107,6 +109,25 @@ Avoid:
 - storing critical Requirements only in Agent-to-Agent messages
 
 The Supervisor owns final integration and verification.
+
+## Final CI / Delivery Evidence
+
+All branch-changing Product Code, tests, execution-note updates, and repository documentation must be complete **before** the Final CI run.
+
+Final verification is tied to one exact Feature Branch Head SHA:
+
+```text
+final branch-changing commit
+→ exact-Head GitHub Actions
+→ PASS
+→ verification evidence in PR/Issue comment
+→ no further branch commit
+→ Merge
+```
+
+After Final CI passes, do **not** commit the CI result or delivery evidence back into the same Pull Request Branch. Doing so changes the Head SHA and invalidates the exact-Head verification.
+
+Post-CI evidence belongs in GitHub Pull Request / Issue comments because comments do not mutate the verified Branch Head.
 
 ## Architectural Invariants
 
