@@ -259,6 +259,8 @@ def test_provider_rejects_non_numeric_vector_value() -> None:
     [
         None,
         "not-an-integer",
+        1.5,
+        True,
         -1,
     ],
 )
