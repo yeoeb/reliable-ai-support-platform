@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import logging
+import math
 from dataclasses import dataclass
 from uuid import UUID
 
@@ -184,6 +185,15 @@ class EmbeddingService:
             if len(vector) != self.embedding_dimensions:
                 raise InvalidEmbeddingProviderResponseError(
                     "Embedding provider returned an invalid dimension"
+                )
+
+            if not all(
+                isinstance(value, (int, float))
+                and math.isfinite(float(value))
+                for value in vector
+            ):
+                raise InvalidEmbeddingProviderResponseError(
+                    "Embedding provider returned an invalid vector value"
                 )
 
         if result.token_usage < 0:
