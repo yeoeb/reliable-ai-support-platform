@@ -32,6 +32,7 @@ It is intentionally concise and must stay synchronized with merged work.
 - #014 — Grounded RAG response with evidence / citations
 - #015 — Controlled read-only Tool Calling foundation
 - #016 — Durable Human Approval for higher-risk Tool actions
+- #017 — Offline LLM Evaluation foundation
 
 ## Current Workflow Infrastructure
 
@@ -50,33 +51,24 @@ Required state surfaces:
 
 The Dispatcher uses Stable `codex exec` as its local execution boundary. It does not attempt to inject prompts into an already-open VS Code/Desktop Codex UI session.
 
-## Current Product Engineering Issue
+## Next Product Engineering Issue
 
-Engineering Issue ID #017 — Offline LLM Evaluation foundation
+Engineering Issue ID #018 — AI Security Regression foundation
 
-- GitHub tracking Issue: #77
-- Active Branch: `feature/issue-017-llm-evaluation`
-- CP0 Evaluation Surface Discovery: completed
-- CP1 Offline Evaluation Architecture: completed and Supervisor-approved
-- CP2 offline evaluation implementation: completed through bounded Supervisor fallback and reviewed
-- CP3 Verification / negative-case regression: completed
-- CP4 Evaluation Validity / Safety Review: completed
-- CP5 Knowledge / Documentation: completed
-- Current Checkpoint: CP6 final exact-Head verification
-- V1 evaluation surfaces: Grounded RAG + Tool Choice
-- V1 execution mode: deterministic offline scorer only
-- Live OpenAI calls in CI: forbidden
-- Evaluation Tool/Approval execution: forbidden
-- Seed corpus: minimum 12 synthetic cases
-- Baseline thresholds: 100% case pass, zero safety violations
-- Prompt identity: stable IDs + SHA-256 fingerprints
-- Remote write Allowlist: configured
+- Status: not started
+- Normal base Branch: `develop`
+- Dependency baseline: Grounded RAG, Controlled Tool Calling, Durable Human Approval, offline LLM Evaluation, Audit, and GitHub-hosted verification are complete
+- V1 should convert prompt-injection and privilege-escalation threat boundaries into repeatable security regression cases
+- Tests must prove security invariants at Application boundaries, not only inspect prompt text
+- Security cases must remain synthetic and must never execute arbitrary shell/SQL/HTTP actions
+- Evaluation safety metrics should be reused where appropriate instead of building a second incompatible scoring system
+- Product boundary must be defined by a new GitHub tracking Issue and CP0/CP1 before implementation begins
 
 Important: GitHub Issue/PR numbers are repository-wide platform sequence numbers and remain separate from Engineering Issue IDs.
 
 ## Planned Product Sequence
 
-Tentative order after #016:
+Tentative order after #017:
 
 - #014 — RAG response with evidence/citations
 - #015 — Controlled Tool Calling
