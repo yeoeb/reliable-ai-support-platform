@@ -6,7 +6,10 @@ from uuid import UUID
 from fastapi import FastAPI
 from fastapi.testclient import TestClient
 
-from app.api.middleware.request_logging import RequestLoggingMiddleware
+from app.api.middleware.request_logging import (
+    RequestLoggingMiddleware,
+    unhandled_exception_response,
+)
 from app.core.logging import JsonFormatter
 from app.core.request_context import get_request_id
 
@@ -14,6 +17,10 @@ from app.core.request_context import get_request_id
 def make_test_app() -> FastAPI:
     app = FastAPI()
     app.add_middleware(RequestLoggingMiddleware)
+    app.add_exception_handler(
+        Exception,
+        unhandled_exception_response,
+    )
 
     route_logger = logging.getLogger("app.test.route")
 
@@ -218,6 +225,7 @@ def test_failure_log_exposes_exception_type_not_message() -> None:
         response = client.get("/failure")
 
     assert response.status_code == 500
+    UUID(response.headers["x-request-id"])
     failed = find_event(
         capture.records(),
         "http.request.failed",
@@ -225,6 +233,10 @@ def test_failure_log_exposes_exception_type_not_message() -> None:
 
     assert failed["route"] == "/failure"
     assert failed["exception_type"] == "RuntimeError"
+    assert (
+        failed["request_id"]
+        == response.headers["x-request-id"]
+    )
     assert (
         "sensitive exception detail"
         not in capture.stream.getvalue()
