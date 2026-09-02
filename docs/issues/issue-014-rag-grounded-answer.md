@@ -405,3 +405,52 @@ Remote Supervisor approval: **CP1**.
 Next authorized action: **CP2** on `feature/issue-014-rag-grounded-answer`.
 
 Full regression is intentionally deferred to CP3.
+
+
+## Supervisor Fallback Execution
+
+The remote CP2 gate remained authorized but was not consumed by the Local Watcher/Codex Executor after repeated checks.
+
+To keep the Product cycle moving, the Supervisor performed a bounded CP2 fallback directly on the Feature Branch.
+
+This fallback preserves the control boundaries:
+
+- Product/Test writes remain inside the existing CP2 Write Allowlist.
+- The Supervisor does not create a fake `checkpoint(issue-014): CP2` commit.
+- CP3 verification remains mandatory.
+- CP4 grounding/security review remains mandatory.
+- Final exact-Head GitHub Actions remain mandatory before Merge.
+
+### Fallback CP2 Implementation Evidence
+
+Implemented:
+
+- RAG request/response/citation schemas
+- generation model/output-token configuration
+- explicit generation Provider error hierarchy
+- OpenAI Responses API adapter with strict JSON Schema Structured Output
+- no tools / hosted tools / function definitions
+- untrusted-evidence prompt-injection instructions
+- RAG orchestration reusing `RetrievalService`
+- zero-evidence deterministic fast path that bypasses generation
+- server-assigned `S1/S2/...` source IDs
+- fail-closed unknown citation validation
+- server-built citation provenance
+- explicit Session rollback before generation Provider wait
+- content-free Audit/Runtime Log metadata
+- `POST /knowledge/answer` protected by `knowledge:read`
+- focused schema/provider/service/API/config tests authored
+
+Verification status:
+
+- focused tests are authored but have not yet been executed by the Supervisor fallback environment
+- full regression is intentionally deferred to CP3
+- no CP3+ checkpoint is marked complete
+
+## Current State
+
+CP0 and CP1 are complete.
+
+CP2 bounded implementation has been produced through Supervisor fallback and awaits CP2 review / CP3 verification authorization.
+
+Remote Supervisor approval remains **CP1** until the CP2 diff is reviewed.

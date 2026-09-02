@@ -24,6 +24,9 @@ class Settings(BaseSettings):
     knowledge_chunk_size: int = 1000
     knowledge_chunk_overlap: int = 150
 
+    rag_model: str = "gpt-5.6-terra"
+    rag_max_output_tokens: int = 1200
+
     model_config = SettingsConfigDict(
         env_file=".env",
         env_file_encoding="utf-8",
@@ -117,6 +120,25 @@ class Settings(BaseSettings):
             )
 
         return self
+
+    @field_validator("rag_model")
+    @classmethod
+    def validate_rag_model(cls, value: str) -> str:
+        normalized = value.strip()
+        if not normalized:
+            raise ValueError(
+                "RAG_MODEL must not be empty"
+            )
+        return normalized
+
+    @field_validator("rag_max_output_tokens")
+    @classmethod
+    def validate_rag_max_output_tokens(cls, value: int) -> int:
+        if not 128 <= value <= 8192:
+            raise ValueError(
+                "RAG_MAX_OUTPUT_TOKENS must be between 128 and 8192"
+            )
+        return value
 
     @property
     def database_url(self) -> URL:
