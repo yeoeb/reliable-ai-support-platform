@@ -54,3 +54,29 @@ If those Product prompts change, the suite fingerprint must be intentionally rev
 All committed v1 cases are synthetic.
 
 Do not add production documents, real access tokens, secrets, or private user/support data.
+
+
+## security-v1 suite
+
+The `security-v1` suite reuses the exact same #017 evaluation loader, schemas, prompt fingerprints, scorer, report, and threshold semantics.
+
+It adds synthetic adversarial cases for:
+
+- prompt injection in retrieved evidence;
+- citation forgery;
+- insufficient-evidence pressure;
+- hallucinated shell / SQL / URL-fetch Tools;
+- admin / role argument injection;
+- invented Tool schemas;
+- Human Approval bypass attempts;
+- hidden unauthorized Tool selection.
+
+Run it with:
+
+```powershell
+python -m app.evaluation.runner --suite evals/suites/security-v1/suite.json --results evals/suites/security-v1/baseline_results.jsonl --candidate security-baseline-v1
+```
+
+The committed security baseline is still only a **deterministic scorer fixture**. A 100% fixture score does not prove that any live model resisted these attacks.
+
+The security suite never executes the attack strings as shell commands, SQL, URLs, Python, or Tool actions. They remain untrusted test data.

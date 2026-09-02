@@ -463,3 +463,28 @@ Remote Supervisor approval: **CP1**.
 Next authorized action: **CP2** on `feature/issue-018-ai-security-regression`.
 
 Initial CP2 has no Product runtime write permission.
+
+
+## Supervisor Fallback Execution
+
+The remote CP2 gate remained authorized but no Local Watcher/Codex checkpoint was published.
+
+A bounded Supervisor fallback is being used for CP2.
+
+The original machine Allowlist remains unchanged and contains no Product Runtime `app/` path.
+
+Fallback CP2 adds only:
+
+- `security-v1` Eval manifest / 16 synthetic adversarial Cases / safe baseline fixture;
+- `evals/README.md` Security suite interpretation;
+- `tests/test_ai_security_regression.py`;
+- `tests/test_ai_security_api.py`;
+- this execution note.
+
+No Product runtime source, database migration, GitHub workflow, or authorization policy is changed.
+
+The new tests inject hostile normalized model/approval data through mocks and never execute shell, arbitrary SQL, attacker URLs, eval/exec, or live OpenAI calls.
+
+Focused tests are authored but are not represented as executed by the Supervisor fallback environment.
+
+Remote approval remains CP1 until CP2 review and GitHub-hosted verification evidence are available.
