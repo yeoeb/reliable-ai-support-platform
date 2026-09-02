@@ -50,18 +50,23 @@ Required state surfaces:
 
 The Dispatcher uses Stable `codex exec` as its local execution boundary. It does not attempt to inject prompts into an already-open VS Code/Desktop Codex UI session.
 
-## Next Product Engineering Issue
+## Current Product Engineering Issue
 
-Engineering Issue ID #017 — LLM Evaluation foundation
+Engineering Issue ID #017 — Offline LLM Evaluation foundation
 
-- Status: not started
-- Normal base Branch: `develop`
-- Dependency baseline: Grounded RAG, Tool Calling, Human Approval, durable Audit, and GitHub-hosted verification are complete
-- Evaluation must be deterministic where possible and must not depend on live OpenAI calls in normal CI
-- V1 should establish a versioned offline evaluation-case format plus measurable pass/fail metrics for grounded answers and Tool decisions
-- Evaluation data must not become Product runtime state
-- Prompt/model/provider changes should be comparable against the same evaluation corpus
-- Product boundary must be defined by a new GitHub tracking Issue and CP0/CP1 before implementation begins
+- GitHub tracking Issue: #77
+- Active Branch: `feature/issue-017-llm-evaluation`
+- CP0 Evaluation Surface Discovery: completed
+- CP1 Offline Evaluation Architecture: completed and Supervisor-approved
+- Current Checkpoint: CP2 authorized
+- V1 evaluation surfaces: Grounded RAG + Tool Choice
+- V1 execution mode: deterministic offline scorer only
+- Live OpenAI calls in CI: forbidden
+- Evaluation Tool/Approval execution: forbidden
+- Seed corpus: minimum 12 synthetic cases
+- Baseline thresholds: 100% case pass, zero safety violations
+- Prompt identity: stable IDs + SHA-256 fingerprints
+- Remote write Allowlist: configured
 
 Important: GitHub Issue/PR numbers are repository-wide platform sequence numbers and remain separate from Engineering Issue IDs.
 
