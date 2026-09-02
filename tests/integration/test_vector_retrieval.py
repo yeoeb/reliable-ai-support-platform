@@ -104,6 +104,7 @@ def test_exact_pgvector_cosine_ranking_threshold_and_config_filter() -> None:
 
     try:
         session.add(document)
+        session.flush()
         session.add_all(chunks)
         session.commit()
 
