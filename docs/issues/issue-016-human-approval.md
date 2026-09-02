@@ -1,6 +1,6 @@
 # Engineering Issue #016 — Durable Human Approval for Higher-Risk Tool Actions
 
-<!-- codex-dispatch-supervisor-approved-through: CP2 -->
+<!-- codex-dispatch-supervisor-approved-through: CP4 -->
 <!-- codex-dispatch-write-allow: ["app/models/approval_request.py","app/models/__init__.py","app/repositories/approval.py","app/services/approval.py","app/services/rbac.py","app/services/agent.py","app/services/tool_execution.py","app/tools/registry.py","app/tools/system.py","app/tools/rbac.py","app/schemas/approval.py","app/schemas/agent.py","app/api/routes/approvals.py","app/api/routes/agent.py","app/core/errors.py","app/main.py","migrations/versions/*approval*.py","tests/test_approval_*.py","tests/test_agent_*.py","tests/test_tool_*.py","tests/test_rbac_service.py","tests/test_migrations.py","docs/issues/issue-016-human-approval.md"] -->
 
 ## GitHub Tracking
@@ -464,6 +464,70 @@ Full regression remains CP3 / Final CI.
 
 If an implementation needs a file outside the machine Allowlist, stop and report Scope expansion instead of editing it.
 
+## CP3 / CP4 Verification Evidence
+
+Final reviewed Product/Test Head before CP5 documentation:
+
+`6e80cd63a71cc392a1699f18f36a253035971dd2`
+
+GitHub-hosted exact-head evidence:
+
+```text
+Backend regression: 424 passed
+Database recovery:   1 passed
+Control Plane:      87 passed
+PostgreSQL / pgvector: PASS
+Alembic upgrade head: PASS
+Alembic downgrade -1: PASS
+Alembic re-upgrade: PASS
+```
+
+### CP4 concurrency proof
+
+A real PostgreSQL two-Session integration test concurrently approves the same durable Approval row.
+
+Observed contract:
+
+- one decision returns executed;
+- one decision returns ApprovalStateConflict;
+- target User has exactly one support_agent role assignment;
+- Approval status is executed exactly once.
+
+This verifies the `SELECT ... FOR UPDATE` boundary behavior rather than only inspecting generated SQL.
+
+### CP4 Security / Authorization / Transaction Review
+
+Status: **PASS**
+
+Findings:
+
+- Model Tool schema exposes only `user_id`; no `role_name`, permission name, admin role, SQL, shell, URL, or executable payload is model-controlled.
+- Higher-risk Tool is server-owned and fixed to `support_agent`.
+- Normal `ToolExecutionService` rejects `approval_required` before permission/executor invocation.
+- Agent high-risk path creates a durable Approval and never calls ToolExecution/finalization.
+- Agent returns deterministic `Human approval required.` and cannot claim mutation success.
+- Pending Approval stores canonical validated Tool name + arguments.
+- Approval survives request boundaries in PostgreSQL.
+- 15-minute expiry is server-owned.
+- `approval:decide` is granted only to admin.
+- Inspect/approve/reject routes require `approval:decide`.
+- Decision Service re-checks current approver permission.
+- Approve re-checks the original requester's current action permission.
+- Permission revocation blocks execution.
+- Persisted Tool is re-resolved through the server Registry and arguments are revalidated before execution.
+- Approve/reject use row locks.
+- Already-decided and expired Approvals cannot execute.
+- Expiry is persisted with durable Audit when encountered on decision.
+- Fixed approval executor calls the no-commit RBAC transaction operation.
+- Approval state + support_agent mutation + RBAC Audit + approval.executed Audit share one outer Commit.
+- Audit/persistence failure rolls back the transaction.
+- Existing direct Admin RBAC API keeps its previous Service-owned Commit behavior.
+- Rejection never invokes the Tool.
+- Approval Audit/runtime metadata is bounded to approval/tool/risk/target/result identifiers and excludes raw model/provider/secrets/arbitrary unvalidated arguments.
+- V1 intentionally permits self-approval; mandatory four-eyes separation is not claimed.
+
+No merge-blocking finding remains.
+
 ## Allowed Write Set
 
 The machine-readable marker at the top is authoritative.
@@ -498,33 +562,27 @@ Conceptual scope:
 - [x] CP0 — Context bootstrap
 - [x] CP1 — Durable approval architecture
 - [x] CP2 — Bounded implementation
-- [ ] CP3 — Verification
-- [ ] CP4 — concurrency / authorization / transaction review
+- [x] CP3 — Verification
+- [x] CP4 — concurrency / authorization / transaction review
 - [ ] CP5 — Knowledge / documentation
 - [ ] CP6 — exact-Head delivery
 
 ## Current State
 
-CP0–CP2 are complete.
+CP0–CP4 are complete.
 
-Implemented CP2 boundary:
+Final reviewed Product/Test Head:
 
-- durable ApprovalRequest with 15-minute expiry
-- admin-only approval:decide migration
-- SELECT ... FOR UPDATE decision repository
-- transaction-participating RBAC role assignment
-- approval_required Tool Registry risk
-- fixed grant_support_agent_role(user_id) action
-- direct ToolExecution refusal for approval-required Tools
-- Agent approval_required branch without execution/finalization
-- inspect/approve/reject API
-- permission re-check at request and approval time
-- exact persisted action revalidation
-- atomic Approval + RBAC mutation + Audit transaction design
-- focused Model/Repository/Service/Tool/Agent/API/Migration tests
+- `6e80cd63a71cc392a1699f18f36a253035971dd2`
+- Backend regression: **424 passed**
+- Database recovery: **1 passed**
+- Dispatcher / Branch Resolver: **87 passed**
+- PostgreSQL / pgvector + Alembic round-trip: PASS
+- real two-Session concurrent approval: PASS
+- CP4 concurrency / authorization / transaction review: PASS
 
-Supervisor approval marker: **CP2**.
+Supervisor approval marker: **CP4**.
 
-Next action: CP3 exact-head GitHub-hosted verification.
+Next action: CP5 Knowledge / Documentation synchronization.
 
-No higher-risk Tool beyond the fixed support_agent grant is authorized.
+No further Product Code change is authorized unless a new verification failure is discovered.
