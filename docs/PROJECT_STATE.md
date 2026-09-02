@@ -59,7 +59,8 @@ Engineering Issue ID #018 — AI Security Regression foundation
 - Active Branch: `feature/issue-018-ai-security-regression`
 - CP0 Existing Defense / Threat Surface Inventory: completed
 - CP1 Cross-Layer Security Regression Architecture: completed and Supervisor-approved
-- Current Checkpoint: CP2 authorized
+- CP2 tests-first security matrix: completed through bounded Supervisor fallback and reviewed
+- Current Checkpoint: CP3 authorized
 - Initial CP2 mode: tests-first; Product runtime writes forbidden
 - Regression layers: security-v1 Offline Eval + Application Boundary no-side-effect tests
 - Security corpus: >=16 synthetic adversarial cases
