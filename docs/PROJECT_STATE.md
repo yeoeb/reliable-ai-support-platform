@@ -49,10 +49,12 @@ Engineering Issue ID #011 — Knowledge Ingestion foundation
 
 - GitHub tracking Issue: #50
 - Active Branch: `feature/issue-011-knowledge-ingestion`
-- Current Checkpoint: CP2 authorized
+- Current Checkpoint: CP5 knowledge/documentation sync
 - CP0 Context Bootstrap: completed
 - CP1 Architecture / Scope: completed and Supervisor-approved
-- CP2 implementation: pending Executor
+- CP2 implementation: completed via bounded Supervisor fallback
+- CP3 verification: completed (235 backend + 1 recovery test; Alembic round-trip PASS)
+- CP4 Security / Ingestion review: completed
 - Product boundary: normalized text/Markdown persistence only; chunking/embedding/retrieval/LLM remain deferred
 
 Important: GitHub Issue/PR numbers are repository-wide platform sequence numbers and remain separate from Engineering Issue IDs.
