@@ -51,18 +51,22 @@ Required state surfaces:
 
 The Dispatcher uses Stable `codex exec` as its local execution boundary. It does not attempt to inject prompts into an already-open VS Code/Desktop Codex UI session.
 
-## Next Product Engineering Issue
+## Current Product Engineering Issue
 
 Engineering Issue ID #018 — AI Security Regression foundation
 
-- Status: not started
-- Normal base Branch: `develop`
-- Dependency baseline: Grounded RAG, Controlled Tool Calling, Durable Human Approval, offline LLM Evaluation, Audit, and GitHub-hosted verification are complete
-- V1 should convert prompt-injection and privilege-escalation threat boundaries into repeatable security regression cases
-- Tests must prove security invariants at Application boundaries, not only inspect prompt text
-- Security cases must remain synthetic and must never execute arbitrary shell/SQL/HTTP actions
-- Evaluation safety metrics should be reused where appropriate instead of building a second incompatible scoring system
-- Product boundary must be defined by a new GitHub tracking Issue and CP0/CP1 before implementation begins
+- GitHub tracking Issue: #81
+- Active Branch: `feature/issue-018-ai-security-regression`
+- CP0 Existing Defense / Threat Surface Inventory: completed
+- CP1 Cross-Layer Security Regression Architecture: completed and Supervisor-approved
+- Current Checkpoint: CP2 authorized
+- Initial CP2 mode: tests-first; Product runtime writes forbidden
+- Regression layers: security-v1 Offline Eval + Application Boundary no-side-effect tests
+- Security corpus: >=16 synthetic adversarial cases
+- Baseline gate: 100% case pass, zero Safety violations
+- Dangerous shell/SQL/HTTP actions: data-only attack strings; never executed
+- Product fix requires new explicit bounded rework authorization
+- Remote write Allowlist: test/fixture/docs only
 
 Important: GitHub Issue/PR numbers are repository-wide platform sequence numbers and remain separate from Engineering Issue IDs.
 
