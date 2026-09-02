@@ -25,6 +25,8 @@ It is intentionally concise and must stay synchronized with merged work.
 - #007 — Password hashing and JWT authentication
 - #008 — RBAC authorization and permission enforcement
 - #009 — Durable Security Audit Trail
+- #010 — Structured Logging / Observability foundation
+- #011 — Knowledge Ingestion foundation
 
 ## Current Workflow Infrastructure
 
@@ -43,28 +45,22 @@ Required state surfaces:
 
 The Dispatcher uses Stable `codex exec` as its local execution boundary. It does not attempt to inject prompts into an already-open VS Code/Desktop Codex UI session.
 
-## Current Product Engineering Issue
+## Next Product Engineering Issue
 
-Engineering Issue ID #011 — Knowledge Ingestion foundation
+Engineering Issue ID #012 — Embedding Pipeline foundation
 
-- GitHub tracking Issue: #50
-- Active Branch: `feature/issue-011-knowledge-ingestion`
-- Current Checkpoint: CP6 delivery
-- CP0 Context Bootstrap: completed
-- CP1 Architecture / Scope: completed and Supervisor-approved
-- CP2 implementation: completed via bounded Supervisor fallback
-- CP3 verification: completed (235 backend + 1 recovery test; Alembic round-trip PASS)
-- CP4 Security / Ingestion review: completed
-- CP5 Knowledge / Documentation synchronization: completed
-- Product boundary: normalized text/Markdown persistence only; chunking/embedding/retrieval/LLM remain deferred
+- Status: not started
+- Normal base Branch: `develop`
+- Dependency baseline: Knowledge Ingestion, RBAC, Audit, Structured Logging, and Backend Verification are complete
+- Input boundary: persisted normalized KnowledgeDocument content from #011
+- Product boundary must be defined by a new GitHub tracking Issue and CP0/CP1 before implementation
 
 Important: GitHub Issue/PR numbers are repository-wide platform sequence numbers and remain separate from Engineering Issue IDs.
 
 ## Planned Product Sequence
 
-Tentative order after #010:
+Tentative order after #011:
 
-- #011 — Knowledge ingestion
 - #012 — Embedding pipeline
 - #013 — Retrieval / Vector Search
 - #014 — RAG response with evidence/citations

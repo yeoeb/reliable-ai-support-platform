@@ -381,8 +381,6 @@ Planned AI Layer
 
 Retrieval / Vector Search
 
-Embeddings
-
 RAG with source citations
 
 Agent tool calling
