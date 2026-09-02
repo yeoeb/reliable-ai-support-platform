@@ -52,17 +52,28 @@ Required state surfaces:
 
 The Dispatcher uses Stable `codex exec` as its local execution boundary. It does not attempt to inject prompts into an already-open VS Code/Desktop Codex UI session.
 
-## Next Product Engineering Issue
+## Current Product Engineering Issue
 
 Engineering Issue ID #019 — Operational Metrics / Monitoring foundation
 
-- Status: not started
-- Normal base Branch: `develop`
-- Dependency baseline: Structured Logging, Request IDs, durable Audit, RAG, Tool Calling, Human Approval, Offline Evaluation, and AI Security Regression are complete
-- V1 should define bounded operational metrics for HTTP and AI application paths without recording sensitive request/content data
-- Metrics must complement, not replace, structured logs and durable Audit Events
-- Metric labels must be low-cardinality and must not contain raw user IDs, request text, document/chunk content, Tool arguments, Approval payloads, tokens, or secrets
-- Monitoring/metrics Product boundary and dependency choice must be defined by a new GitHub tracking Issue and CP0/CP1 before implementation begins
+- GitHub tracking Issue: #85
+- Active Branch: `feature/issue-019-operational-metrics`
+- CP0 Observability / Metric Surface Inventory: completed
+- CP1 Low-Cardinality Prometheus Metrics Architecture: completed and Supervisor-approved
+- CP2 bounded metrics implementation: completed through Supervisor fallback and reviewed
+- CP3 Verification / cardinality & failure regression: completed
+- CP4 Observability / Security Review: completed
+- CP5 Knowledge / Documentation: completed
+- Current Checkpoint: CP6 final exact-Head verification
+- Runtime dependency: prometheus-client
+- Registry: dedicated custom CollectorRegistry
+- HTTP metrics: request count + duration using route templates only
+- AI metrics: RAG/Agent bounded outcomes + aggregate token totals
+- Scrape endpoint: GET /metrics, hidden from OpenAPI, no Product JWT/DB/OpenAI dependency
+- High-cardinality/sensitive labels: forbidden
+- Metrics recording: best-effort; must not change Product semantics
+- /metrics self-scrape: excluded from Product HTTP metrics
+- Remote write Allowlist: configured
 
 Important: GitHub Issue/PR numbers are repository-wide platform sequence numbers and remain separate from Engineering Issue IDs.
 
@@ -162,6 +173,14 @@ Service Layer owns transaction boundaries.
 - Security regression must assert both rejection/safe state and absence of unauthorized side effects.
 - Security Eval and Application Boundary regression are separate layers: safe model output does not replace server enforcement, and server enforcement does not replace model-safety tracking.
 - Adversarial security fixtures are synthetic data only; normal CI must never execute arbitrary shell, SQL, attacker HTTP, eval/exec, or live red-team Provider calls.
+- Operational Metrics complement Structured Logs and durable Audit; they do not replace either.
+- Prometheus metrics use a repository-owned custom CollectorRegistry and reviewed low-cardinality labels only.
+- HTTP metrics use server-owned route templates, normalized methods, and status classes; raw paths and Request IDs never become labels.
+- AI metrics expose only bounded RAG/Agent outcomes and aggregate input/output token totals.
+- User/Approval/Document/Chunk IDs, Prompt/Answer content, Tool arguments, model/provider identifiers, and secrets never become metric labels.
+- Metrics recording is best-effort telemetry and must not change Product response/error semantics.
+- GET /metrics has no Product DB/OpenAI/Tool/Approval dependency and is intentionally excluded from Product HTTP metrics.
+- Production access to the unauthenticated scrape endpoint must be restricted by deployment/network policy.
 
 ### Planned AI Boundary
 

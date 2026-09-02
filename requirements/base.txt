@@ -16,3 +16,5 @@ pwdlib[argon2]
 PyJWT
 
 openai>=3,<4
+
+prometheus-client>=0.20,<1.0

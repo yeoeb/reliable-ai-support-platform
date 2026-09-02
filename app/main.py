@@ -10,6 +10,7 @@ from app.api.routes.agent import router as agent_router
 from app.api.routes.auth import router as auth_router
 from app.api.routes.health import router as health_router
 from app.api.routes.knowledge import router as knowledge_router
+from app.api.routes.metrics import router as metrics_router
 from app.api.routes.retrieval import router as retrieval_router
 from app.api.routes.rag import router as rag_router
 from app.api.routes.users import router as users_router
@@ -32,6 +33,7 @@ app.add_exception_handler(
 )
 
 app.include_router(health_router)
+app.include_router(metrics_router)
 app.include_router(users_router)
 app.include_router(auth_router)
 app.include_router(admin_router)
