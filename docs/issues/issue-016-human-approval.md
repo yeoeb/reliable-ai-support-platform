@@ -1,6 +1,6 @@
 # Engineering Issue #016 — Durable Human Approval for Higher-Risk Tool Actions
 
-<!-- codex-dispatch-supervisor-approved-through: CP1 -->
+<!-- codex-dispatch-supervisor-approved-through: CP2 -->
 <!-- codex-dispatch-write-allow: ["app/models/approval_request.py","app/models/__init__.py","app/repositories/approval.py","app/services/approval.py","app/services/rbac.py","app/services/agent.py","app/services/tool_execution.py","app/tools/registry.py","app/tools/system.py","app/tools/rbac.py","app/schemas/approval.py","app/schemas/agent.py","app/api/routes/approvals.py","app/api/routes/agent.py","app/core/errors.py","app/main.py","migrations/versions/*approval*.py","tests/test_approval_*.py","tests/test_agent_*.py","tests/test_tool_*.py","tests/test_rbac_service.py","tests/test_migrations.py","docs/issues/issue-016-human-approval.md"] -->
 
 ## GitHub Tracking
@@ -497,7 +497,7 @@ Conceptual scope:
 
 - [x] CP0 — Context bootstrap
 - [x] CP1 — Durable approval architecture
-- [ ] CP2 — Bounded implementation
+- [x] CP2 — Bounded implementation
 - [ ] CP3 — Verification
 - [ ] CP4 — concurrency / authorization / transaction review
 - [ ] CP5 — Knowledge / documentation
@@ -505,10 +505,26 @@ Conceptual scope:
 
 ## Current State
 
-CP0 and CP1 are complete.
+CP0–CP2 are complete.
 
-Remote Supervisor approval: **CP1**.
+Implemented CP2 boundary:
 
-Next authorized action: **CP2** on `feature/issue-016-human-approval`.
+- durable ApprovalRequest with 15-minute expiry
+- admin-only approval:decide migration
+- SELECT ... FOR UPDATE decision repository
+- transaction-participating RBAC role assignment
+- approval_required Tool Registry risk
+- fixed grant_support_agent_role(user_id) action
+- direct ToolExecution refusal for approval-required Tools
+- Agent approval_required branch without execution/finalization
+- inspect/approve/reject API
+- permission re-check at request and approval time
+- exact persisted action revalidation
+- atomic Approval + RBAC mutation + Audit transaction design
+- focused Model/Repository/Service/Tool/Agent/API/Migration tests
 
-Full regression is intentionally deferred to CP3.
+Supervisor approval marker: **CP2**.
+
+Next action: CP3 exact-head GitHub-hosted verification.
+
+No higher-risk Tool beyond the fixed support_agent grant is authorized.
