@@ -43,6 +43,9 @@ class AuditService:
         except SQLAlchemyError:
             self.session.rollback()
             logger.error(
-                "event=audit.persistence_failure action=%s",
-                kwargs.get("action"),
+                "Audit persistence failed",
+                extra={
+                    "event": "audit.persistence_failure",
+                    "audit_action": kwargs.get("action"),
+                },
             )
