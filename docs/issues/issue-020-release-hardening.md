@@ -274,3 +274,35 @@ Remote Supervisor approval: **CP1**.
 CP2 is Supervisor-controlled because it changes hard-protected workflow files.
 
 Do not launch the Local Watcher for #020 workflow changes.
+
+
+## CP2 Supervisor-Controlled Implementation
+
+Ancestry reconciliation:
+
+- `abe393dbe6a3b8b4f07301708f35fcaedab7add4`
+- exact develop tree preserved
+- historical main added only as second-parent ancestry
+
+Implemented by Supervisor because `.github/workflows/**` is hard-protected:
+
+- Backend Verification supports `workflow_call`
+- Dispatcher Tests supports `workflow_call`
+- direct PR triggers are scoped to `develop`
+- reusable workflow concurrency prefixes are distinct
+- new `Release Verification` workflow targets every PR to `main`
+- Release Verification has `contents: read` only
+- release job checks out exact PR Head with `fetch-depth: 0`
+- release wrapper calls reusable Backend + Dispatcher workflows
+- `scripts/verify_release_candidate.py` implements network-free release contract verification
+- project/FastAPI version consistency is checked statically
+- main-only content drift fails closed
+- existing version tag fails closed
+- focused release verifier/workflow tests added
+- release process and branch-protection gap documented
+
+No Product runtime, DB schema, deployment, secret, package publishing, tag publishing, or production operation is added.
+
+CP2 verification has not yet been claimed.
+
+Remote approval remains CP1 until Supervisor Review / GitHub-hosted evidence.
