@@ -370,3 +370,48 @@ def test_non_finite_provider_vector_is_rejected_by_service() -> None:
 
     service.embedding_repository.create_many.assert_not_called()
     session.commit.assert_not_called()
+
+
+
+@pytest.mark.parametrize(
+    "bad_result",
+    [
+        SimpleNamespace(
+            vectors=None,
+            token_usage=1,
+        ),
+        SimpleNamespace(
+            vectors=[[0.1] * DIMENSIONS],
+            token_usage="1",
+        ),
+        SimpleNamespace(
+            vectors=[[0.1] * DIMENSIONS],
+            token_usage=True,
+        ),
+        SimpleNamespace(
+            token_usage=1,
+        ),
+    ],
+)
+def test_service_rejects_malformed_provider_result_shape(
+    bad_result,
+) -> None:
+    provider = FakeProvider(
+        lambda texts: bad_result
+    )
+    service, session, provider, document = make_service(
+        provider=provider,
+    )
+    service.embedding_repository.list_states_for_config.return_value = []
+
+    with pytest.raises(
+        InvalidEmbeddingProviderResponseError,
+    ):
+        service.embed_document(
+            actor_user_id=uuid4(),
+            document_id=document.id,
+        )
+
+    service.embedding_repository.create_many.assert_not_called()
+    service.audit_service.record.assert_not_called()
+    session.commit.assert_not_called()
