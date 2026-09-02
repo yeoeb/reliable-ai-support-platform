@@ -49,11 +49,13 @@ Engineering Issue ID #010 — Structured Logging / Observability foundation
 
 - GitHub tracking Issue: #44
 - Active Branch: `feature/issue-010-structured-logging`
-- Current Checkpoint: CP4 review
+- Current Checkpoint: CP6 delivery
 - CP0 Context Bootstrap: completed
 - CP1 Architecture / Scope: completed and Supervisor-approved
 - CP2 implementation: completed via bounded Supervisor fallback
-- CP3 verification: completed (207 backend + 1 recovery test; Alembic round-trip PASS)
+- CP3 verification: completed (208 backend + 1 recovery test; Alembic round-trip PASS)
+- CP4 Security / Observability review: completed
+- CP5 Knowledge / Documentation synchronization: completed
 - Product boundary: runtime Application Logs remain separate from durable Audit Events
 
 Branch resolution is now remote and fail-closed: the Watcher launcher accepts exactly one `feature/issue-NNN-*` branch for the requested Engineering Issue.
@@ -115,6 +117,9 @@ Service Layer owns transaction boundaries.
 - Durable Audit Events use stable Actor / Action / Target / Outcome fields and an append-only application boundary.
 - RBAC privilege mutations and their Audit Events commit atomically.
 - Authentication / Authorization Audit failures use best-effort persistence and must preserve intended 401 / 403 responses.
+- Structured runtime logs use server-generated Request IDs and request-scoped ContextVar correlation.
+- Runtime request logging must not capture raw Request Body, Query String, Authorization/Cookie headers, or arbitrary unmatched raw paths.
+- Runtime Application Logs and durable Audit Events remain separate observability/accountability surfaces.
 
 ### Planned AI Boundary
 
