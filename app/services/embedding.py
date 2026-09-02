@@ -176,30 +176,48 @@ class EmbeddingService:
         *,
         expected_count: int,
     ) -> None:
-        if len(result.vectors) != expected_count:
-            raise InvalidEmbeddingProviderResponseError(
-                "Embedding provider returned an unexpected item count"
-            )
+        try:
+            vectors = result.vectors
+            token_usage = result.token_usage
 
-        for vector in result.vectors:
-            if len(vector) != self.embedding_dimensions:
+            if len(vectors) != expected_count:
                 raise InvalidEmbeddingProviderResponseError(
-                    "Embedding provider returned an invalid dimension"
+                    "Embedding provider returned an unexpected item count"
                 )
 
-            if not all(
-                isinstance(value, (int, float))
-                and math.isfinite(float(value))
-                for value in vector
+            for vector in vectors:
+                if len(vector) != self.embedding_dimensions:
+                    raise InvalidEmbeddingProviderResponseError(
+                        "Embedding provider returned an invalid dimension"
+                    )
+
+                if not all(
+                    isinstance(value, (int, float))
+                    and math.isfinite(float(value))
+                    for value in vector
+                ):
+                    raise InvalidEmbeddingProviderResponseError(
+                        "Embedding provider returned an invalid vector value"
+                    )
+
+            if (
+                not isinstance(token_usage, int)
+                or isinstance(token_usage, bool)
+                or token_usage < 0
             ):
                 raise InvalidEmbeddingProviderResponseError(
-                    "Embedding provider returned an invalid vector value"
+                    "Embedding provider returned invalid token usage"
                 )
 
-        if result.token_usage < 0:
+        except InvalidEmbeddingProviderResponseError:
+            raise
+        except (
+            AttributeError,
+            TypeError,
+        ) as exc:
             raise InvalidEmbeddingProviderResponseError(
-                "Embedding provider returned invalid token usage"
-            )
+                "Embedding provider returned a malformed result"
+            ) from exc
 
     def _records(
         self,
