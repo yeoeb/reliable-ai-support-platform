@@ -17,3 +17,7 @@ class UserNotFoundError(Exception):
 
 class RoleNotFoundError(Exception):
     pass
+
+
+class InvalidKnowledgeContentError(Exception):
+    pass

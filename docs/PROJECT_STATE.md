@@ -43,15 +43,20 @@ Required state surfaces:
 
 The Dispatcher uses Stable `codex exec` as its local execution boundary. It does not attempt to inject prompts into an already-open VS Code/Desktop Codex UI session.
 
-## Next Product Engineering Issue
+## Current Product Engineering Issue
 
 Engineering Issue ID #011 — Knowledge Ingestion foundation
 
-- Status: not started
-- Normal base Branch: `develop`
-- Dependency baseline: Authentication, RBAC, Durable Audit Trail, Structured Logging / Request Correlation, and Backend Verification are complete
-
-The Supervisor must create a new GitHub tracking Issue and Execution Packet before implementation begins.
+- GitHub tracking Issue: #50
+- Active Branch: `feature/issue-011-knowledge-ingestion`
+- Current Checkpoint: CP6 delivery
+- CP0 Context Bootstrap: completed
+- CP1 Architecture / Scope: completed and Supervisor-approved
+- CP2 implementation: completed via bounded Supervisor fallback
+- CP3 verification: completed (235 backend + 1 recovery test; Alembic round-trip PASS)
+- CP4 Security / Ingestion review: completed
+- CP5 Knowledge / Documentation synchronization: completed
+- Product boundary: normalized text/Markdown persistence only; chunking/embedding/retrieval/LLM remain deferred
 
 Important: GitHub Issue/PR numbers are repository-wide platform sequence numbers and remain separate from Engineering Issue IDs.
 
@@ -112,6 +117,9 @@ Service Layer owns transaction boundaries.
 - Structured runtime logs use server-generated Request IDs and request-scoped ContextVar correlation.
 - Runtime request logging must not capture raw Request Body, Query String, Authorization/Cookie headers, or arbitrary unmatched raw paths.
 - Runtime Application Logs and durable Audit Events remain separate observability/accountability surfaces.
+- Knowledge ingestion treats document content as untrusted data, not executable instructions.
+- KnowledgeDocument persistence is normalized and content-addressed with a database idempotency backstop.
+- Knowledge admin writes use dedicated RBAC permission and atomic Audit persistence.
 
 ### Planned AI Boundary
 
