@@ -1,6 +1,6 @@
 # Engineering Issue #020 — CI / Release Hardening Foundation
 
-<!-- codex-dispatch-supervisor-approved-through: CP1 -->
+<!-- codex-dispatch-supervisor-approved-through: CP2 -->
 <!-- codex-dispatch-write-allow: ["scripts/verify_release_candidate.py","tests/test_release_preflight.py","tests/test_release_workflows.py","docs/release-process.md","docs/issues/issue-020-release-hardening.md"] -->
 
 ## GitHub Tracking
@@ -261,7 +261,7 @@ No Product runtime code, migrations, DB schema, credentials, deployment files, o
 
 - [x] CP0 — Release / branch-state inventory
 - [x] CP1 — Release promotion architecture
-- [ ] CP2 — Supervisor-controlled workflow + verifier implementation
+- [x] CP2 — Supervisor-controlled workflow + verifier implementation
 - [ ] CP3 — Verification / release-contract regression
 - [ ] CP4 — Release/security review
 - [ ] CP5 — Knowledge / documentation
@@ -306,3 +306,51 @@ No Product runtime, DB schema, deployment, secret, package publishing, tag publi
 CP2 verification has not yet been claimed.
 
 Remote approval remains CP1 until Supervisor Review / GitHub-hosted evidence.
+
+
+## CP2 Supervisor Review
+
+Status: **PASS**
+
+Reviewed:
+
+- ancestry reconciliation `abe393dbe6a3b8b4f07301708f35fcaedab7add4`
+- control-plane implementation `c1032d7834f5961d070fea9aaf8caf50b1aee672`
+- exact-source hardening `236996f229c1a2b5f75ba7ef61d9c948f9efadf1`
+
+Confirmed:
+
+- reconciliation commit preserves the exact pre-sync develop tree;
+- historical main is recorded only as ancestry;
+- stale README content was not reintroduced;
+- Backend and Dispatcher expose `workflow_call`;
+- direct PR triggers are limited to base `develop`;
+- push-to-develop CI remains intact;
+- reusable workflow concurrency prefixes are distinct;
+- Backend and Dispatcher checkout exact PR Head SHA for PR events and exact `github.sha` for push events;
+- Release Verification targets every PR to `main` with no path filter;
+- Release Verification permissions are `contents: read`;
+- release-contract checks out exact PR Head with full history;
+- release verifier is network-free and uses fixed subprocess argv lists with no `shell=True`;
+- verifier requires same-repo `develop → main`;
+- checked-out HEAD and `origin/develop` must equal expected PR Head SHA;
+- main-only content drift after merge-base fails closed;
+- project version is static SemVer and must match FastAPI version;
+- an existing `v<version>` tag fails closed;
+- Release wrapper calls existing reusable Backend + Dispatcher workflows rather than duplicating them;
+- no production deployment, credential write, package publish, tag publish, GitHub Release publish, or branch-protection mutation exists;
+- branch protection remains an explicitly documented external platform-control gap.
+
+A static Review found and fixed one blocking issue before CP2 approval:
+
+> reusable Backend/Dispatcher workflows initially used default checkout behavior, which could verify a pull-request merge ref rather than the exact release source Head.
+
+They now explicitly checkout:
+
+`github.event.pull_request.head.sha || github.sha`
+
+No blocking CP2 finding remains.
+
+Remote Supervisor approval: **CP2**.
+
+Next: CP3 GitHub-hosted verification.
