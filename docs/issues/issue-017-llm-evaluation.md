@@ -1,6 +1,6 @@
 # Engineering Issue #017 — Offline LLM Evaluation Foundation
 
-<!-- codex-dispatch-supervisor-approved-through: CP5 -->
+<!-- codex-dispatch-supervisor-approved-through: CP6 -->
 <!-- codex-dispatch-write-allow: ["app/evaluation/__init__.py","app/evaluation/schemas.py","app/evaluation/loader.py","app/evaluation/scorer.py","app/evaluation/runner.py","app/evaluation/prompt_fingerprints.py","app/integrations/llm.py","evals/README.md","evals/suites/v1/suite.json","evals/suites/v1/cases.jsonl","evals/suites/v1/baseline_results.jsonl","tests/test_evaluation_*.py","docs/issues/issue-017-llm-evaluation.md"] -->
 
 ## GitHub Tracking
@@ -537,7 +537,7 @@ No Product DB schema or runtime API change is required.
 - [x] CP3 — Verification / negative-case regression
 - [x] CP4 — Evaluation validity / safety review
 - [x] CP5 — Knowledge / documentation
-- [ ] CP6 — exact-Head delivery
+- [x] CP6 — exact-Head delivery
 
 ## Current State
 
@@ -701,17 +701,37 @@ Repository documentation synchronized before Final CI:
 
 ## CP6 — Final Delivery
 
-Status: **final exact-Head verification pending**
+Status: **completed**
 
-All planned Product/Test/Repository documentation writes are complete.
+Verified immutable Product Head:
 
-Next:
+`72c3960236c51289648b176b1db2be8d03ccdbff`
 
-```text
-FINAL HEAD
-→ exact-Head GitHub Actions
-→ PASS
-→ PR / Issue Comment evidence only
-→ no further Branch commit
-→ Merge
-```
+Final exact-Head checks:
+
+- Backend Verification #178 / run `33642301753`: PASS — **441 passed**
+- Dispatcher Tests #132 / run `33642301717`: PASS — **87 passed**
+- database recovery: PASS
+- PostgreSQL + pgvector: PASS
+- Alembic upgrade / downgrade / re-upgrade: PASS
+
+Draft PR #78 was replaced by non-draft PR #79 without changing the Product Head because the connector Ready-for-Review transition is incompatible with the current GitHub GraphQL schema.
+
+Replacement PR checks on the same immutable Head:
+
+- Backend Verification #179 / run `33642494497`: PASS
+- Dispatcher Tests #133 / run `33642494506`: PASS
+
+No Product/Docs Branch commit occurred after Final CI.
+
+## Merge Evidence
+
+- Engineering Issue: #017
+- GitHub Issue #77: Closed / Completed
+- Product PR #79: Merged
+- Superseded Draft PR #78: Closed
+- Product Head: `72c3960236c51289648b176b1db2be8d03ccdbff`
+- Product squash merge: `e732d4c9154f9b405b2685131449985089aeb98e`
+- CP0–CP6: complete
+- Notion knowledge capture: complete
+- Next Product Engineering Issue: #018 AI Security Regression foundation

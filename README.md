@@ -599,6 +599,14 @@ Prompt fingerprint regression guard
 
 Deterministic Safety / threshold gate
 
+Next
+
+AI Security Regression foundation
+
+Prompt-injection regression cases
+
+AI privilege-escalation regression cases
+
 Planned Reliability & AI Safety
 
 Metrics / distributed tracing / external log aggregation
