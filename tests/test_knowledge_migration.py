@@ -1,9 +1,11 @@
+from pathlib import Path
+
 from alembic.config import Config
 from alembic.script import ScriptDirectory
 
-from tests.test_migrations import ALEMBIC_INI
 
-
+PROJECT_ROOT = Path(__file__).resolve().parents[1]
+ALEMBIC_INI = PROJECT_ROOT / "alembic.ini"
 EXPECTED_REVISION = "a61f9b2c3d40"
 
 
@@ -64,6 +66,11 @@ def test_upgrade_seeds_knowledge_permission_and_admin_grant(
         module.op,
         "create_table",
         lambda *args, **kwargs: None,
+    )
+    monkeypatch.setattr(
+        module.op,
+        "f",
+        lambda name: name,
     )
     monkeypatch.setattr(
         module.op,
