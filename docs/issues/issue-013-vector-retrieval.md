@@ -1,6 +1,6 @@
 # Engineering Issue #013 — Exact Vector Retrieval Foundation
 
-<!-- codex-dispatch-supervisor-approved-through: CP1 -->
+<!-- codex-dispatch-supervisor-approved-through: CP2 -->
 <!-- codex-dispatch-write-allow: ["app/core/errors.py","app/schemas/retrieval.py","app/repositories/retrieval.py","app/services/retrieval.py","app/api/routes/retrieval.py","app/main.py","migrations/versions/*retrieval*.py","tests/test_retrieval_schema.py","tests/test_retrieval_repository.py","tests/test_retrieval_service.py","tests/test_retrieval_api.py","tests/test_retrieval_migration.py","tests/integration/test_vector_retrieval.py","tests/test_embedding_migration.py","tests/test_migrations.py","docs/issues/issue-013-vector-retrieval.md"] -->
 
 ## GitHub Tracking
@@ -484,7 +484,7 @@ Supervisor-controlled:
 
 - [x] CP0 — Context bootstrap / contradiction detection
 - [x] CP1 — Architecture + Scope validation
-- [ ] CP2 — Bounded implementation
+- [x] CP2 — Bounded implementation
 - [ ] CP3 — Targeted + full verification
 - [ ] CP4 — Security / retrieval review
 - [ ] CP5 — Knowledge + documentation sync
@@ -568,10 +568,26 @@ Deduplicate in CP5:
 
 ## Current State
 
-CP0 and CP1 are complete.
+CP0–CP2 are complete.
 
-Supervisor approval marker: **CP1**.
+Implemented Product/Test boundary:
 
-CP2 is authorized.
+- dedicated `knowledge:read` permission for support_agent/admin
+- normal B-tree index on embedding_config_hash only
+- bounded retrieval query schema
+- current-config hash filtering
+- exact pgvector cosine search
+- deterministic distance + chunk UUID ordering
+- provenance join to KnowledgeDocument
+- provider-independent query-vector validation
+- explicit request-Session rollback before external Provider wait
+- best-effort read Audit
+- safe runtime logging
+- support/admin-only Retrieval API
+- real pgvector integration coverage
 
-No CP2 Product implementation evidence exists yet.
+Supervisor approval marker: **CP2**.
+
+Next action: CP3 exact-head GitHub-hosted verification.
+
+No ANN index or RAG/LLM path is authorized.
