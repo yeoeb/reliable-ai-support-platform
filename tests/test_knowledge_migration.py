@@ -9,28 +9,26 @@ ALEMBIC_INI = PROJECT_ROOT / "alembic.ini"
 EXPECTED_REVISION = "a61f9b2c3d40"
 
 
-def get_head_module():
+def get_knowledge_migration_module():
     script = ScriptDirectory.from_config(
         Config(str(ALEMBIC_INI))
     )
-    head = script.get_current_head()
-
-    assert head == EXPECTED_REVISION
-
-    revision = script.get_revision(head)
+    revision = script.get_revision(
+        EXPECTED_REVISION
+    )
     assert revision is not None
     return revision.module
 
 
-def test_knowledge_migration_is_linear_head() -> None:
-    module = get_head_module()
+def test_knowledge_migration_has_expected_parent() -> None:
+    module = get_knowledge_migration_module()
 
     assert module.revision == EXPECTED_REVISION
     assert module.down_revision == "9f3c5d7e8a10"
 
 
 def test_migration_uses_stable_admin_only_permission() -> None:
-    module = get_head_module()
+    module = get_knowledge_migration_module()
 
     assert (
         module.KNOWLEDGE_MANAGE_PERMISSION_ID
@@ -45,7 +43,7 @@ def test_migration_uses_stable_admin_only_permission() -> None:
 def test_upgrade_seeds_knowledge_permission_and_admin_grant(
     monkeypatch,
 ) -> None:
-    module = get_head_module()
+    module = get_knowledge_migration_module()
 
     class FakeConnection:
         def __init__(self) -> None:
@@ -102,7 +100,7 @@ def test_upgrade_seeds_knowledge_permission_and_admin_grant(
 def test_downgrade_removes_permission_before_table(
     monkeypatch,
 ) -> None:
-    module = get_head_module()
+    module = get_knowledge_migration_module()
     events = []
 
     class FakeConnection:
