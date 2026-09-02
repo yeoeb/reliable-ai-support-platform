@@ -184,23 +184,22 @@ class ApprovalService:
                 "Tool arguments are invalid"
             ) from exc
 
-        allowed = self.rbac_repository.has_permission(
-            actor_user_id,
-            definition.required_permission,
-        )
-
-        if not allowed:
-            self.session.rollback()
-            raise ToolPermissionDeniedError(
-                "Tool permission denied"
+        try:
+            allowed = self.rbac_repository.has_permission(
+                actor_user_id,
+                definition.required_permission,
             )
 
-        canonical_arguments = validated.model_dump(
-            mode="json"
-        )
-        now = utc_now()
+            if not allowed:
+                raise ToolPermissionDeniedError(
+                    "Tool permission denied"
+                )
 
-        try:
+            canonical_arguments = validated.model_dump(
+                mode="json"
+            )
+            now = utc_now()
+
             approval = self.repository.create(
                 requested_by_user_id=actor_user_id,
                 tool_name=definition.name,
@@ -222,6 +221,9 @@ class ApprovalService:
                 ),
             )
             self.session.commit()
+        except ToolPermissionDeniedError:
+            self.session.rollback()
+            raise
         except SQLAlchemyError as exc:
             self.session.rollback()
             raise PersistenceUnavailableError from exc
@@ -243,26 +245,33 @@ class ApprovalService:
         *,
         approval_id: UUID,
     ) -> ApprovalSnapshot:
-        approval = self.repository.get_by_id(
-            approval_id
-        )
-        if approval is None:
+        try:
+            approval = self.repository.get_by_id(
+                approval_id
+            )
+            if approval is None:
+                raise ApprovalNotFoundError
+
+            effective_status = approval.status
+            if (
+                approval.status == "pending"
+                and utc_now() >= approval.expires_at
+            ):
+                effective_status = "expired"
+
+            snapshot = self._snapshot(
+                approval,
+                status=effective_status,
+            )
             self.session.rollback()
-            raise ApprovalNotFoundError
+            return snapshot
 
-        effective_status = approval.status
-        if (
-            approval.status == "pending"
-            and utc_now() >= approval.expires_at
-        ):
-            effective_status = "expired"
-
-        snapshot = self._snapshot(
-            approval,
-            status=effective_status,
-        )
-        self.session.rollback()
-        return snapshot
+        except ApprovalNotFoundError:
+            self.session.rollback()
+            raise
+        except SQLAlchemyError as exc:
+            self.session.rollback()
+            raise PersistenceUnavailableError from exc
 
     def _expire_locked(
         self,
@@ -304,14 +313,13 @@ class ApprovalService:
         approval_id: UUID,
         approver_user_id: UUID,
     ) -> ApprovalSnapshot:
-        approval = self.repository.get_for_update(
-            approval_id
-        )
-        if approval is None:
-            self.session.rollback()
-            raise ApprovalNotFoundError
-
         try:
+            approval = self.repository.get_for_update(
+                approval_id
+            )
+            if approval is None:
+                raise ApprovalNotFoundError
+
             self._require_decider_permission(
                 approver_user_id
             )
@@ -394,6 +402,7 @@ class ApprovalService:
             self.session.commit()
 
         except (
+            ApprovalNotFoundError,
             ApprovalPermissionDeniedError,
             ApprovalStateConflictError,
             ToolExecutionError,
@@ -423,14 +432,13 @@ class ApprovalService:
         approval_id: UUID,
         approver_user_id: UUID,
     ) -> ApprovalSnapshot:
-        approval = self.repository.get_for_update(
-            approval_id
-        )
-        if approval is None:
-            self.session.rollback()
-            raise ApprovalNotFoundError
-
         try:
+            approval = self.repository.get_for_update(
+                approval_id
+            )
+            if approval is None:
+                raise ApprovalNotFoundError
+
             self._require_decider_permission(
                 approver_user_id
             )
@@ -474,6 +482,7 @@ class ApprovalService:
             self.session.commit()
 
         except (
+            ApprovalNotFoundError,
             ApprovalPermissionDeniedError,
             ApprovalStateConflictError,
         ):
