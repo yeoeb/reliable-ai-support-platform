@@ -55,7 +55,10 @@ def get_current_user(
         ValueError,
         TypeError,
     ):
-        logger.info("event=auth.token.invalid")
+        logger.info(
+            "Authentication token is invalid",
+            extra={"event": "auth.token.invalid"},
+        )
         AuditService(session).record_best_effort(
             actor_user_id=None,
             action="auth.token.invalid",

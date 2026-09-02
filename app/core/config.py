@@ -1,4 +1,4 @@
-from pydantic import SecretStr
+from pydantic import SecretStr, field_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 from sqlalchemy import URL
 
@@ -15,6 +15,7 @@ class Settings(BaseSettings):
     jwt_secret_key: SecretStr
     jwt_algorithm: str = "HS256"
     access_token_expire_minutes: int = 30
+    log_level: str = "INFO"
 
     model_config = SettingsConfigDict(
         env_file=".env",
@@ -22,6 +23,26 @@ class Settings(BaseSettings):
         case_sensitive=False,
         extra="ignore",
     )
+
+    @field_validator("log_level")
+    @classmethod
+    def validate_log_level(cls, value: str) -> str:
+        normalized = value.strip().upper()
+        allowed = {
+            "CRITICAL",
+            "ERROR",
+            "WARNING",
+            "INFO",
+            "DEBUG",
+        }
+
+        if normalized not in allowed:
+            raise ValueError(
+                "LOG_LEVEL must be one of "
+                "CRITICAL, ERROR, WARNING, INFO, DEBUG"
+            )
+
+        return normalized
 
     @property
     def database_url(self) -> URL:

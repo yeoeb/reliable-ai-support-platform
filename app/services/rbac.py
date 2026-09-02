@@ -64,11 +64,13 @@ class RBACService:
             self.session.commit()
 
             logger.info(
-                "event=rbac.role.assigned "
-                "user_id=%s role=%s changed=%s",
-                user.id,
-                role.name,
-                created,
+                "RBAC role assigned",
+                extra={
+                    "event": "rbac.role.assigned",
+                    "user_id": str(user.id),
+                    "role": role.name,
+                    "changed": created,
+                },
             )
 
         except (
@@ -82,10 +84,12 @@ class RBACService:
             self.session.rollback()
 
             logger.error(
-                "event=rbac.role.assign.persistence_failure "
-                "user_id=%s role=%s",
-                user_id,
-                role_name,
+                "RBAC role assignment persistence failed",
+                extra={
+                    "event": "rbac.role.assign.persistence_failure",
+                    "user_id": str(user_id),
+                    "role": role_name,
+                },
             )
 
             raise PersistenceUnavailableError from exc
@@ -130,11 +134,13 @@ class RBACService:
             self.session.commit()
 
             logger.info(
-                "event=rbac.role.removed "
-                "user_id=%s role=%s changed=%s",
-                user.id,
-                role.name,
-                removed,
+                "RBAC role removed",
+                extra={
+                    "event": "rbac.role.removed",
+                    "user_id": str(user.id),
+                    "role": role.name,
+                    "changed": removed,
+                },
             )
 
         except (
@@ -148,10 +154,12 @@ class RBACService:
             self.session.rollback()
 
             logger.error(
-                "event=rbac.role.remove.persistence_failure "
-                "user_id=%s role=%s",
-                user_id,
-                role_name,
+                "RBAC role removal persistence failed",
+                extra={
+                    "event": "rbac.role.remove.persistence_failure",
+                    "user_id": str(user_id),
+                    "role": role_name,
+                },
             )
 
             raise PersistenceUnavailableError from exc
