@@ -5,6 +5,7 @@ from uuid import UUID
 
 from sqlalchemy.orm import Session
 
+from app.core.metrics import application_metrics
 from app.core.errors import (
     InvalidToolCallingProviderResponseError,
     NoAuthorizedToolError,
@@ -30,6 +31,21 @@ class AgentRunResult:
 
 
 class AgentService:
+    @staticmethod
+    def _record_result(
+        result: AgentRunResult,
+    ) -> AgentRunResult:
+        application_metrics.record_ai_operation(
+            operation="agent_run",
+            outcome=result.status,
+        )
+        application_metrics.record_llm_tokens(
+            operation="agent_run",
+            input_tokens=result.input_tokens,
+            output_tokens=result.output_tokens,
+        )
+        return result
+
     def __init__(
         self,
         session: Session,
@@ -86,7 +102,8 @@ class AgentService:
                 raise InvalidToolCallingProviderResponseError(
                     "Tool provider returned invalid direct answer"
                 )
-            return AgentRunResult(
+            return self._record_result(
+                AgentRunResult(
                 status="completed",
                 approval_id=None,
                 answer=choice.answer.strip(),
@@ -95,6 +112,7 @@ class AgentService:
                 model=choice.model,
                 input_tokens=choice.input_tokens,
                 output_tokens=choice.output_tokens,
+                )
             )
 
         definition = self.registry.get(
@@ -107,7 +125,8 @@ class AgentService:
                 tool_name=choice.tool_call.name,
                 arguments=choice.tool_call.arguments,
             )
-            return AgentRunResult(
+            return self._record_result(
+                AgentRunResult(
                 status="approval_required",
                 approval_id=approval.id,
                 answer="Human approval required.",
@@ -116,6 +135,7 @@ class AgentService:
                 model=choice.model,
                 input_tokens=choice.input_tokens,
                 output_tokens=choice.output_tokens,
+                )
             )
 
         result = self.tool_execution.execute(
@@ -129,7 +149,8 @@ class AgentService:
             tool_name=choice.tool_call.name,
             tool_result=result,
         )
-        return AgentRunResult(
+        return self._record_result(
+            AgentRunResult(
             status="completed",
             approval_id=None,
             answer=final.answer,
@@ -144,4 +165,5 @@ class AgentService:
                 choice.output_tokens
                 + final.output_tokens
             ),
+            )
         )

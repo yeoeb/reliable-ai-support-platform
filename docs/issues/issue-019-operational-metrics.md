@@ -504,3 +504,39 @@ Remote Supervisor approval: **CP1**.
 Next authorized action: **CP2** on `feature/issue-019-operational-metrics`.
 
 Full repository regression remains CP3.
+
+
+## Supervisor Fallback Execution
+
+The remote CP2 gate remained authorized but no Local Watcher/Codex checkpoint was published after repeated remote checks.
+
+A bounded Supervisor fallback is being used on the Feature Branch.
+
+Control boundaries preserved:
+
+- writes remain inside the existing #019 machine Allowlist;
+- no migration / DB model / Docker Compose / GitHub workflow change;
+- no fake `checkpoint(issue-019): CP2` commit;
+- CP3 full GitHub-hosted regression remains mandatory;
+- CP4 cardinality/security review remains mandatory;
+- CP6 exact-Head delivery remains mandatory.
+
+Fallback CP2 implements:
+
+- `prometheus-client>=0.20,<1.0`;
+- dedicated custom `CollectorRegistry`;
+- bounded HTTP Counter + latency Histogram;
+- fixed AI operation outcomes;
+- aggregate LLM input/output token counters;
+- low-cardinality normalization;
+- best-effort metrics recording;
+- instrumentation inside the existing RequestLoggingMiddleware;
+- public `GET /metrics` hidden from OpenAPI;
+- `/metrics` self-scrape exclusion;
+- RAG outcome/token instrumentation;
+- Agent outcome/token instrumentation;
+- focused Registry / HTTP / AI / Endpoint tests.
+
+No full regression is represented as executed by the Supervisor fallback environment.
+
+Remote approval remains CP1 until CP2 review is complete.

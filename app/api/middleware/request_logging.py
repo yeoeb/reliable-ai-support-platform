@@ -9,6 +9,7 @@ from fastapi import Request
 from fastapi.responses import PlainTextResponse
 from starlette.types import ASGIApp, Message, Receive, Scope, Send
 
+from app.core.metrics import ApplicationMetrics, application_metrics
 from app.core.request_context import reset_request_id, set_request_id
 
 
@@ -30,8 +31,13 @@ def _resolved_route(scope: Scope) -> str:
 
 
 class RequestLoggingMiddleware:
-    def __init__(self, app: ASGIApp) -> None:
+    def __init__(
+        self,
+        app: ASGIApp,
+        metrics: ApplicationMetrics = application_metrics,
+    ) -> None:
         self.app = app
+        self.metrics = metrics
 
     async def __call__(
         self,
@@ -80,16 +86,23 @@ class RequestLoggingMiddleware:
                 0.0,
                 (time.perf_counter() - started_at) * 1000,
             )
+            route = _resolved_route(scope)
             logger.error(
                 "HTTP request failed",
                 extra={
                     "event": "http.request.failed",
                     "http_method": scope.get("method"),
-                    "route": _resolved_route(scope),
+                    "route": route,
                     "status_code": status_code,
                     "duration_ms": round(duration_ms, 3),
                     "exception_type": type(exc).__name__,
                 },
+            )
+            self.metrics.record_http(
+                method=scope.get("method"),
+                route=route,
+                status_code=status_code,
+                duration_seconds=duration_ms / 1000.0,
             )
             raise
         else:
@@ -97,15 +110,22 @@ class RequestLoggingMiddleware:
                 0.0,
                 (time.perf_counter() - started_at) * 1000,
             )
+            route = _resolved_route(scope)
             logger.info(
                 "HTTP request completed",
                 extra={
                     "event": "http.request.completed",
                     "http_method": scope.get("method"),
-                    "route": _resolved_route(scope),
+                    "route": route,
                     "status_code": status_code,
                     "duration_ms": round(duration_ms, 3),
                 },
+            )
+            self.metrics.record_http(
+                method=scope.get("method"),
+                route=route,
+                status_code=status_code,
+                duration_seconds=duration_ms / 1000.0,
             )
         finally:
             reset_request_id(token)

@@ -6,6 +6,7 @@ from uuid import UUID
 
 from sqlalchemy.orm import Session
 
+from app.core.metrics import application_metrics
 from app.core.errors import (
     GenerationProviderError,
     InvalidGenerationProviderResponseError,
@@ -179,6 +180,15 @@ class RagService:
                 **metadata,
             },
         )
+        application_metrics.record_ai_operation(
+            operation="rag_answer",
+            outcome=status,
+        )
+        application_metrics.record_llm_tokens(
+            operation="rag_answer",
+            input_tokens=input_tokens,
+            output_tokens=output_tokens,
+        )
 
     def answer(
         self,
@@ -264,6 +274,10 @@ class RagService:
                     "top_k": request.top_k,
                     "min_similarity": request.min_similarity,
                 },
+            )
+            application_metrics.record_ai_operation(
+                operation="rag_answer",
+                outcome="provider_failure",
             )
             raise
 
