@@ -1,6 +1,6 @@
 # Engineering Issue #012 — Embedding Pipeline Foundation
 
-<!-- codex-dispatch-supervisor-approved-through: CP1 -->
+<!-- codex-dispatch-supervisor-approved-through: CP2 -->
 <!-- codex-dispatch-write-allow: ["compose.yaml",".github/workflows/backend-tests.yml","requirements/base.txt",".env.example","app/core/config.py","app/core/errors.py","app/models/knowledge_chunk.py","app/models/__init__.py","app/repositories/knowledge.py","app/repositories/embedding.py","app/services/chunking.py","app/services/embedding.py","app/integrations/__init__.py","app/integrations/embeddings.py","app/schemas/embedding.py","app/api/routes/knowledge.py","migrations/versions/*embedding*.py","tests/test_config.py","tests/test_chunking.py","tests/test_embedding_provider.py","tests/test_embedding_model.py","tests/test_embedding_repository.py","tests/test_embedding_service.py","tests/test_embedding_api.py","tests/test_embedding_migration.py","tests/test_knowledge_migration.py","tests/test_migrations.py","docs/issues/issue-012-embedding-pipeline.md"] -->
 
 ## GitHub Tracking
@@ -617,7 +617,7 @@ Supervisor-controlled:
 
 - [x] CP0 — Context bootstrap / contradiction detection
 - [x] CP1 — Architecture + Scope validation
-- [ ] CP2 — Bounded implementation
+- [x] CP2 — Bounded implementation
 - [ ] CP3 — Targeted + full verification
 - [ ] CP4 — Security / provider / vector review
 - [ ] CP5 — Knowledge + documentation sync
@@ -700,10 +700,27 @@ Deduplicate in CP5:
 
 ## Current State
 
-CP0 and CP1 are complete.
+CP0–CP2 are complete.
 
-Supervisor approval marker: **CP1**.
+Implemented Product boundary:
 
-CP2 is authorized.
+- pgvector PostgreSQL 16 development/CI image
+- vector extension migration
+- KnowledgeChunk vector(1536) persistence
+- deterministic char-v1 chunking + config hash
+- SDK-independent EmbeddingProvider Protocol
+- OpenAI text-embedding-3-small adapter with explicit 1536 dimensions
+- bounded batch size
+- Service-owned external-call / DB transaction boundary
+- idempotent COMPLETE path with no provider call
+- partial-state fail-closed behavior
+- concurrent post-provider recheck
+- atomic KnowledgeChunk + Audit transaction
+- metadata-only admin API
+- focused Unit/API/Migration tests
 
-No CP2 Product implementation evidence exists yet.
+Supervisor approval marker: **CP2**.
+
+Next action: CP3 GitHub-hosted exact-head verification.
+
+No #013 vector search/indexing is authorized.
