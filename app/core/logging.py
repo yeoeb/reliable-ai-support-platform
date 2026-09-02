@@ -39,44 +39,48 @@ _STANDARD_LOG_RECORD_FIELDS = {
     "threadName",
 }
 
-_SENSITIVE_KEYS = {
+_SENSITIVE_KEY_CANONICALS = {
     "password",
-    "password_hash",
+    "passwordhash",
     "token",
-    "access_token",
+    "accesstoken",
     "authorization",
-    "authorization_header",
+    "authorizationheader",
     "cookie",
-    "set_cookie",
+    "setcookie",
     "secret",
-    "jwt_secret",
-    "jwt_secret_key",
-    "api_key",
-    "database_url",
-    "connection_string",
-    "postgres_password",
+    "jwtsecret",
+    "jwtsecretkey",
+    "apikey",
+    "databaseurl",
+    "connectionstring",
+    "postgrespassword",
 }
 
 
-def _normalize_key(key: str) -> str:
-    return key.strip().lower().replace("-", "_")
+def _canonical_key(key: str) -> str:
+    return "".join(
+        character
+        for character in key.strip().lower()
+        if character.isalnum()
+    )
 
 
 def _is_sensitive_key(key: str) -> bool:
-    normalized = _normalize_key(key)
+    canonical = _canonical_key(key)
 
-    if normalized in _SENSITIVE_KEYS:
+    if canonical in _SENSITIVE_KEY_CANONICALS:
         return True
 
-    return normalized.endswith(
+    return canonical.endswith(
         (
-            "_password",
-            "_password_hash",
-            "_access_token",
-            "_authorization",
-            "_cookie",
-            "_api_key",
-            "_secret",
+            "password",
+            "passwordhash",
+            "accesstoken",
+            "authorization",
+            "cookie",
+            "apikey",
+            "secret",
         )
     )
 
@@ -103,6 +107,13 @@ def _sanitize_value(value: Any) -> Any:
 
 class JsonFormatter(logging.Formatter):
     def format(self, record: logging.LogRecord) -> str:
+        context_request_id = get_request_id()
+        record_request_id = getattr(
+            record,
+            "request_id",
+            None,
+        )
+
         payload: dict[str, Any] = {
             "timestamp": datetime.now(timezone.utc)
             .isoformat()
@@ -111,10 +122,10 @@ class JsonFormatter(logging.Formatter):
             "logger": record.name,
             "message": record.getMessage(),
             "event": getattr(record, "event", None),
-            "request_id": getattr(
-                record,
-                "request_id",
-                get_request_id(),
+            "request_id": (
+                context_request_id
+                if context_request_id is not None
+                else record_request_id
             ),
         }
 
