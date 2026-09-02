@@ -4,7 +4,7 @@ Production-oriented internal AI support platform built with FastAPI, PostgreSQL,
 
 The project is being developed incrementally toward a complete AI support system with RAG, controlled tool calling, human approval, evaluation, security testing, and observability.
 
-Current status: backend foundation, persistence, migrations, authentication, database-backed RBAC, durable security audit logging, structured request-correlated logging, bounded knowledge ingestion, deterministic chunking, OpenAI embedding integration behind an explicit provider boundary, pgvector vector persistence, authorized exact vector retrieval, grounded RAG answer generation with server-validated evidence citations, and GitHub-hosted backend verification are implemented. Controlled Tool Calling remains the next AI execution boundary.
+Current status: backend foundation, persistence, migrations, authentication, database-backed RBAC, durable security audit logging, structured request-correlated logging, bounded knowledge ingestion, deterministic chunking, OpenAI embedding integration behind an explicit provider boundary, pgvector vector persistence, authorized exact vector retrieval, grounded RAG answer generation with server-validated evidence citations, controlled read-only Tool Calling, and GitHub-hosted backend verification are implemented. Human Approval for higher-risk Tool actions remains the next AI execution boundary.
 
 Why This Project
 
@@ -507,17 +507,21 @@ Server-owned citation validation
 
 Zero-evidence generation bypass
 
+Controlled read-only Tool Calling
+
+Server-owned Tool Registry and strict argument validation
+
+Execution-time database-backed permission re-check
+
+Single-Tool execution bound with no Tool access during finalization
+
 Next
 
-Controlled Tool Calling
+Human Approval for higher-risk Tool actions
 
 Planned AI Layer
 
-Controlled agent tool calling
-
-Tool parameter validation
-
-Human confirmation for high-risk actions
+Human confirmation for higher-risk Tool actions
 
 Planned Reliability & AI Safety
 

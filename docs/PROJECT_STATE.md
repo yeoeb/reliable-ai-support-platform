@@ -57,7 +57,10 @@ Engineering Issue ID #015 — Controlled Tool Calling foundation
 - CP0 Context Bootstrap: completed
 - CP1 Architecture / Plan: completed and Supervisor-approved
 - CP2 bounded implementation: completed through Supervisor fallback and reviewed
-- Current Checkpoint: CP3 authorized
+- CP3 Verification: completed after one bounded test-maintenance fix
+- CP4 Security / Authorization Review: completed
+- CP5 Knowledge / Documentation: completed
+- Current Checkpoint: CP6 final exact-Head verification
 - V1 Tool: `platform_readiness` only
 - V1 Tool risk: read-only
 - V1 Tool execution bound: maximum one Tool per request
