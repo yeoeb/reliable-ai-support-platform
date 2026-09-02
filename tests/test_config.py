@@ -70,3 +70,30 @@ def test_jwt_secret_is_secret_type() -> None:
     assert "super-secret-value" not in repr(
         settings.jwt_secret_key
     )
+
+
+def test_log_level_defaults_to_info() -> None:
+    settings = make_settings()
+
+    assert settings.log_level == "INFO"
+
+
+def test_log_level_is_normalized() -> None:
+    settings = make_settings(
+        log_level="debug",
+    )
+
+    assert settings.log_level == "DEBUG"
+
+
+def test_invalid_log_level_is_rejected() -> None:
+    import pytest
+    from pydantic import ValidationError
+
+    with pytest.raises(
+        ValidationError,
+        match="LOG_LEVEL",
+    ):
+        make_settings(
+            log_level="verbose",
+        )
