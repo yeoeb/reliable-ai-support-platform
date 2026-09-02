@@ -62,7 +62,8 @@ Engineering Issue ID #020 — CI / Release Hardening foundation
 - Active Branch: `feature/issue-020-release-hardening`
 - CP0 Release / Branch-State Inventory: completed
 - CP1 Release Promotion Architecture: completed and Supervisor-approved
-- Current Checkpoint: CP2 Supervisor-controlled implementation
+- CP2 Supervisor-controlled workflow/verifier implementation: completed and reviewed
+- Current Checkpoint: CP3 GitHub-hosted verification
 - One-time ancestry reconciliation commit: `abe393dbe6a3b8b4f07301708f35fcaedab7add4`
 - Reconciliation preserved the exact pre-sync develop tree while adding main ancestry
 - Release contract: same-repo `develop → main`
