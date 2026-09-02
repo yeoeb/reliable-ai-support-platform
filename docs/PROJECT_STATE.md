@@ -47,15 +47,18 @@ Required state surfaces:
 
 The Dispatcher uses Stable `codex exec` as its local execution boundary. It does not attempt to inject prompts into an already-open VS Code/Desktop Codex UI session.
 
-## Next Product Engineering Issue
+## Current Product Engineering Issue
 
-Engineering Issue ID #014 — RAG response with evidence / citations
+Engineering Issue ID #014 — Grounded RAG response with evidence / citations
 
-- Status: not started
-- Normal base Branch: `develop`
-- Dependency baseline: Knowledge Ingestion, Embedding Pipeline, Exact Retrieval, RBAC, Audit, Structured Logging, and Backend Verification are complete
+- GitHub tracking Issue: #65
+- Active Branch: `feature/issue-014-rag-grounded-answer`
+- CP0 Context Bootstrap: completed
+- CP1 Architecture / Plan: completed and Supervisor-approved
+- Current Checkpoint: CP2 authorized
+- Remote write Allowlist: configured
 - Retrieval evidence boundary: retrieved KnowledgeChunk content remains untrusted context
-- Product boundary must be defined by a new GitHub tracking Issue and CP0/CP1 before implementation begins
+- Tool Calling / hosted tools: explicitly out of scope
 
 Important: GitHub Issue/PR numbers are repository-wide platform sequence numbers and remain separate from Engineering Issue IDs.
 
