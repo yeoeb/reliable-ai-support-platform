@@ -567,7 +567,9 @@ Row-locked one-time decision with approval-time permission re-check
 
 Atomic support_agent mutation + Approval / RBAC Audit transaction
 
-Planned AI Layer
+Next
+
+LLM Evaluation foundation
 
 Planned Reliability & AI Safety
 
