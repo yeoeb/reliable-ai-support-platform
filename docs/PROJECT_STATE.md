@@ -49,10 +49,11 @@ Engineering Issue ID #010 — Structured Logging / Observability foundation
 
 - GitHub tracking Issue: #44
 - Active Branch: `feature/issue-010-structured-logging`
-- Current Checkpoint: CP2 authorized
+- Current Checkpoint: CP4 review
 - CP0 Context Bootstrap: completed
 - CP1 Architecture / Scope: completed and Supervisor-approved
-- CP2 implementation: pending Executor
+- CP2 implementation: completed via bounded Supervisor fallback
+- CP3 verification: completed (207 backend + 1 recovery test; Alembic round-trip PASS)
 - Product boundary: runtime Application Logs remain separate from durable Audit Events
 
 Branch resolution is now remote and fail-closed: the Watcher launcher accepts exactly one `feature/issue-NNN-*` branch for the requested Engineering Issue.
