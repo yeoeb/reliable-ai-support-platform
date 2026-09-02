@@ -1,7 +1,7 @@
 # Engineering Issue #015 — Controlled Read-Only Tool Calling Foundation
 
 <!-- codex-dispatch-supervisor-approved-through: CP2 -->
-<!-- codex-dispatch-write-allow: ["app/tools/__init__.py","app/tools/registry.py","app/tools/system.py","app/integrations/llm.py","app/services/tool_execution.py","app/services/agent.py","app/schemas/agent.py","app/api/routes/agent.py","app/core/errors.py","app/main.py","migrations/versions/*tool*.py","tests/test_tool_*.py","tests/test_agent_*.py","docs/issues/issue-015-controlled-tool-calling.md"] -->
+<!-- codex-dispatch-write-allow: ["app/tools/__init__.py","app/tools/registry.py","app/tools/system.py","app/integrations/llm.py","app/services/tool_execution.py","app/services/agent.py","app/schemas/agent.py","app/api/routes/agent.py","app/core/errors.py","app/main.py","migrations/versions/*tool*.py","tests/test_tool_*.py","tests/test_agent_*.py","tests/test_retrieval_migration.py","docs/issues/issue-015-controlled-tool-calling.md"] -->
 
 ## GitHub Tracking
 
@@ -512,3 +512,26 @@ No blocking CP2 finding remains.
 Remote Supervisor approval: **CP2**.
 
 Next authorized action: **CP3 verification**.
+
+
+## CP3 Attempt 1
+
+GitHub-hosted verification on Head `988a6017bb44f9a3601cf17705804ce6922703fe`:
+
+- Dispatcher Tests #112: **PASS**
+- Database recovery: **PASS**
+- Backend regression: **387 passed, 1 failed**
+- Alembic upgrade through new #015 revision: **PASS**
+
+Only failure:
+
+`tests/test_retrieval_migration.py::test_retrieval_migration_is_linear_head`
+
+The #013 regression test hardcoded its historical revision `c83b5d6e7f92` as the permanent global Alembic head. #015 correctly adds `d94c6e7f8a03` after it, so the old assertion became stale.
+
+CP3 bounded rework authorization:
+
+- add `tests/test_retrieval_migration.py` to the write scope;
+- preserve #013's revision/down-revision/index/permission invariants;
+- remove only the invalid assumption that #013 must remain the global head;
+- do not weaken the repository-wide single-head check in `tests/test_migrations.py`.
