@@ -671,7 +671,7 @@ Release Verification is repository promotion evidence, not production deployment
 
 Next
 
-First hardened develop → main release promotion
+First hardened develop → main release promotion using Release Verification
 
 Planned Reliability & AI Safety
 
