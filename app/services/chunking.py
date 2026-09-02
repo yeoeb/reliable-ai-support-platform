@@ -6,9 +6,6 @@ from hashlib import sha256
 
 
 CHUNKING_STRATEGY = "char-v1"
-EMBEDDING_PROVIDER_NAME = "openai"
-
-
 @dataclass(frozen=True)
 class TextChunk:
     index: int
@@ -99,13 +96,14 @@ def split_into_chunks(
 
 def build_embedding_pipeline_config(
     *,
+    provider_name: str,
     chunk_size: int,
     chunk_overlap: int,
     embedding_model: str,
     embedding_dimensions: int,
 ) -> EmbeddingPipelineConfig:
     return EmbeddingPipelineConfig(
-        provider_name=EMBEDDING_PROVIDER_NAME,
+        provider_name=provider_name,
         chunking_strategy=CHUNKING_STRATEGY,
         chunk_size=chunk_size,
         chunk_overlap=chunk_overlap,
