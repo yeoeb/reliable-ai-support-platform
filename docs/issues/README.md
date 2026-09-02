@@ -77,3 +77,7 @@ Repository Issue URL / number
 - The Dispatcher reads approval from `origin/<feature-branch>`, not the mutable local Working Tree.
 - Update Current State at every meaningful Checkpoint.
 - At completion, preserve only decisions/evidence useful for future maintenance.
+- Complete every branch-changing documentation update before requesting Final CI.
+- Treat the Final CI result as evidence for one exact Head SHA.
+- After Final CI passes, record CI run IDs/results in the GitHub PR or Issue comment; do not commit those results back into the Feature Branch.
+- Any commit after Final CI creates a new Head and requires a new exact-Head verification.
