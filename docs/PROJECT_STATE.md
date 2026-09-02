@@ -51,12 +51,13 @@ Engineering Issue ID #012 — Embedding Pipeline foundation
 
 - GitHub tracking Issue: #54
 - Active Branch: `feature/issue-012-embedding-pipeline`
-- Current Checkpoint: CP5 knowledge/documentation sync
+- Current Checkpoint: CP6 delivery
 - CP0 Context Bootstrap: completed
 - CP1 Architecture / Scope: completed and Supervisor-approved
 - CP2 implementation: completed via bounded Supervisor fallback
 - CP3 verification: completed (306 backend + 1 recovery test; pgvector/Alembic round-trip PASS)
 - CP4 Security / Provider / Vector review: completed
+- CP5 Knowledge / Documentation synchronization: completed
 - Product boundary: deterministic chunking + OpenAI embedding + pgvector persistence; vector search/indexing/RAG remain deferred
 - External data boundary: Knowledge chunk text may be sent to configured OpenAI Embeddings API only when the endpoint is explicitly invoked
 
@@ -121,6 +122,11 @@ Service Layer owns transaction boundaries.
 - Knowledge ingestion treats document content as untrusted data, not executable instructions.
 - KnowledgeDocument persistence is normalized and content-addressed with a database idempotency backstop.
 - Knowledge admin writes use dedicated RBAC permission and atomic Audit persistence.
+- Embedding pipeline sends bounded KnowledgeChunk text only through an explicit external Provider boundary.
+- External provider waits must not intentionally hold an open database transaction.
+- Persisted embeddings are deterministic per document + pipeline configuration and stored as pgvector vector(1536).
+- Provider output is validated before persistence; chunk/vector/API-key data is excluded from Audit and runtime logs.
+- Vector storage does not imply Retrieval: similarity search/indexing remains a separate architecture boundary.
 
 ### Planned AI Boundary
 
