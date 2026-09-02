@@ -258,3 +258,42 @@ Dispatcher 不負責：
 - 操控已開啟的 VS Code / Desktop Codex UI
 
 這些仍由 GPT Supervisor 或後續獨立 Review 的 Orchestration Layer 負責。
+
+
+## CP6 Exact-Head Delivery Rule
+
+CP6 的 Branch-changing 工作必須在 Final CI **之前**完成：
+
+1. 完成 Product Code / tests。
+2. 完成 execution note、PROJECT_STATE、README/architecture 等必要 Repository 文件。
+3. 確認沒有預期中的下一個 Branch commit。
+4. 記錄 Final Head SHA。
+5. 只對這個 exact Head 等待 GitHub Actions。
+6. Backend / Dispatcher Checks 全部通過後，把 run ID、結果、Head SHA 寫到 PR / Issue Comment。
+7. 不再 Commit 「CI passed」或 Delivery Evidence 回 Feature Branch。
+8. Head SHA 未變才可 Merge。
+
+如果 Final CI 後又發現必須修改 Repository：
+
+```text
+make required commit
+→ new Head SHA
+→ previous Final CI is stale
+→ run exact-Head CI again
+```
+
+### 為什麼 Evidence 放 Comment
+
+GitHub PR/Issue Comment 不改變 Git Branch Head，因此可以保存：
+
+- exact Head SHA
+- workflow run ID
+- test result
+- reviewer finding
+- merge decision
+
+而不會重新觸發同一個 Pull Request 的 CI。
+
+### Workflow Concurrency
+
+Verification workflows 使用 PR/ref-scoped `concurrency` 並 `cancel-in-progress: true`。當同一 PR 出現新 Head 時，舊的 in-progress verification 應被取消，避免 stale CI 浪費 Runner 時間。
