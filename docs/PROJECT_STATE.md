@@ -49,12 +49,13 @@ Engineering Issue ID #011 — Knowledge Ingestion foundation
 
 - GitHub tracking Issue: #50
 - Active Branch: `feature/issue-011-knowledge-ingestion`
-- Current Checkpoint: CP5 knowledge/documentation sync
+- Current Checkpoint: CP6 delivery
 - CP0 Context Bootstrap: completed
 - CP1 Architecture / Scope: completed and Supervisor-approved
 - CP2 implementation: completed via bounded Supervisor fallback
 - CP3 verification: completed (235 backend + 1 recovery test; Alembic round-trip PASS)
 - CP4 Security / Ingestion review: completed
+- CP5 Knowledge / Documentation synchronization: completed
 - Product boundary: normalized text/Markdown persistence only; chunking/embedding/retrieval/LLM remain deferred
 
 Important: GitHub Issue/PR numbers are repository-wide platform sequence numbers and remain separate from Engineering Issue IDs.
@@ -116,6 +117,9 @@ Service Layer owns transaction boundaries.
 - Structured runtime logs use server-generated Request IDs and request-scoped ContextVar correlation.
 - Runtime request logging must not capture raw Request Body, Query String, Authorization/Cookie headers, or arbitrary unmatched raw paths.
 - Runtime Application Logs and durable Audit Events remain separate observability/accountability surfaces.
+- Knowledge ingestion treats document content as untrusted data, not executable instructions.
+- KnowledgeDocument persistence is normalized and content-addressed with a database idempotency backstop.
+- Knowledge admin writes use dedicated RBAC permission and atomic Audit persistence.
 
 ### Planned AI Boundary
 
