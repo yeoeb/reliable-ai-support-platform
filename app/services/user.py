@@ -36,7 +36,10 @@ class UserService:
                     display_name=data.display_name,
                 )
             except IntegrityError as exc:
-                logger.warning("event=user.create.conflict")
+                logger.warning(
+                    "User creation conflict",
+                    extra={"event": "user.create.conflict"},
+                )
                 raise UserAlreadyExistsError from exc
 
             self.credential_repository.create(
@@ -60,8 +63,11 @@ class UserService:
             self.session.refresh(user)
 
             logger.info(
-                "event=user.create.succeeded user_id=%s",
-                user.id,
+                "User created",
+                extra={
+                    "event": "user.create.succeeded",
+                    "user_id": str(user.id),
+                },
             )
 
             return user
@@ -74,7 +80,10 @@ class UserService:
             self.session.rollback()
 
             logger.error(
-                "event=user.create.default_role_missing"
+                "Default user role is not configured",
+                extra={
+                    "event": "user.create.default_role_missing"
+                },
             )
 
             raise
@@ -83,7 +92,10 @@ class UserService:
             self.session.rollback()
 
             logger.error(
-                "event=user.create.persistence_failure"
+                "User creation persistence failed",
+                extra={
+                    "event": "user.create.persistence_failure"
+                },
             )
 
             raise PersistenceUnavailableError from exc
@@ -92,7 +104,10 @@ class UserService:
             self.session.rollback()
 
             logger.error(
-                "event=user.create.role_assignment_failed"
+                "Default role assignment failed",
+                extra={
+                    "event": "user.create.role_assignment_failed"
+                },
             )
 
             raise
@@ -103,7 +118,10 @@ class UserService:
 
         except OperationalError as exc:
             logger.error(
-                "event=user.list.persistence_failure"
+                "User listing persistence failed",
+                extra={
+                    "event": "user.list.persistence_failure"
+                },
             )
 
             raise PersistenceUnavailableError from exc
