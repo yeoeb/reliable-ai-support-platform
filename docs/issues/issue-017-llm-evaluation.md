@@ -1,6 +1,6 @@
 # Engineering Issue #017 — Offline LLM Evaluation Foundation
 
-<!-- codex-dispatch-supervisor-approved-through: CP1 -->
+<!-- codex-dispatch-supervisor-approved-through: CP2 -->
 <!-- codex-dispatch-write-allow: ["app/evaluation/__init__.py","app/evaluation/schemas.py","app/evaluation/loader.py","app/evaluation/scorer.py","app/evaluation/runner.py","app/evaluation/prompt_fingerprints.py","app/integrations/llm.py","evals/README.md","evals/suites/v1/suite.json","evals/suites/v1/cases.jsonl","evals/suites/v1/baseline_results.jsonl","tests/test_evaluation_*.py","docs/issues/issue-017-llm-evaluation.md"] -->
 
 ## GitHub Tracking
@@ -533,7 +533,7 @@ No Product DB schema or runtime API change is required.
 
 - [x] CP0 — Evaluation surface discovery
 - [x] CP1 — Offline evaluation architecture
-- [ ] CP2 — Bounded implementation
+- [x] CP2 — Bounded implementation
 - [ ] CP3 — Verification / negative-case regression
 - [ ] CP4 — Evaluation validity / safety review
 - [ ] CP5 — Knowledge / documentation
@@ -588,3 +588,40 @@ Implemented:
 Focused tests are authored but have not been represented as executed by the Supervisor fallback environment.
 
 Remote approval remains CP1 until CP2 review is complete.
+
+
+## CP2 Supervisor Review
+
+Status: **PASS**
+
+Reviewed fallback Head:
+
+`f9d5dcea0256e56a55e02d770d1226e3d3f70859`
+
+Confirmed:
+
+- Prompt semantics were not changed to improve Eval scores.
+- Stable Prompt IDs and SHA-256 fingerprints are derived from the existing instruction text.
+- Suite manifest is strict and pins the current Prompt fingerprints.
+- Prompt drift fails explicitly.
+- JSON/JSONL input is bounded to 1 MiB and 1000 records.
+- Manifest case path is constrained to the suite directory after path resolution.
+- Unknown/duplicate/missing Case or Result IDs fail explicitly.
+- Candidate Case type mismatch fails explicitly.
+- RAG scorer checks answerability, citation integrity, required citation coverage, and bounded answer fragments.
+- Tool scorer checks direct/tool decision, exact Tool name, exact arguments, and allowed Tool names.
+- Unauthorized Tool selection is a safety violation even outside a safety-critical Case.
+- Safety-critical Case failure counts at most once per Case.
+- Reports use finite deterministic metrics with defined zero-denominator behavior.
+- CLI distinguishes threshold failure (1) from malformed input (2).
+- Seed corpus has exactly 12 synthetic Cases and matching Results.
+- Corpus includes prompt-injection evidence, invented-citation safety, admin escalation, shell, and unauthorized Tool scenarios.
+- Baseline README states explicitly that 100% is a deterministic scorer fixture, not a live-model score.
+- Evaluation package has no Product DB, ToolExecution, Approval, subprocess, shell, dynamic import, arbitrary HTTP, or OpenAI client invocation path.
+- No GitHub workflow file was changed.
+
+No blocking CP2 finding remains.
+
+Remote Supervisor approval: **CP2**.
+
+Next authorized action: **CP3 full verification / negative-case regression**.
