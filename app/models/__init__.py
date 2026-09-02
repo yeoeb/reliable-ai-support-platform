@@ -1,3 +1,4 @@
+from app.models.approval_request import ApprovalRequest
 from app.models.audit_event import AuditEvent
 from app.models.knowledge_chunk import KnowledgeChunk
 from app.models.knowledge_document import KnowledgeDocument
@@ -9,6 +10,7 @@ from app.models.user_credential import UserCredential
 from app.models.user_role import UserRole
 
 __all__ = [
+    "ApprovalRequest",
     "AuditEvent",
     "KnowledgeChunk",
     "KnowledgeDocument",
