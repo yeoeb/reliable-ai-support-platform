@@ -258,6 +258,35 @@ def test_content_length_is_bounded() -> None:
     assert response.status_code == 422
 
 
+def test_raw_content_limit_cannot_be_bypassed_by_outer_whitespace() -> None:
+    app.dependency_overrides[
+        require_knowledge_manage
+    ] = override_knowledge_manager
+    app.dependency_overrides[get_db] = override_db
+
+    oversized_raw_content = (
+        " "
+        + (
+            "x"
+            * MAX_KNOWLEDGE_CONTENT_CHARS
+        )
+        + " "
+    )
+
+    try:
+        response = client.post(
+            "/admin/knowledge/documents",
+            json={
+                **valid_payload(),
+                "content": oversized_raw_content,
+            },
+        )
+    finally:
+        app.dependency_overrides.clear()
+
+    assert response.status_code == 422
+
+
 def test_ingest_requires_authentication() -> None:
     response = client.post(
         "/admin/knowledge/documents",
