@@ -1,6 +1,6 @@
 # Engineering Issue #011 — Knowledge Document Ingestion Foundation
 
-<!-- codex-dispatch-supervisor-approved-through: CP5 -->
+<!-- codex-dispatch-supervisor-approved-through: CP6 -->
 <!-- codex-dispatch-write-allow: ["app/models/knowledge_document.py","app/models/__init__.py","app/repositories/knowledge.py","app/services/knowledge.py","app/schemas/knowledge.py","app/api/routes/knowledge.py","app/main.py","app/core/errors.py","migrations/versions/*knowledge*.py","tests/test_knowledge_model.py","tests/test_knowledge_repository.py","tests/test_knowledge_service.py","tests/test_knowledge_api.py","tests/test_knowledge_migration.py","tests/test_migrations.py","docs/issues/issue-011-knowledge-ingestion.md"] -->
 
 ## GitHub Tracking
@@ -349,7 +349,7 @@ Supervisor-controlled only:
 - [x] CP3 — Targeted + full verification
 - [x] CP4 — Security / ingestion review
 - [x] CP5 — Knowledge + documentation sync
-- [ ] CP6 — PR delivery evidence
+- [x] CP6 — PR delivery evidence
 
 ## Supervisor Fallback Execution
 
@@ -518,7 +518,7 @@ Deduplicate in CP5:
 
 ## Current State
 
-CP0–CP5 are complete.
+Engineering Issue #011 is complete and ready for Delivery.
 
 Final reviewed Product/Test Head before CP5 documentation:
 
@@ -529,9 +529,16 @@ Final reviewed Product/Test Head before CP5 documentation:
 - PostgreSQL 16 + Alembic upgrade/downgrade/re-upgrade: PASS
 - CP4 Security / Ingestion Review: PASS
 - CP5 Notion Knowledge Capture: complete
+- README / Project State synchronization: complete
 
-Supervisor approval marker: **CP5**.
+The documentation-inclusive Draft Head also passed:
 
-Next action: CP6 PR delivery.
+- Backend regression: **235 passed**
+- Database recovery: **1 passed**
+- Dispatcher / Branch Resolver: **87 passed**
 
-No further Product Code change is authorized unless final exact-head verification discovers a failure.
+Supervisor approval marker: **CP6**.
+
+The final non-Draft Delivery PR must run exact-head GitHub-hosted verification before Merge.
+
+No known merge-blocking finding remains.
