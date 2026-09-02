@@ -152,6 +152,11 @@ class RetrievalService:
     ) -> KnowledgeSearchServiceResult:
         config_hash = self._config_hash()
 
+        # Authorization dependencies may have opened a read transaction
+        # on this shared request Session. Close it before waiting on the
+        # external Embedding Provider.
+        self.session.rollback()
+
         try:
             provider_result = self.provider.embed(
                 [request.query]
