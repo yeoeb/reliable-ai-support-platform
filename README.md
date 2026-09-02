@@ -323,6 +323,20 @@ protected current-user lookup
 
 invalid / expired token rejection
 
+Knowledge Administration
+
+POST /admin/knowledge/documents
+
+POST /admin/knowledge/documents/{document_id}/embeddings
+
+Both endpoints require the database-backed `knowledge:manage` permission.
+
+Knowledge ingestion accepts bounded text / Markdown and returns metadata without echoing document content.
+
+Embedding creation uses deterministic chunking, an explicit OpenAI provider boundary, and pgvector vector(1536) persistence. Existing complete embeddings return idempotently without calling the provider again.
+
+Retrieval / similarity search is not implemented yet.
+
 Reliability & Security Principles
 
 Fail explicitly instead of silently ignoring errors.
