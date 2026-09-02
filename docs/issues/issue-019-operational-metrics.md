@@ -1,6 +1,6 @@
 # Engineering Issue #019 — Operational Metrics / Monitoring Foundation
 
-<!-- codex-dispatch-supervisor-approved-through: CP1 -->
+<!-- codex-dispatch-supervisor-approved-through: CP2 -->
 <!-- codex-dispatch-write-allow: ["requirements/base.txt","app/core/metrics.py","app/api/routes/metrics.py","app/api/middleware/request_logging.py","app/main.py","app/services/rag.py","app/services/agent.py","tests/test_metrics.py","tests/test_request_metrics.py","tests/test_ai_metrics.py","tests/test_metrics_api.py","docs/issues/issue-019-operational-metrics.md"] -->
 
 ## GitHub Tracking
@@ -489,7 +489,7 @@ No migration, model, repository, DB schema, Docker Compose, or GitHub workflow c
 
 - [x] CP0 — Observability / metric-surface inventory
 - [x] CP1 — Low-cardinality Prometheus metrics architecture
-- [ ] CP2 — Bounded implementation
+- [x] CP2 — Bounded implementation
 - [ ] CP3 — Verification / cardinality & failure regression
 - [ ] CP4 — Observability / security review
 - [ ] CP5 — Knowledge / documentation
@@ -540,3 +540,42 @@ Fallback CP2 implements:
 No full regression is represented as executed by the Supervisor fallback environment.
 
 Remote approval remains CP1 until CP2 review is complete.
+
+
+## CP2 Supervisor Review
+
+Status: **PASS**
+
+Reviewed fallback commits:
+
+- `63e51f67034bf68ee903824b1293a4a61b87e623`
+- `6c901e4bf05f09447ae55b504835fc3ee6183df0`
+
+Confirmed:
+
+- runtime dependency is limited to `prometheus-client>=0.20,<1.0`;
+- application metrics use a dedicated custom `CollectorRegistry`;
+- no default process/python metric registry is exposed;
+- HTTP Counter labels are exactly method / route / status_class;
+- HTTP Histogram labels are exactly method / route;
+- route labels come from the existing server-owned route-template resolver;
+- unmatched requests collapse to `<unmatched>`;
+- unknown methods normalize to `OTHER`;
+- status is grouped to fixed classes or `unknown`;
+- `/metrics` self-scrape is excluded from Product request metrics;
+- AI outcome labels use fixed operation/outcome pairs only;
+- LLM token metrics use fixed operation/direction labels only;
+- no user/request/document/chunk/Approval/Tool/model/prompt/content IDs or values are metric labels;
+- scrape endpoint is hidden from OpenAPI and has no JWT/DB/OpenAI/Tool/Approval dependency;
+- metrics recording is best-effort inside `ApplicationMetrics`;
+- RequestLoggingMiddleware also catches an injected recorder failure so a telemetry failure cannot convert a successful Product response into a 500;
+- Request ID and structured lifecycle logging remain in the same middleware boundary;
+- RAG metrics record bounded outcomes and aggregate token totals only;
+- Agent metrics record completed / approval_required plus aggregate tokens only;
+- no migration, database model, Docker Compose, or GitHub workflow change exists.
+
+No blocking CP2 finding remains.
+
+Remote Supervisor approval: **CP2**.
+
+Next authorized action: **CP3 full GitHub-hosted verification / cardinality & failure regression**.
