@@ -13,7 +13,10 @@ from app.core.errors import PersistenceUnavailableError
 from app.db.session import get_db
 from app.main import app
 from app.models.knowledge_document import KnowledgeDocument
-from app.schemas.knowledge import MAX_KNOWLEDGE_CONTENT_CHARS
+from app.schemas.knowledge import (
+    MAX_KNOWLEDGE_CONTENT_CHARS,
+    KnowledgeDocumentCreate,
+)
 from app.services.knowledge import KnowledgeIngestResult, KnowledgeService
 
 
@@ -230,6 +233,23 @@ def test_source_type_is_restricted() -> None:
         app.dependency_overrides.clear()
 
     assert response.status_code == 422
+
+
+def test_exact_maximum_content_length_is_accepted() -> None:
+    data = KnowledgeDocumentCreate(
+        title="Runbook",
+        source_type="text",
+        source_name="runbook.txt",
+        content=(
+            "x"
+            * MAX_KNOWLEDGE_CONTENT_CHARS
+        ),
+    )
+
+    assert (
+        len(data.content)
+        == MAX_KNOWLEDGE_CONTENT_CHARS
+    )
 
 
 def test_content_length_is_bounded() -> None:
