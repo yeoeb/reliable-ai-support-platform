@@ -1,7 +1,7 @@
 # Engineering Issue #013 — Exact Vector Retrieval Foundation
 
 <!-- codex-dispatch-supervisor-approved-through: CP1 -->
-<!-- codex-dispatch-write-allow: ["app/core/errors.py","app/schemas/retrieval.py","app/repositories/retrieval.py","app/services/retrieval.py","app/api/routes/retrieval.py","app/main.py","migrations/versions/*retrieval*.py","tests/test_retrieval_schema.py","tests/test_retrieval_repository.py","tests/test_retrieval_service.py","tests/test_retrieval_api.py","tests/test_retrieval_migration.py","tests/integration/test_vector_retrieval.py","tests/test_migrations.py","docs/issues/issue-013-vector-retrieval.md"] -->
+<!-- codex-dispatch-write-allow: ["app/core/errors.py","app/schemas/retrieval.py","app/repositories/retrieval.py","app/services/retrieval.py","app/api/routes/retrieval.py","app/main.py","migrations/versions/*retrieval*.py","tests/test_retrieval_schema.py","tests/test_retrieval_repository.py","tests/test_retrieval_service.py","tests/test_retrieval_api.py","tests/test_retrieval_migration.py","tests/integration/test_vector_retrieval.py","tests/test_embedding_migration.py","tests/test_migrations.py","docs/issues/issue-013-vector-retrieval.md"] -->
 
 ## GitHub Tracking
 
@@ -507,6 +507,14 @@ This fallback does **not** bypass:
 The latest repository control-plane rule against delivery-evidence CI retrigger loops remains authoritative.
 
 Branch history must not be represented as a Codex-generated checkpoint unless the Dispatcher actually produced it.
+
+### Scope Expansion — Embedding Migration Regression Test
+
+`tests/test_embedding_migration.py` incorrectly assumes #012 must remain the current Alembic head.
+
+#013 legitimately adds a successor revision, so that test is authorized for bounded maintenance: validate revision `b72a4c5d6e81` directly and keep the parent/pgvector contract, without asserting it is the latest head.
+
+No #012 Product behavior changes.
 
 ## CP2 Ordered Slices
 
