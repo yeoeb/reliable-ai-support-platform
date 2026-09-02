@@ -10,6 +10,15 @@ class KnowledgeRepository:
     def __init__(self, session: Session) -> None:
         self.session = session
 
+    def get_by_id(
+        self,
+        document_id: UUID,
+    ) -> KnowledgeDocument | None:
+        statement = select(KnowledgeDocument).where(
+            KnowledgeDocument.id == document_id
+        )
+        return self.session.scalar(statement)
+
     def get_by_source_name_and_hash(
         self,
         *,
