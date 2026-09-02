@@ -293,6 +293,20 @@ Logging `str(exc)` may expose query/credential/request data; use exception type 
 - [ ] CP5 — Knowledge + documentation sync
 - [ ] CP6 — PR delivery evidence
 
+## Supervisor Fallback Execution
+
+The Remote CP2 gate was authorized, but no Local Watcher/Codex Executor consumed it.
+
+To avoid blocking the Product cycle on local process availability, the Supervisor is performing a bounded fallback implementation directly on the Feature Branch.
+
+This fallback does **not** bypass later gates:
+
+- Product writes remain inside the existing CP2 Write Allowlist.
+- No Control Plane file is modified as Product implementation.
+- CP3 GitHub-hosted verification remains mandatory.
+- CP4 Security / Observability review remains mandatory.
+- The Branch history must not be represented as a Codex-generated checkpoint unless the Dispatcher actually produced it.
+
 ## CP2 Ordered Slices
 
 Codex may implement these in one CP2 turn, preserving the order:
