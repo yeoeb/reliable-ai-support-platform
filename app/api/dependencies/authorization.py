@@ -35,10 +35,12 @@ def require_permission(
             permission_name,
         ):
             logger.info(
-                "event=authorization.denied "
-                "user_id=%s permission=%s",
-                current_user.id,
-                permission_name,
+                "Authorization denied",
+                extra={
+                    "event": "authorization.denied",
+                    "user_id": str(current_user.id),
+                    "permission": permission_name,
+                },
             )
             AuditService(session).record_best_effort(
                 actor_user_id=current_user.id,
