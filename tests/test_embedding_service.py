@@ -7,13 +7,17 @@ from sqlalchemy.exc import OperationalError
 from sqlalchemy.orm import Session
 
 from app.core.errors import (
+    EmbeddingProviderNotConfiguredError,
     EmbeddingProviderUnavailableError,
     EmbeddingStateConflictError,
     InvalidEmbeddingProviderResponseError,
     KnowledgeDocumentNotFoundError,
     PersistenceUnavailableError,
 )
-from app.integrations.embeddings import EmbeddingBatchResult
+from app.integrations.embeddings import (
+    EmbeddingBatchResult,
+    OpenAIEmbeddingProvider,
+)
 from app.repositories.embedding import PersistedChunkState
 from app.services.chunking import split_into_chunks
 from app.services.embedding import EmbeddingService
@@ -415,3 +419,117 @@ def test_service_rejects_malformed_provider_result_shape(
     service.embedding_repository.create_many.assert_not_called()
     service.audit_service.record.assert_not_called()
     session.commit.assert_not_called()
+
+
+
+def test_complete_state_does_not_require_openai_api_key() -> None:
+    provider = OpenAIEmbeddingProvider(
+        api_key=None,
+        model="text-embedding-3-small",
+        dimensions=DIMENSIONS,
+    )
+    service, session, _, document = make_service(
+        provider=provider,
+    )
+    states = complete_states(
+        service,
+        document,
+    )
+    service.embedding_repository.list_states_for_config.return_value = states
+
+    result = service.embed_document(
+        actor_user_id=uuid4(),
+        document_id=document.id,
+    )
+
+    assert result.changed is False
+    assert result.token_usage == 0
+    service.embedding_repository.create_many.assert_not_called()
+    session.commit.assert_called_once()
+
+
+def test_missing_state_requires_openai_api_key_only_at_provider_boundary() -> None:
+    provider = OpenAIEmbeddingProvider(
+        api_key=None,
+        model="text-embedding-3-small",
+        dimensions=DIMENSIONS,
+    )
+    service, session, _, document = make_service(
+        provider=provider,
+    )
+    service.embedding_repository.list_states_for_config.return_value = []
+
+    with pytest.raises(
+        EmbeddingProviderNotConfiguredError,
+    ):
+        service.embed_document(
+            actor_user_id=uuid4(),
+            document_id=document.id,
+        )
+
+    service.embedding_repository.create_many.assert_not_called()
+    service.audit_service.record.assert_not_called()
+    session.commit.assert_not_called()
+    assert session.rollback.call_count == 1
+
+
+def test_audit_and_runtime_log_exclude_content_vector_and_api_key(
+    monkeypatch,
+) -> None:
+    service, session, provider, document = make_service(
+        content="sensitive-chunk-content",
+    )
+    service.embedding_repository.list_states_for_config.side_effect = [
+        [],
+        [],
+    ]
+
+    log_info = MagicMock()
+    monkeypatch.setattr(
+        "app.services.embedding.logger.info",
+        log_info,
+    )
+
+    result = service.embed_document(
+        actor_user_id=uuid4(),
+        document_id=document.id,
+    )
+
+    audit_metadata = (
+        service.audit_service.record.call_args.kwargs[
+            "event_metadata"
+        ]
+    )
+    log_extra = log_info.call_args.kwargs[
+        "extra"
+    ]
+
+    assert set(audit_metadata) == {
+        "embedding_provider",
+        "embedding_model",
+        "embedding_dimensions",
+        "chunk_count",
+        "embedding_config_hash",
+        "changed",
+        "token_usage",
+    }
+    assert set(log_extra) == {
+        "event",
+        "document_id",
+        "embedding_provider",
+        "embedding_model",
+        "embedding_dimensions",
+        "chunk_count",
+        "changed",
+        "token_usage",
+    }
+
+    serialized = (
+        str(audit_metadata)
+        + str(log_extra)
+    )
+    assert "sensitive-chunk-content" not in serialized
+    assert "embedding" not in log_extra
+    assert "vector" not in log_extra
+    assert "api_key" not in serialized
+    assert result.changed is True
