@@ -17,6 +17,8 @@ app = FastAPI(
     version="0.1.0",
 )
 
+app.add_middleware(RequestLoggingMiddleware)
+
 app.include_router(health_router)
 app.include_router(users_router)
 app.include_router(auth_router)
