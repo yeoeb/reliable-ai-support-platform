@@ -64,15 +64,29 @@ def test_json_formatter_uses_request_context() -> None:
     assert get_request_id() is None
 
 
+def test_context_request_id_cannot_be_overridden_by_extra() -> None:
+    token = set_request_id("server-request-id")
+    try:
+        payload = format_record(
+            extra={"request_id": "spoofed-request-id"},
+        )
+    finally:
+        reset_request_id(token)
+
+    assert payload["request_id"] == "server-request-id"
+
+
 def test_json_formatter_redacts_sensitive_structured_fields() -> None:
     payload = format_record(
         extra={
             "password": "plain-password",
             "access_token": "raw-token",
             "Authorization": "Bearer raw-token",
+            "passwordHash": "camel-password-hash",
+            "connectionString": "postgres://secret",
             "safe_value": "visible",
             "nested": {
-                "api_key": "secret-api-key",
+                "apiKey": "secret-api-key",
                 "permission": "users:read",
             },
         }
@@ -81,8 +95,10 @@ def test_json_formatter_redacts_sensitive_structured_fields() -> None:
     assert payload["password"] == "[REDACTED]"
     assert payload["access_token"] == "[REDACTED]"
     assert payload["Authorization"] == "[REDACTED]"
+    assert payload["passwordHash"] == "[REDACTED]"
+    assert payload["connectionString"] == "[REDACTED]"
     assert payload["safe_value"] == "visible"
-    assert payload["nested"]["api_key"] == "[REDACTED]"
+    assert payload["nested"]["apiKey"] == "[REDACTED]"
     assert payload["nested"]["permission"] == "users:read"
 
     serialized = json.dumps(payload)
@@ -90,6 +106,8 @@ def test_json_formatter_redacts_sensitive_structured_fields() -> None:
         "plain-password",
         "raw-token",
         "secret-api-key",
+        "camel-password-hash",
+        "postgres://secret",
     ):
         assert secret not in serialized
 
