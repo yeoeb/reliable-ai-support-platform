@@ -47,15 +47,22 @@ Required state surfaces:
 
 The Dispatcher uses Stable `codex exec` as its local execution boundary. It does not attempt to inject prompts into an already-open VS Code/Desktop Codex UI session.
 
-## Next Product Engineering Issue
+## Current Product Engineering Issue
 
-Engineering Issue ID #014 — RAG response with evidence / citations
+Engineering Issue ID #014 — Grounded RAG response with evidence / citations
 
-- Status: not started
-- Normal base Branch: `develop`
-- Dependency baseline: Knowledge Ingestion, Embedding Pipeline, Exact Retrieval, RBAC, Audit, Structured Logging, and Backend Verification are complete
+- GitHub tracking Issue: #65
+- Active Branch: `feature/issue-014-rag-grounded-answer`
+- CP0 Context Bootstrap: completed
+- CP1 Architecture / Plan: completed and Supervisor-approved
+- CP2 bounded RAG implementation: completed and Supervisor-reviewed
+- CP3 Verification: completed
+- CP4 Grounding / Security Review: completed
+- CP5 Knowledge / Documentation: completed
+- Current Checkpoint: CP6 final exact-Head verification
+- Remote write Allowlist: configured
 - Retrieval evidence boundary: retrieved KnowledgeChunk content remains untrusted context
-- Product boundary must be defined by a new GitHub tracking Issue and CP0/CP1 before implementation begins
+- Tool Calling / hosted tools: explicitly out of scope
 
 Important: GitHub Issue/PR numbers are repository-wide platform sequence numbers and remain separate from Engineering Issue IDs.
 
@@ -127,6 +134,13 @@ Service Layer owns transaction boundaries.
 - The shared request DB read transaction must be closed before the external query-embedding Provider wait.
 - Retrieved KnowledgeChunk content remains untrusted context; Retrieval does not grant instruction, policy, or tool-execution authority.
 - Exact Vector Search is the current correctness baseline; ANN indexes remain evidence-driven future optimization.
+- Grounded RAG reuses authorized Retrieval rather than bypassing its RBAC/provenance boundary.
+- RAG citations are server-owned: the model may reference only server-assigned source IDs, and final citation provenance is reconstructed from retrieved rows.
+- Zero-evidence RAG bypasses generation; the model is not allowed to fill missing evidence from pretrained knowledge.
+- Retrieved evidence remains untrusted data inside the generation context and does not gain instruction or tool authority.
+- Grounded generation uses structured Provider output plus server-side citation validation; schema-valid output alone is not treated as grounding proof.
+- RAG question/answer/chunk content, vectors, API keys, and raw Provider responses are excluded from Audit and runtime logs.
+- No Tool Calling or hosted model tools are enabled by the RAG foundation.
 
 ### Planned AI Boundary
 

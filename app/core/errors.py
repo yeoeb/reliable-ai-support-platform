@@ -46,3 +46,19 @@ class EmbeddingProviderUnavailableError(EmbeddingProviderError):
 
 class InvalidEmbeddingProviderResponseError(EmbeddingProviderError):
     pass
+
+
+class GenerationProviderError(Exception):
+    pass
+
+
+class GenerationProviderNotConfiguredError(GenerationProviderError):
+    pass
+
+
+class GenerationProviderUnavailableError(GenerationProviderError):
+    pass
+
+
+class InvalidGenerationProviderResponseError(GenerationProviderError):
+    pass

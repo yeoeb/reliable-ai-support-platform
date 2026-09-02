@@ -9,6 +9,7 @@ from app.api.routes.auth import router as auth_router
 from app.api.routes.health import router as health_router
 from app.api.routes.knowledge import router as knowledge_router
 from app.api.routes.retrieval import router as retrieval_router
+from app.api.routes.rag import router as rag_router
 from app.api.routes.users import router as users_router
 from app.core.config import settings
 from app.core.logging import configure_logging
@@ -35,3 +36,4 @@ app.include_router(admin_router)
 app.include_router(knowledge_router)
 
 app.include_router(retrieval_router)
+app.include_router(rag_router)

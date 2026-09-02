@@ -205,3 +205,37 @@ def test_knowledge_chunk_overlap_cannot_be_negative() -> None:
         make_settings(
             knowledge_chunk_overlap=-1,
         )
+
+
+def test_rag_settings_defaults() -> None:
+    settings = make_settings()
+
+    assert settings.rag_model == "gpt-5.6-terra"
+    assert settings.rag_max_output_tokens == 1200
+
+
+def test_rag_model_must_not_be_empty() -> None:
+    import pytest
+    from pydantic import ValidationError
+
+    with pytest.raises(
+        ValidationError,
+        match="RAG_MODEL",
+    ):
+        make_settings(
+            rag_model="   ",
+        )
+
+
+def test_rag_output_tokens_are_bounded() -> None:
+    import pytest
+    from pydantic import ValidationError
+
+    for invalid in (127, 8193):
+        with pytest.raises(
+            ValidationError,
+            match="RAG_MAX_OUTPUT_TOKENS",
+        ):
+            make_settings(
+                rag_max_output_tokens=invalid,
+            )
