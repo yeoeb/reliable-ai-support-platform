@@ -71,3 +71,17 @@ def test_release_workflow_contains_no_deployment_or_secret_write() -> None:
     ]
     for value in forbidden:
         assert value not in release
+
+
+
+def test_release_process_documents_external_control_boundaries() -> None:
+    release_process = (
+        ROOT / "docs" / "release-process.md"
+    ).read_text(encoding="utf-8")
+
+    assert "main: unprotected" in release_process
+    assert "develop: unprotected" in release_process
+    assert "external platform-control gap" in release_process
+    assert "Release Is Not Deployment" in release_process
+    assert "production database migrations ran" in release_process
+    assert "Git tag or GitHub Release was created" in release_process

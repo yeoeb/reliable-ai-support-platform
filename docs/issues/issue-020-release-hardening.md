@@ -1,6 +1,6 @@
 # Engineering Issue #020 — CI / Release Hardening Foundation
 
-<!-- codex-dispatch-supervisor-approved-through: CP2 -->
+<!-- codex-dispatch-supervisor-approved-through: CP5 -->
 <!-- codex-dispatch-write-allow: ["scripts/verify_release_candidate.py","tests/test_release_preflight.py","tests/test_release_workflows.py","docs/release-process.md","docs/issues/issue-020-release-hardening.md"] -->
 
 ## GitHub Tracking
@@ -262,9 +262,9 @@ No Product runtime code, migrations, DB schema, credentials, deployment files, o
 - [x] CP0 — Release / branch-state inventory
 - [x] CP1 — Release promotion architecture
 - [x] CP2 — Supervisor-controlled workflow + verifier implementation
-- [ ] CP3 — Verification / release-contract regression
-- [ ] CP4 — Release/security review
-- [ ] CP5 — Knowledge / documentation
+- [x] CP3 — Verification / release-contract regression
+- [x] CP4 — Release/security review
+- [x] CP5 — Knowledge / documentation
 - [ ] CP6 — exact-Head delivery
 
 ## Current State
@@ -354,3 +354,91 @@ No blocking CP2 finding remains.
 Remote Supervisor approval: **CP2**.
 
 Next: CP3 GitHub-hosted verification.
+
+
+## CP3 — GitHub-Hosted Verification
+
+Status: **completed**
+
+Verified Head:
+
+`a38f30520b20b573d5330507b9c08cc3ecb1e116`
+
+Results:
+
+- Backend Verification #189 / run `33651540228`: **PASS**
+- backend regression: **481 passed**
+- database recovery: **PASS**
+- Dispatcher Tests #149 / run `33651540179`: **PASS**
+- control-plane regression: **87 passed**
+
+The modified workflow files were accepted and executed by GitHub Actions.
+
+No CP3 Product/control-plane correction was required after the exact-source checkout hardening already completed in CP2 Review.
+
+## CP4 — Release / Security Review
+
+Status: **PASS**
+
+Confirmed:
+
+- #020 Feature history now contains historical main ancestry; comparison to main is behind by 0.
+- ancestry reconciliation preserved the exact pre-sync develop tree.
+- no stale main-only README content was reintroduced.
+- Release Verification is triggered for every PR to main and has no path filter.
+- Release Verification permissions are read-only.
+- release-contract verifies same-repository `develop → main`.
+- exact PR Head SHA is checked out with full history.
+- reusable Backend and Dispatcher workflows verify exact PR source Heads rather than implicit merge refs.
+- push-to-develop verification continues to use exact push SHA.
+- reusable workflow concurrency prefixes are distinct.
+- main-only file-content drift fails closed.
+- project SemVer and FastAPI static version must match.
+- a previously used `v<version>` tag fails closed.
+- executable workflow/verifier sources contain no production deployment, `contents: write`, OIDC write, package write, secret access, force push, GitHub Release publication, container push, Kubernetes, or Terraform path.
+- GitHub still reports main/develop branch protection disabled and no repository ruleset; repository CI must not be described as platform-enforced direct-push prevention.
+- #020 Release Verification is repository promotion evidence, not production deployment evidence.
+
+No merge-blocking CP4 finding remains.
+
+## CP5 — Knowledge / Documentation
+
+Status: **completed**
+
+Notion deduplication performed before creation.
+
+Created reusable Engineering Encyclopedia entry:
+
+**Release Promotion：develop→main Gate、Exact Head、Reusable Workflow 與 Branch Topology**
+
+Created Work Log:
+
+**Issue #020 — CI / Release Hardening Foundation**
+
+Repository documentation synchronized before Final CI:
+
+- `docs/release-process.md`
+- `README.md`
+- `docs/PROJECT_STATE.md`
+- this execution note
+
+## CP6 — Final Delivery
+
+Status: **final exact-Head verification pending**
+
+All planned branch-changing control-plane, tests, and documentation work is complete.
+
+Final merge constraint remains:
+
+> PR #91 must be merged into develop using **merge commit**, not squash/rebase, so ancestry reconciliation survives.
+
+Next:
+
+```text
+FINAL HEAD
+→ exact-Head Backend + Dispatcher CI
+→ PASS
+→ evidence in PR/Issue comments only
+→ replacement non-Draft PR on same Head if needed
+→ merge method = merge
+```
