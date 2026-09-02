@@ -118,10 +118,9 @@ def test_upgrade_enables_vector_and_creates_vector_1536(
             UniqueConstraint,
         )
     )
-    assert [
-        column.name
-        for column in unique.columns
-    ] == [
+    assert list(
+        unique._pending_colargs
+    ) == [
         "document_id",
         "chunk_index",
         "embedding_config_hash",
