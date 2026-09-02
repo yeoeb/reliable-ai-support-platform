@@ -1,6 +1,6 @@
 # Engineering Issue #015 — Controlled Read-Only Tool Calling Foundation
 
-<!-- codex-dispatch-supervisor-approved-through: CP2 -->
+<!-- codex-dispatch-supervisor-approved-through: CP5 -->
 <!-- codex-dispatch-write-allow: ["app/tools/__init__.py","app/tools/registry.py","app/tools/system.py","app/integrations/llm.py","app/services/tool_execution.py","app/services/agent.py","app/schemas/agent.py","app/api/routes/agent.py","app/core/errors.py","app/main.py","migrations/versions/*tool*.py","tests/test_tool_*.py","tests/test_agent_*.py","tests/test_retrieval_migration.py","docs/issues/issue-015-controlled-tool-calling.md"] -->
 
 ## GitHub Tracking
@@ -8,530 +8,134 @@
 - GitHub Issue: #69
 - Engineering Issue ID: #015
 - Branch: `feature/issue-015-controlled-tool-calling`
+- Product PR: #70
 
 ## Goal
 
-Create the first bounded custom function Tool Calling boundary.
-
-The model may propose one server-defined read-only Tool, but the server owns Tool discovery, argument schema, authorization, execution, Audit, and loop bounds.
+Establish the first server-controlled custom function Tool boundary with one bounded read-only diagnostic capability.
 
 V1 Tool:
 
-`platform_readiness`
+- `platform_readiness`
+- required permission: `system:read`
+- allowed roles: support_agent and admin
+- maximum Tool executions per request: 1
 
-Required permission:
+## Delivered Boundary
 
-`system:read`
+The Application owns:
 
-## Required Reading
+- Tool Registry
+- Tool name and description
+- required permission
+- risk classification
+- argument schema
+- executor binding
+- execution-time permission decision
+- Audit metadata
+- execution count
 
-Before CP2 edits:
+The model can only propose a registered Tool name and structured arguments.
 
-- `AGENTS.md`
-- `docs/PROJECT_STATE.md`
-- GitHub Issue #69
-- this execution note
-- `app/integrations/llm.py`
-- `app/services/rag.py`
-- `app/services/authorization.py`
-- `app/api/dependencies/auth.py`
-- `app/api/dependencies/authorization.py`
-- `app/repositories/rbac.py`
-- `app/services/audit.py`
-- `app/api/routes/health.py`
-- `app/db/session.py`
-- `migrations/versions/c83b5d6e7f92_add_vector_retrieval.py`
-- existing authorization/audit/logging tests
+The server validates the proposal and re-checks current database-backed permission before execution.
 
-## CP0 — Context Bootstrap
-
-Status: **completed by Supervisor**
-
-Findings:
-
-1. #014 Grounded RAG is merged and `develop` records #015 as the next Product Issue.
-2. No existing Tool Registry, Tool execution service, Tool Calling endpoint, or Tool permission exists.
-3. Existing OpenAI integration is isolated in `app/integrations/llm.py`; #015 should extend that Provider boundary instead of importing the SDK into Route/Service code.
-4. Existing AuthorizationService reads effective permissions from database-backed RBAC.
-5. Existing AuditService supports best-effort read/security event recording.
-6. `check_database_connection()` already provides a bounded PostgreSQL readiness probe and owns its own Engine connection.
-7. `platform_readiness` is a suitable first Tool because it is read-only, bounded, operationally meaningful, and does not require #016 Human Approval.
-8. Existing #013 permission migration demonstrates deterministic support_agent/admin permission seeding and downgrade.
-9. Request Session reads can open a transaction; Provider waits and Tool execution must not intentionally hold that read transaction.
-10. Raw Tool Request/arguments/result must not become generic log payloads.
-11. No arbitrary shell, SQL, dynamic import, URL fetch, Python callable lookup, MCP, hosted tools, or parallel Tool execution is required.
-12. Official current Responses API exposes custom function tools with strict schemas and returns `function_call` output items. #015 will isolate the concrete SDK shape behind fake-client Provider tests.
-
-No contradiction was found.
-
-## CP1 — Architecture / Plan
-
-Status: **completed and approved by Supervisor**
-
-### Core Invariant
-
-```text
-LLM Tool Request
-    ≠
-Authorization
-```
-
-The model is a proposer only.
-
-### V1 Bounded Flow
-
-```text
-Authenticated User
-    ↓
-load current effective permissions
-    ↓
-filter server Tool Registry
-    ↓
-no allowed Tool? → deterministic 403, no Provider call
-    ↓
-close request DB read transaction
-    ↓
-Provider choose(request, allowed_tools)
-    ↓
-final response? → return
-    ↓ one ToolCallRequest
-exact Registry lookup
-    ↓
-strict argument validation
-    ↓
-re-check permission from DB
-    ↓
-permission denied? → 403, no execution
-    ↓
-close authorization read transaction
-    ↓
-execute exactly one read-only Tool
-    ↓
-best-effort Audit / safe runtime log
-    ↓
-Provider finalize(request, tool result) with NO TOOLS
-    ↓
-final response
-```
-
-Maximum Tool executions per HTTP request: **1**.
-
-No loop.
-
-### Tool Registry
-
-Create `app/tools/registry.py`.
-
-Suggested ToolDefinition:
-
-- `name`
-- `description`
-- `required_permission`
-- `risk_level`
-- `arguments_model`
-- executor
-
-Registry invariants:
-
-- server-owned definitions only
-- stable names
-- duplicate names fail at construction
-- unknown name fails closed
-- V1 registration accepts read-only risk only
-- JSON Schema generated from server-owned Pydantic model
-- callers never submit Tool schemas or callable paths
-
-### platform_readiness Tool
-
-Create `app/tools/system.py`.
-
-Arguments model:
-
-- no fields
-- `extra="forbid"`
-
-Execution:
-
-```text
-check_database_connection()
-→ success      → {"status":"ready"}
-→ SQLAlchemyError → {"status":"unavailable"}
-```
-
-No user-controlled SQL/host/URL.
-
-The Tool result shape is server-owned and bounded.
-
-### Permission
-
-New permission:
-
-`system:read`
-
-Migration grants only:
-
-- support_agent
-- admin
-
-Not default user.
-
-Use deterministic UUID and reversible downgrade consistent with existing RBAC migrations.
-
-### Pre-Provider Authorization Filtering
-
-AgentService loads the caller's effective permissions and sends only authorized Tool definitions to the Provider.
-
-If the caller has zero authorized Tools:
-
-- return/raise permission denied;
-- do not call Provider.
-
-After this permission read, explicitly close the Session read transaction before Provider wait.
-
-### Execution-Time Authorization
-
-ToolExecutionService must re-check permission **after** the model proposes a Tool and immediately before execution.
-
-Reason:
-
-- permissions may change after the initial filter;
-- model output is never authority;
-- defense in depth.
-
-After re-check, close the Session transaction before Tool executor work.
-
-### Argument Boundary
-
-Provider function arguments are untrusted JSON.
-
-Expected sequence:
-
-```text
-JSON parse
-→ exact Tool name lookup
-→ Pydantic model validation
-→ extra fields rejected
-→ execution-time permission check
-→ execute
-```
-
-Malformed JSON / unexpected fields / wrong types → no Tool execution.
-
-### Provider Boundary
-
-Extend `app/integrations/llm.py`.
-
-Suggested Provider types:
-
-```text
-ToolSpec
-ToolCallRequest
-ToolChoiceResult
-ToolFinalResult
-
-ToolCallingProvider
-  choose(request, tools)
-  finalize(request, tool_name, tool_result)
-```
-
-OpenAI choose call:
-
-- Responses API
-- custom `type="function"` Tools only
-- Tool name/description/schema generated from registry
-- `strict=true`
-- `parallel_tool_calls=false`
-- no Web Search
-- no File Search
-- no Computer Use
-- no hosted tools
-- no shell/code interpreter
-- no MCP
-
-Provider parsing:
-
-- zero function calls + final text is allowed
-- exactly one function call is allowed
-- >1 function call fails closed
-- malformed function arguments fails closed
-- unknown function name is still rejected by Server registry
-
-Finalization call:
-
-- receives original request + bounded Tool name/result as data
-- receives **no tools**
-- Tool output is explicitly treated as untrusted data
-- cannot issue a second Tool Call in V1
-
-A new independent finalization request is acceptable for V1; do not introduce conversation persistence solely for this Issue.
-
-### API Boundary
-
-Suggested endpoint:
-
-`POST /agent/run`
-
-Authentication required.
-
-Do not use model-provided permission claims.
-
-Response should expose bounded execution metadata such as:
-
-- answer
-- tool_used: string | null
-- tool_status: string | null
-- model
-- token usage
-
-Do not dump raw Provider response or arbitrary Tool result.
-
-### Error Boundary
-
-Domain errors should distinguish internally:
-
-- no authorized Tool
-- unknown Tool
-- invalid Tool arguments
-- permission revoked
-- Provider unavailable
-- invalid Provider response
-- unexpected Tool infrastructure failure
-
-API maps to generic 401/403/503 as appropriate without leaking internals.
-
-### Audit / Runtime Log
-
-Tool execution event:
-
-`tool.execute`
-
-Safe metadata only:
-
-- tool_name
-- risk_level
-- outcome
-- bounded result_status
-
-Do not include:
-
-- raw user request
-- raw arguments
-- raw Tool result
-- API key
-- access token
-- Authorization header
-- raw Provider output
-
-Read-only execution uses best-effort Audit in #015.
-
-### CP2 Ordered Slices
-
-CP2 is deliberately bounded.
-
-1. **Permission migration**
-   - add `system:read`
-   - support_agent/admin only
-   - focused migration test
-
-2. **Tool Registry + platform_readiness**
-   - registry invariants
-   - strict empty args
-   - readiness executor
-   - focused registry/system Tool tests
-
-3. **Provider boundary**
-   - function Tool definitions
-   - one-call parsing
-   - `parallel_tool_calls=false`
-   - no hosted tools
-   - finalization has no tools
-   - fake-client tests only
-
-4. **ToolExecutionService**
-   - exact lookup
-   - argument validation
-   - permission re-check
-   - transaction close
-   - Audit/log exclusion
-
-5. **AgentService + API**
-   - authorized Tool filtering
-   - no-tool deterministic denial before Provider
-   - bounded one Tool path
-   - no loop
-   - generic errors
-
-6. **Focused tests only**
-   - `tests/test_tool_*.py`
-   - `tests/test_agent_*.py`
-
-**Do not run full repository regression in CP2.**
-Full regression is CP3 / Final CI.
-
-If a required Production/Test file is outside the machine Allowlist, stop and report Scope expansion instead of editing it.
-
-## Allowed Write Set
-
-The machine-readable marker at the top is the Safe Publish authority.
-
-Conceptual scope:
-
-- `app/tools/`
-- `app/integrations/llm.py`
-- `app/services/tool_execution.py`
-- `app/services/agent.py`
-- `app/schemas/agent.py`
-- `app/api/routes/agent.py`
-- `app/core/errors.py`
-- `app/main.py`
-- one Tool permission migration
-- focused Tool/Agent tests
-- this execution note
-
-## Out of Scope
-
-- mutating Tools
-- Human Approval
-- shell
-- arbitrary SQL
-- arbitrary HTTP
-- MCP
-- hosted tools
-- parallel calls
-- multi-call loops
-- tool search
-- persistent conversation
-- background jobs
-- ticket/user/RBAC mutation
-- automatic retry
+The final generation step receives no Tool definitions.
 
 ## Checkpoints
 
 - [x] CP0 — Context bootstrap
 - [x] CP1 — Architecture / plan
 - [x] CP2 — Bounded implementation
-- [ ] CP3 — Verification
-- [ ] CP4 — Security / authorization / Tool boundary review
-- [ ] CP5 — Knowledge / documentation
+- [x] CP3 — Verification
+- [x] CP4 — Security / authorization review
+- [x] CP5 — Knowledge / documentation
 - [ ] CP6 — exact-Head delivery
 
-## Current State
+## CP2 Evidence
 
-CP0 and CP1 are complete.
+CP2 was completed through a bounded Supervisor fallback because the local Watcher did not publish the authorized checkpoint after repeated remote checks.
 
-Remote Supervisor approval: **CP1**.
+Product implementation includes:
 
-Next authorized action: **CP2** on `feature/issue-015-controlled-tool-calling`.
+- `system:read` migration
+- server-owned Tool Registry
+- bounded `platform_readiness`
+- custom-function Provider boundary
+- strict server-side argument validation
+- authorized Tool filtering before Provider wait
+- permission re-check before execution
+- transaction boundaries around external waits
+- one-Tool request bound
+- safe Audit / Runtime metadata
+- authenticated `POST /agent/run`
+- focused tests
 
-Full regression is intentionally deferred to CP3.
+Supervisor Review also replaced an internal assertion with explicit fail-closed validation and removed a real-database dependency from a focused unit test.
 
+## CP3 Evidence
 
-## Supervisor Fallback Execution
+First GitHub-hosted run:
 
-The remote CP2 gate remained authorized but the Local Watcher/Codex Executor did not publish a CP2 checkpoint after repeated remote checks.
+- Backend: 387 passed, 1 failed
+- Dispatcher: PASS
+- Database recovery: PASS
+- #015 migration upgrade: PASS
 
-The Supervisor therefore produced a bounded CP2 fallback directly on the Feature Branch.
+The only failure was stale #013 test debt: its historical migration test incorrectly required the #013 revision to remain the permanent global Alembic Head.
 
-Control boundaries preserved:
+Bounded maintenance updated that test to validate its own ancestry and invariants while leaving the repository-wide single-head test authoritative.
 
-- all Product/Test writes remain inside the existing CP2 machine Allowlist;
-- no fake `checkpoint(issue-015): CP2` commit is created;
-- CP3 verification remains mandatory;
-- CP4 security/authorization review remains mandatory;
-- Final exact-Head CI remains mandatory.
+Second GitHub-hosted run on `3a6d5e886189cbb2f430e37064a6c92184063afc`:
 
-### Fallback CP2 Implementation Evidence
+- Backend Verification #163: PASS
+- Backend regression: 388 passed
+- Dispatcher Tests #113: PASS
+- Control Plane: 87 passed
+- Database recovery: PASS
+- PostgreSQL / pgvector verification: PASS
+- Alembic upgrade / downgrade / re-upgrade: PASS
 
-Implemented:
+## CP4 Review
 
-- deterministic `system:read` permission migration for support_agent/admin only;
-- server-owned read-only Tool Registry;
-- strict empty-argument `platform_readiness` Tool;
-- bounded ready/unavailable result contract;
-- Responses custom function Provider boundary;
-- strict function schema;
-- `parallel_tool_calls=false`;
-- zero-or-one Tool Call parsing;
-- second/finalization Provider call with no Tools;
-- pre-Provider authorized Tool filtering;
-- deterministic 403 when caller has no authorized Tools;
-- execution-time database-backed permission re-check;
-- transaction close before Provider wait and Tool execution;
-- maximum one Tool execution per HTTP request;
-- best-effort `tool.execute` Audit and safe structured runtime metadata;
-- `POST /agent/run` authenticated API;
-- focused Registry/System/Provider/Execution/Agent/API/Migration tests authored.
-
-Verification status:
-
-- focused tests are authored but not yet executed by the Supervisor fallback environment;
-- full regression remains CP3;
-- no CP3+ checkpoint is marked complete.
-
-Remote Supervisor approval remains **CP1** until CP2 review is complete.
-
-
-## CP2 Supervisor Review
-
-Status: **PASS**
-
-Reviewed fallback Product commits:
-
-- `fb41d20845bb9496dddfd2c957f2ea9b2ebcb175`
-- `d66ed4b056a64e6fd1b34983f2467fc77ad19918`
+Security and authorization review passed.
 
 Confirmed:
 
-- Registry owns Tool names, permission names, schemas, risk level, and executor callable.
-- Model can supply only a function name plus JSON arguments.
+- Registry is server-owned.
 - Unknown Tool names fail closed.
-- Pydantic validates arguments before permission check/execution.
-- `extra="forbid"` rejects arbitrary fields such as command/SQL/URL.
-- Authorized Tool list is filtered from database-backed effective permissions before Provider call.
-- Request Session transaction is rolled back before Provider network wait.
-- Permission is re-read from database immediately before Tool execution.
-- Authorization read transaction is rolled back before Tool executor work.
-- V1 Registry contains only `platform_readiness`.
-- V1 risk level is read-only.
-- Provider sets `parallel_tool_calls=false`.
-- More than one returned function call fails closed defensively.
-- AgentService invokes ToolExecutionService at most once; there is no loop.
-- Finalization Provider call does not pass a `tools` field.
-- Tool output is framed as untrusted data.
-- Audit/Runtime Log metadata excludes raw request, arguments, raw Tool result, API key, token, and Provider response.
-- Migration grants `system:read` only to support_agent/admin.
-- No shell, eval, exec, dynamic import, arbitrary SQL, arbitrary URL fetch, MCP, hosted tools, or mutable Tool exists.
+- Tool arguments require server-side schema validation.
+- Caller permissions filter the Tool list before Provider wait.
+- Current permission is checked again before execution.
+- Provider and execution waits do not intentionally retain request read transactions.
+- V1 executes at most one read-only Tool.
+- Parallel Tool execution is disabled.
+- Finalization receives no Tool definitions.
+- Tool results remain untrusted data.
+- No Product mutation is available in #015.
+- Sensitive request/result/provider content is excluded from Audit and Runtime Log metadata.
 
-Review hardening applied:
+## CP5 Knowledge Capture
 
-1. Replaced an internal `assert` on Provider direct-answer shape with explicit fail-closed validation.
-2. Isolated the Tool execution unit test from a real PostgreSQL dependency.
+Notion knowledge updated:
 
-No blocking CP2 finding remains.
+- `AI Agent Tool Safety：Argument Validation、Tool Allowlist、Error Handling、max_steps`
 
-Remote Supervisor approval: **CP2**.
+Work Log created:
 
-Next authorized action: **CP3 verification**.
+- `Issue #015 — Controlled Read-Only Tool Calling`
 
+Repository documentation synchronized:
 
-## CP3 Attempt 1
+- `README.md`
+- `docs/PROJECT_STATE.md`
+- this execution snapshot
 
-GitHub-hosted verification on Head `988a6017bb44f9a3601cf17705804ce6922703fe`:
+## Current State
 
-- Dispatcher Tests #112: **PASS**
-- Database recovery: **PASS**
-- Backend regression: **387 passed, 1 failed**
-- Alembic upgrade through new #015 revision: **PASS**
+Remote Supervisor approval: **CP5**.
 
-Only failure:
+Next action: **CP6 exact-Head GitHub Actions only**.
 
-`tests/test_retrieval_migration.py::test_retrieval_migration_is_linear_head`
+No further Product or repository documentation write is planned before Final CI.
 
-The #013 regression test hardcoded its historical revision `c83b5d6e7f92` as the permanent global Alembic head. #015 correctly adds `d94c6e7f8a03` after it, so the old assertion became stale.
-
-CP3 bounded rework authorization:
-
-- add `tests/test_retrieval_migration.py` to the write scope;
-- preserve #013's revision/down-revision/index/permission invariants;
-- remove only the invalid assumption that #013 must remain the global head;
-- do not weaken the repository-wide single-head check in `tests/test_migrations.py`.
+After Final CI passes, verification evidence must be stored in GitHub PR / Issue comments without changing the verified Branch Head.
