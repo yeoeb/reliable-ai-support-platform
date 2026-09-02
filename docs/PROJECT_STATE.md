@@ -51,10 +51,10 @@ Engineering Issue ID #012 — Embedding Pipeline foundation
 
 - GitHub tracking Issue: #54
 - Active Branch: `feature/issue-012-embedding-pipeline`
-- Current Checkpoint: CP2 authorized
+- Current Checkpoint: CP3 verification
 - CP0 Context Bootstrap: completed
 - CP1 Architecture / Scope: completed and Supervisor-approved
-- CP2 implementation: pending Executor
+- CP2 implementation: completed via bounded Supervisor fallback
 - Product boundary: deterministic chunking + OpenAI embedding + pgvector persistence; vector search/indexing/RAG remain deferred
 - External data boundary: Knowledge chunk text may be sent to configured OpenAI Embeddings API only when the endpoint is explicitly invoked
 
