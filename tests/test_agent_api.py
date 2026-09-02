@@ -40,6 +40,8 @@ def test_agent_route_returns_bounded_metadata(
         AgentService,
         "run",
         lambda self, **kwargs: AgentRunResult(
+            status="completed",
+            approval_id=None,
             answer="Ready.",
             tool_used="platform_readiness",
             tool_status="ready",
@@ -60,6 +62,8 @@ def test_agent_route_returns_bounded_metadata(
 
     assert response.status_code == 200
     assert response.json() == {
+        "status": "completed",
+        "approval_id": None,
         "answer": "Ready.",
         "tool_used": "platform_readiness",
         "tool_status": "ready",
@@ -89,3 +93,45 @@ def test_no_authorized_tool_maps_to_generic_403(
     assert response.status_code == 403
     assert response.json() == {"detail": "Forbidden"}
     assert "private detail" not in response.text
+
+
+
+def test_agent_route_returns_deterministic_approval_required_state(
+    monkeypatch,
+) -> None:
+    approval_id = uuid4()
+    monkeypatch.setattr(
+        AgentService,
+        "run",
+        lambda self, **kwargs: AgentRunResult(
+            status="approval_required",
+            approval_id=approval_id,
+            answer="Human approval required.",
+            tool_used="grant_support_agent_role",
+            tool_status="approval_required",
+            model="gpt-5.6-terra",
+            input_tokens=4,
+            output_tokens=2,
+        ),
+    )
+    app.dependency_overrides[get_current_user] = override_user
+    app.dependency_overrides[get_db] = override_db
+    try:
+        response = client.post(
+            "/agent/run",
+            json=payload(),
+        )
+    finally:
+        app.dependency_overrides.clear()
+
+    assert response.status_code == 200
+    assert response.json() == {
+        "status": "approval_required",
+        "approval_id": str(approval_id),
+        "answer": "Human approval required.",
+        "tool_used": "grant_support_agent_role",
+        "tool_status": "approval_required",
+        "model": "gpt-5.6-terra",
+        "input_tokens": 4,
+        "output_tokens": 2,
+    }
