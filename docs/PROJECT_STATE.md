@@ -30,6 +30,7 @@ It is intentionally concise and must stay synchronized with merged work.
 - #012 — Embedding Pipeline foundation
 - #013 — Retrieval / Vector Search foundation
 - #014 — Grounded RAG response with evidence / citations
+- #015 — Controlled read-only Tool Calling foundation
 
 ## Current Workflow Infrastructure
 
@@ -48,31 +49,24 @@ Required state surfaces:
 
 The Dispatcher uses Stable `codex exec` as its local execution boundary. It does not attempt to inject prompts into an already-open VS Code/Desktop Codex UI session.
 
-## Current Product Engineering Issue
+## Next Product Engineering Issue
 
-Engineering Issue ID #015 — Controlled Tool Calling foundation
+Engineering Issue ID #016 — Human Approval for higher-risk Tool actions
 
-- GitHub tracking Issue: #69
-- Active Branch: `feature/issue-015-controlled-tool-calling`
-- CP0 Context Bootstrap: completed
-- CP1 Architecture / Plan: completed and Supervisor-approved
-- CP2 bounded implementation: completed through Supervisor fallback and reviewed
-- CP3 Verification: completed after one bounded test-maintenance fix
-- CP4 Security / Authorization Review: completed
-- CP5 Knowledge / Documentation: completed
-- Current Checkpoint: CP6 final exact-Head verification
-- V1 Tool: `platform_readiness` only
-- V1 Tool risk: read-only
-- V1 Tool execution bound: maximum one Tool per request
-- New permission: `system:read` for support_agent/admin
-- Human Approval / mutating Tools: explicitly deferred to #016
-- Remote write Allowlist: configured
+- Status: not started
+- Normal base Branch: `develop`
+- Dependency baseline: Controlled Tool Calling, database-backed RBAC, durable Audit, Structured Logging, and exact-Head verification are complete
+- Approval must be server-owned and bound to an exact pending action; model output alone cannot approve execution
+- Approval state must survive request boundaries so confirmation cannot depend on one in-memory model turn
+- Execution must re-check current permission and approval state before the higher-risk action runs
+- V1 should introduce one bounded demonstrator action rather than a broad action catalog
+- Product boundary must be defined by a new GitHub tracking Issue and CP0/CP1 before implementation begins
 
 Important: GitHub Issue/PR numbers are repository-wide platform sequence numbers and remain separate from Engineering Issue IDs.
 
 ## Planned Product Sequence
 
-Tentative order after #014:
+Tentative order after #015:
 
 - #014 — RAG response with evidence/citations
 - #015 — Controlled Tool Calling
@@ -144,7 +138,12 @@ Service Layer owns transaction boundaries.
 - Retrieved evidence remains untrusted data inside the generation context and does not gain instruction or tool authority.
 - Grounded generation uses structured Provider output plus server-side citation validation; schema-valid output alone is not treated as grounding proof.
 - RAG question/answer/chunk content, vectors, API keys, and raw Provider responses are excluded from Audit and runtime logs.
-- No Tool Calling or hosted model tools are enabled by the RAG foundation.
+- Grounded RAG does not grant execution authority; Tool Calling is a separate server-controlled capability boundary.
+- Controlled Tool Calling uses server-owned Tool definitions and database-backed permission checks.
+- Tool arguments are untrusted input and require server-side schema validation before execution.
+- V1 executes at most one read-only Tool per request and exposes no Tool definitions during finalization.
+- Tool results remain untrusted data and cannot grant additional capability.
+- Higher-risk or mutating actions require a separate Human Approval boundary.
 
 ### Planned AI Boundary
 
