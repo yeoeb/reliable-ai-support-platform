@@ -4,7 +4,7 @@ Production-oriented internal AI support platform built with FastAPI, PostgreSQL,
 
 The project is being developed incrementally toward a complete AI support system with RAG, controlled tool calling, human approval, evaluation, security testing, and observability.
 
-Current status: backend foundation, persistence, migrations, user creation, password hashing, JWT authentication, RBAC permission enforcement, durable security audit logging, and GitHub-hosted backend verification are implemented. AI capabilities remain planned.
+Current status: backend foundation, persistence, migrations, user creation, password hashing, JWT authentication, RBAC permission enforcement, durable security audit logging, structured runtime logging with request correlation, and GitHub-hosted backend verification are implemented. AI capabilities remain planned.
 
 Why This Project
 
@@ -107,6 +107,24 @@ Best-effort Audit recording for authentication / authorization failures
 Sensitive-data exclusion for passwords, tokens, authorization headers, and secrets
 
 Append-only application boundary for Audit records
+
+Observability
+
+Structured one-line JSON application logs
+
+Server-generated per-request UUID correlation
+
+Request-scoped ContextVar propagation
+
+X-Request-ID response header
+
+HTTP request completion / failure events
+
+Route-template logging instead of arbitrary raw paths
+
+Sensitive structured-field redaction
+
+Runtime Application Logs kept separate from durable Audit Events
 
 Testing
 
@@ -329,11 +347,17 @@ Privilege-escalation tests
 
 Durable security audit logging
 
+Structured JSON runtime logging
+
+Server-generated Request ID correlation
+
+Sensitive log-field redaction
+
 GitHub Actions backend verification
 
 In Progress
 
-Structured logging / observability
+Knowledge ingestion / RAG foundation
 
 Planned AI Layer
 
@@ -351,7 +375,7 @@ Human confirmation for high-risk actions
 
 Planned Reliability & AI Safety
 
-Structured logging / monitoring
+Metrics / distributed tracing / external log aggregation
 
 100+ LLM evaluation cases
 
