@@ -83,11 +83,14 @@ def make_row(
     )
 
 
-def test_provider_runs_before_repository_query() -> None:
+def test_provider_runs_after_request_transaction_is_closed() -> None:
     service = None
+    session = None
 
     def callback(texts):
         service.repository.search_exact_cosine.assert_not_called()
+        assert session.rollback.call_count == 1
+        assert session.commit.call_count == 0
         return EmbeddingBatchResult(
             vectors=[
                 [1.0] + [0.0] * (DIMENSIONS - 1)
@@ -96,7 +99,7 @@ def test_provider_runs_before_repository_query() -> None:
         )
 
     provider = FakeProvider(callback)
-    service, _, _ = make_service(provider=provider)
+    service, session, _ = make_service(provider=provider)
     service.repository.search_exact_cosine.return_value = []
 
     service.search(
@@ -159,7 +162,7 @@ def test_provider_failure_does_not_query_database() -> None:
 
     service.repository.search_exact_cosine.assert_not_called()
     service.audit_service.record_best_effort.assert_not_called()
-    session.rollback.assert_not_called()
+    session.rollback.assert_called_once()
 
 
 @pytest.mark.parametrize(
@@ -219,7 +222,7 @@ def test_database_failure_rolls_back_and_translates() -> None:
             request=make_request(),
         )
 
-    session.rollback.assert_called_once()
+    assert session.rollback.call_count == 2
     service.audit_service.record_best_effort.assert_not_called()
 
 
