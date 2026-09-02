@@ -1,4 +1,5 @@
 from app.models.audit_event import AuditEvent
+from app.models.knowledge_chunk import KnowledgeChunk
 from app.models.knowledge_document import KnowledgeDocument
 from app.models.permission import Permission
 from app.models.role import Role
@@ -9,6 +10,7 @@ from app.models.user_role import UserRole
 
 __all__ = [
     "AuditEvent",
+    "KnowledgeChunk",
     "KnowledgeDocument",
     "Permission",
     "Role",

@@ -45,15 +45,21 @@ Required state surfaces:
 
 The Dispatcher uses Stable `codex exec` as its local execution boundary. It does not attempt to inject prompts into an already-open VS Code/Desktop Codex UI session.
 
-## Next Product Engineering Issue
+## Current Product Engineering Issue
 
 Engineering Issue ID #012 — Embedding Pipeline foundation
 
-- Status: not started
-- Normal base Branch: `develop`
-- Dependency baseline: Knowledge Ingestion, RBAC, Audit, Structured Logging, and Backend Verification are complete
-- Input boundary: persisted normalized KnowledgeDocument content from #011
-- Product boundary must be defined by a new GitHub tracking Issue and CP0/CP1 before implementation
+- GitHub tracking Issue: #54
+- Active Branch: `feature/issue-012-embedding-pipeline`
+- Current Checkpoint: CP6 delivery
+- CP0 Context Bootstrap: completed
+- CP1 Architecture / Scope: completed and Supervisor-approved
+- CP2 implementation: completed via bounded Supervisor fallback
+- CP3 verification: completed (306 backend + 1 recovery test; pgvector/Alembic round-trip PASS)
+- CP4 Security / Provider / Vector review: completed
+- CP5 Knowledge / Documentation synchronization: completed
+- Product boundary: deterministic chunking + OpenAI embedding + pgvector persistence; vector search/indexing/RAG remain deferred
+- External data boundary: Knowledge chunk text may be sent to configured OpenAI Embeddings API only when the endpoint is explicitly invoked
 
 Important: GitHub Issue/PR numbers are repository-wide platform sequence numbers and remain separate from Engineering Issue IDs.
 
@@ -116,6 +122,11 @@ Service Layer owns transaction boundaries.
 - Knowledge ingestion treats document content as untrusted data, not executable instructions.
 - KnowledgeDocument persistence is normalized and content-addressed with a database idempotency backstop.
 - Knowledge admin writes use dedicated RBAC permission and atomic Audit persistence.
+- Embedding pipeline sends bounded KnowledgeChunk text only through an explicit external Provider boundary.
+- External provider waits must not intentionally hold an open database transaction.
+- Persisted embeddings are deterministic per document + pipeline configuration and stored as pgvector vector(1536).
+- Provider output is validated before persistence; chunk/vector/API-key data is excluded from Audit and runtime logs.
+- Vector storage does not imply Retrieval: similarity search/indexing remains a separate architecture boundary.
 
 ### Planned AI Boundary
 

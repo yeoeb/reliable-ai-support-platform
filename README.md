@@ -4,7 +4,7 @@ Production-oriented internal AI support platform built with FastAPI, PostgreSQL,
 
 The project is being developed incrementally toward a complete AI support system with RAG, controlled tool calling, human approval, evaluation, security testing, and observability.
 
-Current status: backend foundation, persistence, migrations, user creation, password hashing, JWT authentication, RBAC permission enforcement, durable security audit logging, structured runtime logging with request correlation, bounded knowledge document ingestion, and GitHub-hosted backend verification are implemented. Embedding, retrieval, and LLM-backed RAG remain planned.
+Current status: backend foundation, persistence, migrations, authentication, database-backed RBAC, durable security audit logging, structured request-correlated logging, bounded knowledge ingestion, deterministic chunking, OpenAI embedding integration behind an explicit provider boundary, pgvector vector persistence, and GitHub-hosted backend verification are implemented. Retrieval and LLM-backed RAG remain planned.
 
 Why This Project
 
@@ -140,7 +140,31 @@ Database Unique Constraint concurrency backstop
 
 Atomic KnowledgeDocument + Audit Event transaction
 
-Untrusted-document boundary: no file execution, remote fetch, embedding, retrieval, or LLM use
+Untrusted-document boundary during ingestion: no file execution, remote fetch, retrieval, or LLM instruction execution
+
+Embedding Pipeline
+
+Deterministic char-v1 chunking with bounded chunk size and overlap
+
+Stable embedding configuration hash for reproducible/idempotent processing
+
+SDK-independent EmbeddingProvider boundary with OpenAI adapter
+
+text-embedding-3-small with explicit 1536-dimensional output validation
+
+Bounded provider batches and malformed-response fail-closed validation
+
+pgvector PostgreSQL storage using vector(1536)
+
+External provider wait occurs outside the initial DB read transaction
+
+Post-provider DB re-check and Unique Constraint concurrency backstop
+
+Atomic KnowledgeChunk + Audit Event persistence
+
+No chunk text, vectors, API key, or raw provider response in API/Audit/runtime logs
+
+No HNSW/IVFFlat/similarity query in this milestone
 
 Testing
 
@@ -174,13 +198,21 @@ Pydantic
 
 Database
 
-PostgreSQL
+PostgreSQL + pgvector
 
 SQLAlchemy 2.x
 
 Psycopg 3
 
 Alembic
+
+AI Integration
+
+OpenAI Embeddings API
+
+text-embedding-3-small
+
+Provider Protocol / Adapter boundary
 
 Security
 
@@ -227,6 +259,8 @@ python -m pip install -r requirements/dev.txt
 Copy-Item .env.example .env
 
 Fill in the local PostgreSQL and JWT settings in .env.
+
+OPENAI_API_KEY is optional for normal application startup and existing non-embedding features. It is required only when a new embedding request must call the real OpenAI provider.
 
 5. Start PostgreSQL
 
@@ -373,13 +407,19 @@ GitHub Actions backend verification
 
 Knowledge ingestion foundation
 
+Embedding pipeline foundation
+
+Deterministic chunking and configuration identity
+
+OpenAI embedding provider boundary
+
+pgvector vector(1536) persistence
+
 Next
 
-Embedding pipeline
+Retrieval / Vector Search
 
 Planned AI Layer
-
-Retrieval / Vector Search
 
 RAG with source citations
 
