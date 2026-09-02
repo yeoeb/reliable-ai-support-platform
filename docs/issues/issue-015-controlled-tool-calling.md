@@ -424,3 +424,48 @@ Remote Supervisor approval: **CP1**.
 Next authorized action: **CP2** on `feature/issue-015-controlled-tool-calling`.
 
 Full regression is intentionally deferred to CP3.
+
+
+## Supervisor Fallback Execution
+
+The remote CP2 gate remained authorized but the Local Watcher/Codex Executor did not publish a CP2 checkpoint after repeated remote checks.
+
+The Supervisor therefore produced a bounded CP2 fallback directly on the Feature Branch.
+
+Control boundaries preserved:
+
+- all Product/Test writes remain inside the existing CP2 machine Allowlist;
+- no fake `checkpoint(issue-015): CP2` commit is created;
+- CP3 verification remains mandatory;
+- CP4 security/authorization review remains mandatory;
+- Final exact-Head CI remains mandatory.
+
+### Fallback CP2 Implementation Evidence
+
+Implemented:
+
+- deterministic `system:read` permission migration for support_agent/admin only;
+- server-owned read-only Tool Registry;
+- strict empty-argument `platform_readiness` Tool;
+- bounded ready/unavailable result contract;
+- Responses custom function Provider boundary;
+- strict function schema;
+- `parallel_tool_calls=false`;
+- zero-or-one Tool Call parsing;
+- second/finalization Provider call with no Tools;
+- pre-Provider authorized Tool filtering;
+- deterministic 403 when caller has no authorized Tools;
+- execution-time database-backed permission re-check;
+- transaction close before Provider wait and Tool execution;
+- maximum one Tool execution per HTTP request;
+- best-effort `tool.execute` Audit and safe structured runtime metadata;
+- `POST /agent/run` authenticated API;
+- focused Registry/System/Provider/Execution/Agent/API/Migration tests authored.
+
+Verification status:
+
+- focused tests are authored but not yet executed by the Supervisor fallback environment;
+- full regression remains CP3;
+- no CP3+ checkpoint is marked complete.
+
+Remote Supervisor approval remains **CP1** until CP2 review is complete.

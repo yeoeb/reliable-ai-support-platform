@@ -62,3 +62,39 @@ class GenerationProviderUnavailableError(GenerationProviderError):
 
 class InvalidGenerationProviderResponseError(GenerationProviderError):
     pass
+
+
+class ToolCallingProviderError(Exception):
+    pass
+
+
+class ToolCallingProviderNotConfiguredError(ToolCallingProviderError):
+    pass
+
+
+class ToolCallingProviderUnavailableError(ToolCallingProviderError):
+    pass
+
+
+class InvalidToolCallingProviderResponseError(ToolCallingProviderError):
+    pass
+
+
+class NoAuthorizedToolError(Exception):
+    pass
+
+
+class UnknownToolError(Exception):
+    pass
+
+
+class InvalidToolArgumentsError(Exception):
+    pass
+
+
+class ToolPermissionDeniedError(Exception):
+    pass
+
+
+class ToolExecutionError(Exception):
+    pass
