@@ -82,64 +82,71 @@ class OpenAIEmbeddingProvider:
                 "Embedding provider request failed"
             ) from exc
 
-        data = list(response.data)
+        try:
+            data = list(response.data)
 
-        if len(data) != len(texts):
-            raise InvalidEmbeddingProviderResponseError(
-                "Embedding provider returned an unexpected item count"
-            )
-
-        ordered = sorted(
-            data,
-            key=lambda item: item.index,
-        )
-
-        if [
-            item.index
-            for item in ordered
-        ] != list(range(len(texts))):
-            raise InvalidEmbeddingProviderResponseError(
-                "Embedding provider returned invalid indexes"
-            )
-
-        vectors: list[list[float]] = []
-
-        for item in ordered:
-            raw_vector = list(item.embedding)
-
-            if len(raw_vector) != self.dimensions:
+            if len(data) != len(texts):
                 raise InvalidEmbeddingProviderResponseError(
-                    "Embedding provider returned an invalid dimension"
+                    "Embedding provider returned an unexpected item count"
                 )
 
-            vector = [
-                float(value)
-                for value in raw_vector
-            ]
+            ordered = sorted(
+                data,
+                key=lambda item: item.index,
+            )
 
-            if not all(
-                math.isfinite(value)
-                for value in vector
-            ):
+            if [
+                item.index
+                for item in ordered
+            ] != list(range(len(texts))):
                 raise InvalidEmbeddingProviderResponseError(
-                    "Embedding provider returned a non-finite value"
+                    "Embedding provider returned invalid indexes"
                 )
 
-            vectors.append(vector)
+            vectors: list[list[float]] = []
 
-        token_usage = int(
-            getattr(
-                response.usage,
-                "total_tokens",
-                0,
+            for item in ordered:
+                raw_vector = list(item.embedding)
+
+                if len(raw_vector) != self.dimensions:
+                    raise InvalidEmbeddingProviderResponseError(
+                        "Embedding provider returned an invalid dimension"
+                    )
+
+                vector = [
+                    float(value)
+                    for value in raw_vector
+                ]
+
+                if not all(
+                    math.isfinite(value)
+                    for value in vector
+                ):
+                    raise InvalidEmbeddingProviderResponseError(
+                        "Embedding provider returned a non-finite value"
+                    )
+
+                vectors.append(vector)
+
+            token_usage = int(
+                response.usage.total_tokens
             )
-            or 0
-        )
 
-        if token_usage < 0:
+            if token_usage < 0:
+                raise InvalidEmbeddingProviderResponseError(
+                    "Embedding provider returned invalid token usage"
+                )
+
+        except InvalidEmbeddingProviderResponseError:
+            raise
+        except (
+            AttributeError,
+            TypeError,
+            ValueError,
+        ) as exc:
             raise InvalidEmbeddingProviderResponseError(
-                "Embedding provider returned invalid token usage"
-            )
+                "Embedding provider returned a malformed response"
+            ) from exc
 
         return EmbeddingBatchResult(
             vectors=vectors,
