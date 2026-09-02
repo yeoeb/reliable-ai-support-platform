@@ -1,6 +1,6 @@
 # Engineering Issue #020 — CI / Release Hardening Foundation
 
-<!-- codex-dispatch-supervisor-approved-through: CP5 -->
+<!-- codex-dispatch-supervisor-approved-through: CP6 -->
 <!-- codex-dispatch-write-allow: ["scripts/verify_release_candidate.py","tests/test_release_preflight.py","tests/test_release_workflows.py","docs/release-process.md","docs/issues/issue-020-release-hardening.md"] -->
 
 ## GitHub Tracking
@@ -265,7 +265,7 @@ No Product runtime code, migrations, DB schema, credentials, deployment files, o
 - [x] CP3 — Verification / release-contract regression
 - [x] CP4 — Release/security review
 - [x] CP5 — Knowledge / documentation
-- [ ] CP6 — exact-Head delivery
+- [x] CP6 — exact-Head delivery
 
 ## Current State
 
@@ -442,3 +442,50 @@ FINAL HEAD
 → replacement non-Draft PR on same Head if needed
 → merge method = merge
 ```
+
+
+## Post-Merge Delivery Reconciliation
+
+Engineering Issue #020 is **completed**.
+
+Final immutable Feature Head:
+
+`4170d12acfe5ddd91d90258e64b2bbed3bea6d50`
+
+Final exact-Head PR checks:
+
+- Backend Verification #190 / run `33652080847`: PASS — **482 passed**
+- database recovery: PASS
+- Dispatcher Tests #150 / run `33652080880`: PASS — **87 passed**
+
+Replacement non-Draft PR #92 checks on the same Head:
+
+- Backend Verification #191 / run `33652284565`: PASS
+- database recovery: PASS
+- Dispatcher Tests #151 / run `33652284499`: PASS
+
+Merge into develop:
+
+- PR #92: merged with **merge commit**
+- merge SHA: `40c958e39aff4d175e649940d2bc7bd3b7060246`
+- ancestry reconciliation `abe393dbe6a3b8b4f07301708f35fcaedab7add4` remains reachable
+- comparison after merge: develop is behind main by **0**
+- develop push Backend Verification #192: PASS
+- develop push Dispatcher Tests #152: PASS
+
+GitHub tracking:
+
+- Issue #89: Closed / Completed
+- duplicate Issue #90: Closed / Not Planned
+- Draft PR #91: Closed / superseded
+- Product/control-plane PR #92: Merged
+
+External platform-control debt remains:
+
+- main Branch Protection: disabled
+- develop Branch Protection: disabled
+- repository Rulesets: none
+
+Next Engineering Issue:
+
+**#021 — First Hardened Release Promotion**
