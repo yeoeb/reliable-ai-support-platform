@@ -60,7 +60,8 @@ Engineering Issue ID #019 — Operational Metrics / Monitoring foundation
 - Active Branch: `feature/issue-019-operational-metrics`
 - CP0 Observability / Metric Surface Inventory: completed
 - CP1 Low-Cardinality Prometheus Metrics Architecture: completed and Supervisor-approved
-- Current Checkpoint: CP2 authorized
+- CP2 bounded metrics implementation: completed through Supervisor fallback and reviewed
+- Current Checkpoint: CP3 authorized
 - Runtime dependency: prometheus-client
 - Registry: dedicated custom CollectorRegistry
 - HTTP metrics: request count + duration using route templates only
