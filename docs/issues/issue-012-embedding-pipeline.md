@@ -1,6 +1,6 @@
 # Engineering Issue #012 — Embedding Pipeline Foundation
 
-<!-- codex-dispatch-supervisor-approved-through: CP5 -->
+<!-- codex-dispatch-supervisor-approved-through: CP6 -->
 <!-- codex-dispatch-write-allow: ["compose.yaml",".github/workflows/backend-tests.yml","requirements/base.txt",".env.example","app/core/config.py","app/core/errors.py","app/models/knowledge_chunk.py","app/models/__init__.py","app/repositories/knowledge.py","app/repositories/embedding.py","app/services/chunking.py","app/services/embedding.py","app/integrations/__init__.py","app/integrations/embeddings.py","app/schemas/embedding.py","app/api/routes/knowledge.py","migrations/versions/*embedding*.py","tests/test_config.py","tests/test_chunking.py","tests/test_embedding_provider.py","tests/test_embedding_model.py","tests/test_embedding_repository.py","tests/test_embedding_service.py","tests/test_embedding_api.py","tests/test_embedding_migration.py","tests/test_knowledge_migration.py","tests/test_migrations.py","docs/issues/issue-012-embedding-pipeline.md"] -->
 
 ## GitHub Tracking
@@ -621,7 +621,7 @@ Supervisor-controlled:
 - [x] CP3 — Targeted + full verification
 - [x] CP4 — Security / provider / vector review
 - [x] CP5 — Knowledge + documentation sync
-- [ ] CP6 — PR delivery evidence
+- [x] CP6 — PR delivery evidence
 
 ## Supervisor Fallback Execution
 
@@ -802,9 +802,9 @@ Deduplicate in CP5:
 
 ## Current State
 
-CP0–CP5 are complete.
+Engineering Issue #012 is complete and ready for Delivery.
 
-Final reviewed Product/Test Head before CP5 docs:
+Final reviewed Product/Test Head before CP5 documentation:
 
 - `95660212a8bce4fcfc15c2545cc8c992c5b83a40`
 - Backend regression: **306 passed**
@@ -814,9 +814,16 @@ Final reviewed Product/Test Head before CP5 docs:
 - Alembic upgrade/downgrade/re-upgrade: PASS
 - CP4 Security / Provider / Vector Review: PASS
 - CP5 Notion Knowledge Capture: complete
+- README / Project State synchronization: complete
 
-Supervisor approval marker: **CP5**.
+Documentation-inclusive CP5 Head also passed:
 
-Next action: CP6 PR delivery.
+- Backend regression: **306 passed**
+- Database recovery: **1 passed**
+- Dispatcher / Branch Resolver: **87 passed**
 
-No further Product Code change is authorized unless final exact-head verification discovers a failure.
+Supervisor approval marker: **CP6**.
+
+The final non-Draft Delivery PR must run exact-head GitHub-hosted verification before Merge.
+
+No known merge-blocking finding remains.
