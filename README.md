@@ -4,7 +4,7 @@ Production-oriented internal AI support platform built with FastAPI, PostgreSQL,
 
 The project is being developed incrementally toward a complete AI support system with RAG, controlled tool calling, human approval, evaluation, security testing, and observability.
 
-Current status: backend foundation, persistence, migrations, user creation, password hashing, JWT authentication, RBAC permission enforcement, durable security audit logging, structured runtime logging with request correlation, and GitHub-hosted backend verification are implemented. AI capabilities remain planned.
+Current status: backend foundation, persistence, migrations, user creation, password hashing, JWT authentication, RBAC permission enforcement, durable security audit logging, structured runtime logging with request correlation, bounded knowledge document ingestion, and GitHub-hosted backend verification are implemented. Embedding, retrieval, and LLM-backed RAG remain planned.
 
 Why This Project
 
@@ -125,6 +125,22 @@ Route-template logging instead of arbitrary raw paths
 Sensitive structured-field redaction
 
 Runtime Application Logs kept separate from durable Audit Events
+
+Knowledge Ingestion
+
+Admin-only text / Markdown ingestion with dedicated knowledge:manage permission
+
+Deterministic newline normalization and SHA-256 content hashing
+
+Provenance through bounded source_name metadata
+
+Idempotent source_name + content_hash persistence
+
+Database Unique Constraint concurrency backstop
+
+Atomic KnowledgeDocument + Audit Event transaction
+
+Untrusted-document boundary: no file execution, remote fetch, embedding, retrieval, or LLM use
 
 Testing
 
@@ -355,11 +371,15 @@ Sensitive log-field redaction
 
 GitHub Actions backend verification
 
+Knowledge ingestion foundation
+
 Next
 
-Knowledge ingestion
+Embedding pipeline
 
 Planned AI Layer
+
+Retrieval / Vector Search
 
 Embeddings
 
