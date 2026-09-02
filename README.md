@@ -625,9 +625,7 @@ No-side-effect assertions for rejected hostile AI-controlled input
 
 Next
 
-Prompt-injection regression cases
-
-AI privilege-escalation regression cases
+Operational Metrics / Monitoring foundation
 
 Planned Reliability & AI Safety
 
@@ -636,10 +634,6 @@ Metrics / distributed tracing / external log aggregation
 100+ LLM evaluation cases
 
 Prompt version comparison
-
-Prompt injection testing
-
-AI privilege-escalation testing
 
 Target Architecture
 
