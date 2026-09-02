@@ -1,6 +1,6 @@
 # Engineering Issue #015 — Controlled Read-Only Tool Calling Foundation
 
-<!-- codex-dispatch-supervisor-approved-through: CP1 -->
+<!-- codex-dispatch-supervisor-approved-through: CP2 -->
 <!-- codex-dispatch-write-allow: ["app/tools/__init__.py","app/tools/registry.py","app/tools/system.py","app/integrations/llm.py","app/services/tool_execution.py","app/services/agent.py","app/schemas/agent.py","app/api/routes/agent.py","app/core/errors.py","app/main.py","migrations/versions/*tool*.py","tests/test_tool_*.py","tests/test_agent_*.py","docs/issues/issue-015-controlled-tool-calling.md"] -->
 
 ## GitHub Tracking
@@ -409,7 +409,7 @@ Conceptual scope:
 
 - [x] CP0 — Context bootstrap
 - [x] CP1 — Architecture / plan
-- [ ] CP2 — Bounded implementation
+- [x] CP2 — Bounded implementation
 - [ ] CP3 — Verification
 - [ ] CP4 — Security / authorization / Tool boundary review
 - [ ] CP5 — Knowledge / documentation
@@ -469,3 +469,46 @@ Verification status:
 - no CP3+ checkpoint is marked complete.
 
 Remote Supervisor approval remains **CP1** until CP2 review is complete.
+
+
+## CP2 Supervisor Review
+
+Status: **PASS**
+
+Reviewed fallback Product commits:
+
+- `fb41d20845bb9496dddfd2c957f2ea9b2ebcb175`
+- `d66ed4b056a64e6fd1b34983f2467fc77ad19918`
+
+Confirmed:
+
+- Registry owns Tool names, permission names, schemas, risk level, and executor callable.
+- Model can supply only a function name plus JSON arguments.
+- Unknown Tool names fail closed.
+- Pydantic validates arguments before permission check/execution.
+- `extra="forbid"` rejects arbitrary fields such as command/SQL/URL.
+- Authorized Tool list is filtered from database-backed effective permissions before Provider call.
+- Request Session transaction is rolled back before Provider network wait.
+- Permission is re-read from database immediately before Tool execution.
+- Authorization read transaction is rolled back before Tool executor work.
+- V1 Registry contains only `platform_readiness`.
+- V1 risk level is read-only.
+- Provider sets `parallel_tool_calls=false`.
+- More than one returned function call fails closed defensively.
+- AgentService invokes ToolExecutionService at most once; there is no loop.
+- Finalization Provider call does not pass a `tools` field.
+- Tool output is framed as untrusted data.
+- Audit/Runtime Log metadata excludes raw request, arguments, raw Tool result, API key, token, and Provider response.
+- Migration grants `system:read` only to support_agent/admin.
+- No shell, eval, exec, dynamic import, arbitrary SQL, arbitrary URL fetch, MCP, hosted tools, or mutable Tool exists.
+
+Review hardening applied:
+
+1. Replaced an internal `assert` on Provider direct-answer shape with explicit fail-closed validation.
+2. Isolated the Tool execution unit test from a real PostgreSQL dependency.
+
+No blocking CP2 finding remains.
+
+Remote Supervisor approval: **CP2**.
+
+Next authorized action: **CP3 verification**.

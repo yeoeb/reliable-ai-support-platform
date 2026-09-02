@@ -56,7 +56,8 @@ Engineering Issue ID #015 — Controlled Tool Calling foundation
 - Active Branch: `feature/issue-015-controlled-tool-calling`
 - CP0 Context Bootstrap: completed
 - CP1 Architecture / Plan: completed and Supervisor-approved
-- Current Checkpoint: CP2 authorized
+- CP2 bounded implementation: completed through Supervisor fallback and reviewed
+- Current Checkpoint: CP3 authorized
 - V1 Tool: `platform_readiness` only
 - V1 Tool risk: read-only
 - V1 Tool execution bound: maximum one Tool per request
