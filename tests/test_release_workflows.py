@@ -30,6 +30,11 @@ def test_existing_workflows_are_reusable_and_develop_scoped() -> None:
 
     assert "backend-verification-" in backend
     assert "dispatcher-tests-" in dispatcher
+    exact_ref = (
+        "github.event.pull_request.head.sha || github.sha"
+    )
+    assert backend.count(exact_ref) == 2
+    assert dispatcher.count(exact_ref) == 1
     assert "backend-verification-" not in dispatcher
     assert "dispatcher-tests-" not in backend
 
