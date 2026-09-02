@@ -1,7 +1,7 @@
 # Engineering Issue #012 — Embedding Pipeline Foundation
 
 <!-- codex-dispatch-supervisor-approved-through: CP1 -->
-<!-- codex-dispatch-write-allow: ["compose.yaml",".github/workflows/backend-tests.yml","requirements/base.txt",".env.example","app/core/config.py","app/core/errors.py","app/models/knowledge_chunk.py","app/models/__init__.py","app/repositories/knowledge.py","app/repositories/embedding.py","app/services/chunking.py","app/services/embedding.py","app/integrations/__init__.py","app/integrations/embeddings.py","app/schemas/embedding.py","app/api/routes/knowledge.py","migrations/versions/*embedding*.py","tests/test_config.py","tests/test_chunking.py","tests/test_embedding_provider.py","tests/test_embedding_model.py","tests/test_embedding_repository.py","tests/test_embedding_service.py","tests/test_embedding_api.py","tests/test_embedding_migration.py","tests/test_migrations.py","docs/issues/issue-012-embedding-pipeline.md"] -->
+<!-- codex-dispatch-write-allow: ["compose.yaml",".github/workflows/backend-tests.yml","requirements/base.txt",".env.example","app/core/config.py","app/core/errors.py","app/models/knowledge_chunk.py","app/models/__init__.py","app/repositories/knowledge.py","app/repositories/embedding.py","app/services/chunking.py","app/services/embedding.py","app/integrations/__init__.py","app/integrations/embeddings.py","app/schemas/embedding.py","app/api/routes/knowledge.py","migrations/versions/*embedding*.py","tests/test_config.py","tests/test_chunking.py","tests/test_embedding_provider.py","tests/test_embedding_model.py","tests/test_embedding_repository.py","tests/test_embedding_service.py","tests/test_embedding_api.py","tests/test_embedding_migration.py","tests/test_knowledge_migration.py","tests/test_migrations.py","docs/issues/issue-012-embedding-pipeline.md"] -->
 
 ## GitHub Tracking
 
@@ -638,6 +638,14 @@ This fallback does **not** bypass:
 - CP6 Delivery Gate.
 
 Branch history must not be represented as a Codex-generated checkpoint unless the Dispatcher actually produced it.
+
+### Scope Expansion — Existing Migration Test
+
+Supervisor review found that `tests/test_knowledge_migration.py` incorrectly assumes the #011 migration must remain the current Alembic head.
+
+Because #012 legitimately adds a successor revision, the test must be changed to validate revision `a61f9b2c3d40` directly rather than asserting it is the head.
+
+This is a bounded regression-test maintenance change; it does not alter #011 Product behavior.
 
 ## CP2 Ordered Slices
 
