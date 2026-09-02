@@ -128,14 +128,18 @@ class OpenAIEmbeddingProvider:
 
                 vectors.append(vector)
 
-            token_usage = int(
-                response.usage.total_tokens
-            )
+            raw_token_usage = response.usage.total_tokens
 
-            if token_usage < 0:
+            if (
+                not isinstance(raw_token_usage, int)
+                or isinstance(raw_token_usage, bool)
+                or raw_token_usage < 0
+            ):
                 raise InvalidEmbeddingProviderResponseError(
                     "Embedding provider returned invalid token usage"
                 )
+
+            token_usage = raw_token_usage
 
         except InvalidEmbeddingProviderResponseError:
             raise
