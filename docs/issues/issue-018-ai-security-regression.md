@@ -1,6 +1,6 @@
 # Engineering Issue #018 — AI Security Regression Foundation
 
-<!-- codex-dispatch-supervisor-approved-through: CP1 -->
+<!-- codex-dispatch-supervisor-approved-through: CP2 -->
 <!-- codex-dispatch-write-allow: ["evals/README.md","evals/suites/security-v1/suite.json","evals/suites/security-v1/cases.jsonl","evals/suites/security-v1/baseline_results.jsonl","tests/test_ai_security_regression.py","tests/test_ai_security_api.py","docs/issues/issue-018-ai-security-regression.md"] -->
 
 ## GitHub Tracking
@@ -448,7 +448,7 @@ There is deliberately no `app/` path.
 
 - [x] CP0 — Existing-defense / threat-surface inventory
 - [x] CP1 — Cross-layer Security Regression architecture
-- [ ] CP2 — Tests-first security matrix implementation
+- [x] CP2 — Tests-first security matrix implementation
 - [ ] CP3 — Full verification / bounded Product fix only if required
 - [ ] CP4 — Security Review / no-side-effect evidence
 - [ ] CP5 — Knowledge / documentation
@@ -488,3 +488,42 @@ The new tests inject hostile normalized model/approval data through mocks and ne
 Focused tests are authored but are not represented as executed by the Supervisor fallback environment.
 
 Remote approval remains CP1 until CP2 review and GitHub-hosted verification evidence are available.
+
+
+## CP2 Supervisor Review
+
+Status: **PASS**
+
+Reviewed fallback Head:
+
+`2843cb043e72033c3ca7496e061d585873d4b10d`
+
+Confirmed:
+
+- changed files are limited to the original test/fixture/docs Allowlist;
+- no `app/` Product runtime source was changed;
+- `security-v1` reuses the existing #017 loader / schemas / scorer;
+- 16 synthetic adversarial Cases and 16 Results reconcile exactly;
+- all 16 Cases are safety-critical;
+- Prompt fingerprints remain pinned to the existing Grounded RAG / Tool-choice instruction identities;
+- baseline threshold remains 100% pass / zero Safety violations;
+- committed security baseline is documented as a scorer fixture, not live-model performance;
+- RAG adversarial corpus covers prompt injection, citation forgery, insufficient evidence pressure, and fake Tool instructions;
+- Tool corpus covers shell, SQL, URL fetch, admin escalation, role argument injection, invented Tool schema, Approval bypass, and hidden Tool selection;
+- cross-layer tests assert both rejection/safe state and absence of unauthorized side effects;
+- unknown Tool path asserts no ToolExecution, no Approval request, and no finalization;
+- argument injection asserts executor/finalization are not called;
+- privilege argument injection asserts no Approval persistence, no executor, no commit, and no finalization;
+- no-authorized-Tool path asserts Provider is not called;
+- persisted Approval Tool-name / argument tampering assert no execution/commit and remain pending;
+- RAG failure metadata checks exclude synthetic Prompt/Evidence/Provider attack strings;
+- API attack failure is expected to return bounded generic detail without echoing hostile/private content;
+- tests contain no actual shell, arbitrary SQL, attacker HTTP request, eval/exec, dynamic import, or live OpenAI call.
+
+No blocking CP2 finding remains.
+
+Remote Supervisor approval: **CP2**.
+
+Next authorized action: **CP3 full GitHub-hosted verification**.
+
+If CP3 exposes a real Product boundary defect, preserve the failing security test and require explicit bounded Product rework authorization.
