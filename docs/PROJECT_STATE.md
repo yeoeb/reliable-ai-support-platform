@@ -52,10 +52,10 @@ Engineering Issue ID #013 — Retrieval / Vector Search foundation
 
 - GitHub tracking Issue: #60
 - Active Branch: `feature/issue-013-vector-retrieval`
-- Current Checkpoint: CP2 authorized
+- Current Checkpoint: CP3 verification
 - CP0 Context Bootstrap: completed
 - CP1 Architecture / Scope: completed and Supervisor-approved
-- CP2 implementation: pending Executor
+- CP2 implementation: completed via bounded Supervisor fallback
 - Product boundary: exact cosine retrieval over current embedding config; HNSW/IVFFlat/RAG remain deferred
 - Access boundary: raw retrieval results require `knowledge:read` and are intended for support_agent/admin only
 
