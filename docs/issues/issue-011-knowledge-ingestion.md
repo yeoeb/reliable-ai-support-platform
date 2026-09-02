@@ -1,6 +1,6 @@
 # Engineering Issue #011 — Knowledge Document Ingestion Foundation
 
-<!-- codex-dispatch-supervisor-approved-through: CP1 -->
+<!-- codex-dispatch-supervisor-approved-through: CP4 -->
 <!-- codex-dispatch-write-allow: ["app/models/knowledge_document.py","app/models/__init__.py","app/repositories/knowledge.py","app/services/knowledge.py","app/schemas/knowledge.py","app/api/routes/knowledge.py","app/main.py","app/core/errors.py","migrations/versions/*knowledge*.py","tests/test_knowledge_model.py","tests/test_knowledge_repository.py","tests/test_knowledge_service.py","tests/test_knowledge_api.py","tests/test_knowledge_migration.py","tests/test_migrations.py","docs/issues/issue-011-knowledge-ingestion.md"] -->
 
 ## GitHub Tracking
@@ -345,9 +345,9 @@ Supervisor-controlled only:
 
 - [x] CP0 — Context bootstrap / contradiction detection
 - [x] CP1 — Architecture + Scope validation
-- [ ] CP2 — Bounded implementation
-- [ ] CP3 — Targeted + full verification
-- [ ] CP4 — Security / ingestion review
+- [x] CP2 — Bounded implementation
+- [x] CP3 — Targeted + full verification
+- [x] CP4 — Security / ingestion review
 - [ ] CP5 — Knowledge + documentation sync
 - [ ] CP6 — PR delivery evidence
 
@@ -395,6 +395,78 @@ python -m pytest -q
 
 GitHub-hosted PostgreSQL/Alembic Backend Verification is authoritative.
 
+## CP2 / CP3 Verification Evidence
+
+CP2 was implemented through the recorded bounded Supervisor fallback.
+
+Initial GitHub-hosted verification:
+
+```text
+232 passed, 1 failed
+```
+
+The single failure was a Test Contract mismatch: Pydantic `str_strip_whitespace=True` rejects whitespace-only content before the Service executes. Product validation was preserved; the test was corrected to assert the framework-level 422 boundary.
+
+Second exact-head verification:
+
+```text
+Backend regression: 233 passed
+Database recovery:   1 passed
+Control Plane:      87 passed
+Alembic round-trip: PASS
+```
+
+CP4 then found a real input-boundary gap: Pydantic trimming could reduce oversized raw content before `max_length` validation.
+
+Bounded hardening added:
+
+- a `mode="before"` raw content length validator;
+- a whitespace-bypass negative test;
+- an exact 100,000-character acceptance test.
+
+Final reviewed Product/Test Head:
+
+`6f1e2a468e09991efd859ceb815ae45964a5aeaf`
+
+Final exact-head evidence:
+
+```text
+Backend regression: 235 passed
+Database recovery:   1 passed
+Control Plane:      87 passed
+PostgreSQL 16:       PASS
+Alembic upgrade:     PASS
+Alembic downgrade:   PASS
+Alembic re-upgrade:  PASS
+```
+
+## CP4 Security / Ingestion Review
+
+Status: **PASS**
+
+Findings:
+
+- Knowledge content remains stored untrusted data only.
+- No PDF/DOCX/Excel/OCR parser exists.
+- No filesystem open, remote URL fetch, HTTP client, LLM, Embedding, pgvector, Retrieval, or RAG path was introduced.
+- `source_name` remains a logical provenance label only.
+- `knowledge:manage` uses a dedicated stable Permission and is granted only to the stable admin Role UUID in the migration.
+- Repository owns no Commit/Rollback.
+- Service owns the single transaction boundary.
+- New KnowledgeDocument + Audit Event commit atomically.
+- Audit failure rolls back a newly-created document.
+- duplicate `source_name + normalized content_hash` is idempotent and still audited with `changed=false`.
+- PostgreSQL Unique Constraint is the concurrency backstop; SAVEPOINT recovery handles duplicate insert races.
+- Audit metadata excludes document content, title, and source_name.
+- Runtime success/failure logs exclude document content, title, and source_name.
+- API success response excludes document content.
+- raw content is capped at 100,000 characters before trimming/normalization can reduce it.
+- exact 100,000 characters are accepted; oversized content is rejected.
+- model and migration remain aligned.
+- one linear Alembic head is preserved.
+
+No merge-blocking finding remains.
+
 ## CP4 Review Focus
 
 - content/provenance never enters logs/audit unexpectedly
@@ -418,10 +490,19 @@ Deduplicate in CP5:
 
 ## Current State
 
-CP0 and CP1 are complete.
+CP0–CP4 are complete.
 
-Supervisor approval marker: **CP1**.
+Final reviewed Product/Test Head:
 
-CP2 is authorized.
+- `6f1e2a468e09991efd859ceb815ae45964a5aeaf`
+- Backend regression: **235 passed**
+- Docker Compose database recovery: **1 passed**
+- Dispatcher / Branch Resolver: **87 passed**
+- PostgreSQL 16 + Alembic upgrade/downgrade/re-upgrade: PASS
+- CP4 Security / Ingestion Review: PASS
 
-No CP2 Product implementation evidence exists yet.
+Supervisor approval marker: **CP4**.
+
+Next action: CP5 Knowledge / Documentation synchronization.
+
+No further Product Code change is authorized unless a new verification failure is discovered.
