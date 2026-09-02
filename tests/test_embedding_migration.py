@@ -22,15 +22,7 @@ def get_embedding_migration_module():
     return revision.module
 
 
-def test_embedding_migration_is_linear_head() -> None:
-    script = ScriptDirectory.from_config(
-        Config(str(ALEMBIC_INI))
-    )
-
-    assert script.get_heads() == [
-        EXPECTED_REVISION
-    ]
-
+def test_embedding_migration_has_expected_parent() -> None:
     module = get_embedding_migration_module()
     assert module.revision == EXPECTED_REVISION
     assert module.down_revision == "a61f9b2c3d40"

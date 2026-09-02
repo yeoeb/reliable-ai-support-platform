@@ -4,7 +4,7 @@ Production-oriented internal AI support platform built with FastAPI, PostgreSQL,
 
 The project is being developed incrementally toward a complete AI support system with RAG, controlled tool calling, human approval, evaluation, security testing, and observability.
 
-Current status: backend foundation, persistence, migrations, authentication, database-backed RBAC, durable security audit logging, structured request-correlated logging, bounded knowledge ingestion, deterministic chunking, OpenAI embedding integration behind an explicit provider boundary, pgvector vector persistence, and GitHub-hosted backend verification are implemented. Retrieval and LLM-backed RAG remain planned.
+Current status: backend foundation, persistence, migrations, authentication, database-backed RBAC, durable security audit logging, structured request-correlated logging, bounded knowledge ingestion, deterministic chunking, OpenAI embedding integration behind an explicit provider boundary, pgvector vector persistence, authorized exact vector retrieval, and GitHub-hosted backend verification are implemented. LLM-backed RAG with evidence/citations remains planned.
 
 Why This Project
 
@@ -165,6 +165,30 @@ Atomic KnowledgeChunk + Audit Event persistence
 No chunk text, vectors, API key, or raw provider response in API/Audit/runtime logs
 
 No HNSW/IVFFlat/similarity query in this milestone
+
+Exact Vector Retrieval
+
+Dedicated `knowledge:read` permission for support_agent and admin
+
+Bounded search query with top_k and minimum similarity validation
+
+Ephemeral query embedding through the existing EmbeddingProvider boundary
+
+Shared request DB read transaction closed before external query-embedding wait
+
+Exact pgvector cosine-distance search over the current embedding configuration
+
+Similarity threshold applied before LIMIT
+
+Deterministic distance + Chunk UUID ordering
+
+KnowledgeDocument provenance joined into retrieval results
+
+Best-effort read Audit and safe structured retrieval logs
+
+Retrieved chunk content returned as untrusted evidence without exposing vectors
+
+No HNSW/IVFFlat/ANN, reranking, or RAG generation in this milestone
 
 Testing
 
@@ -335,7 +359,17 @@ Knowledge ingestion accepts bounded text / Markdown and returns metadata without
 
 Embedding creation uses deterministic chunking, an explicit OpenAI provider boundary, and pgvector vector(1536) persistence. Existing complete embeddings return idempotently without calling the provider again.
 
-Retrieval / similarity search is not implemented yet.
+Knowledge Retrieval
+
+POST /knowledge/search
+
+This endpoint requires the database-backed `knowledge:read` permission.
+
+V1 grants raw internal Retrieval to `support_agent` and `admin`, not the default `user` role.
+
+Search uses exact pgvector cosine distance over the current embedding configuration, applies a bounded similarity threshold / top_k, joins KnowledgeDocument provenance, and returns chunk content as untrusted evidence without returning stored vectors.
+
+RAG answer generation is not implemented yet.
 
 Reliability & Security Principles
 
@@ -429,13 +463,19 @@ OpenAI embedding provider boundary
 
 pgvector vector(1536) persistence
 
+Exact vector retrieval foundation
+
+knowledge:read least-privilege retrieval access
+
+Current-config cosine search with provenance
+
 Next
 
-Retrieval / Vector Search
+RAG response with evidence / citations
 
 Planned AI Layer
 
-RAG with source citations
+RAG answer generation
 
 Agent tool calling
 

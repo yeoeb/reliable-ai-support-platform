@@ -46,15 +46,21 @@ Required state surfaces:
 
 The Dispatcher uses Stable `codex exec` as its local execution boundary. It does not attempt to inject prompts into an already-open VS Code/Desktop Codex UI session.
 
-## Next Product Engineering Issue
+## Current Product Engineering Issue
 
 Engineering Issue ID #013 — Retrieval / Vector Search foundation
 
-- Status: not started
-- Normal base Branch: `develop`
-- Dependency baseline: Knowledge Ingestion, Embedding Pipeline, pgvector storage, RBAC, Audit, Structured Logging, and Backend Verification are complete
-- Input boundary: persisted KnowledgeChunk rows with vector(1536)
-- Product boundary must be defined by a new GitHub tracking Issue and CP0/CP1 before implementation
+- GitHub tracking Issue: #60
+- Active Branch: `feature/issue-013-vector-retrieval`
+- Current Checkpoint: CP6 delivery
+- CP0 Context Bootstrap: completed
+- CP1 Architecture / Scope: completed and Supervisor-approved
+- CP2 implementation: completed via bounded Supervisor fallback
+- CP3 verification: completed (344 backend + 1 recovery test; pgvector/Alembic round-trip PASS)
+- CP4 Security / Retrieval review: completed
+- CP5 Knowledge / Documentation synchronization: completed
+- Product boundary: exact cosine retrieval over current embedding config; HNSW/IVFFlat/RAG remain deferred
+- Access boundary: raw retrieval results require `knowledge:read` and are intended for support_agent/admin only
 
 Important: GitHub Issue/PR numbers are repository-wide platform sequence numbers and remain separate from Engineering Issue IDs.
 
@@ -121,6 +127,12 @@ Service Layer owns transaction boundaries.
 - Persisted embeddings are deterministic per document + pipeline configuration and stored as pgvector vector(1536).
 - Provider output is validated before persistence; chunk/vector/API-key data is excluded from Audit and runtime logs.
 - Vector storage does not imply Retrieval: similarity search/indexing remains a separate architecture boundary.
+- Exact retrieval uses current-config cosine distance with deterministic tie-breaking and bounded Top-K/threshold inputs.
+- Raw internal Retrieval requires dedicated `knowledge:read` and is limited to support_agent/admin in V1.
+- Retrieval query embeddings are ephemeral; query text/vector are excluded from persistence, Audit content, and runtime logs.
+- The shared request DB read transaction must be closed before the external query-embedding Provider wait.
+- Retrieved KnowledgeChunk content remains untrusted context; Retrieval does not grant instruction, policy, or tool-execution authority.
+- Exact Vector Search is the current correctness baseline; ANN indexes remain evidence-driven future optimization.
 
 ### Planned AI Boundary
 
