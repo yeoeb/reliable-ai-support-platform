@@ -5,6 +5,8 @@ import time
 from typing import Any
 from uuid import uuid4
 
+from fastapi import Request
+from fastapi.responses import PlainTextResponse
 from starlette.types import ASGIApp, Message, Receive, Scope, Send
 
 from app.core.request_context import reset_request_id, set_request_id
@@ -14,6 +16,7 @@ logger = logging.getLogger(__name__)
 
 _UNMATCHED_ROUTE = "<unmatched>"
 _REQUEST_ID_HEADER = b"x-request-id"
+_REQUEST_ID_HEADER_NAME = "X-Request-ID"
 
 
 def _resolved_route(scope: Scope) -> str:
@@ -41,6 +44,7 @@ class RequestLoggingMiddleware:
             return
 
         request_id = str(uuid4())
+        scope.setdefault("state", {})["request_id"] = request_id
         token = set_request_id(request_id)
         started_at = time.perf_counter()
         status_code: int | None = None
@@ -105,3 +109,28 @@ class RequestLoggingMiddleware:
             )
         finally:
             reset_request_id(token)
+
+
+
+async def unhandled_exception_response(
+    request: Request,
+    exc: Exception,
+) -> PlainTextResponse:
+    del exc
+
+    request_id = getattr(
+        request.state,
+        "request_id",
+        None,
+    )
+    headers = (
+        {_REQUEST_ID_HEADER_NAME: request_id}
+        if request_id
+        else {}
+    )
+
+    return PlainTextResponse(
+        "Internal Server Error",
+        status_code=500,
+        headers=headers,
+    )
