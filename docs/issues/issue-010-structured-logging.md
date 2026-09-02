@@ -1,6 +1,6 @@
 # Engineering Issue #010 — Structured Logging / Request Correlation
 
-<!-- codex-dispatch-supervisor-approved-through: CP5 -->
+<!-- codex-dispatch-supervisor-approved-through: CP6 -->
 <!-- codex-dispatch-write-allow: [".env.example","app/core/logging.py","app/core/request_context.py","app/api/middleware/__init__.py","app/api/middleware/request_logging.py","app/main.py","app/core/config.py","app/services/user.py","app/services/rbac.py","app/services/audit.py","app/api/dependencies/auth.py","app/api/dependencies/authorization.py","tests/test_logging.py","tests/test_request_logging.py","tests/test_config.py","docs/issues/issue-010-structured-logging.md"] -->
 
 ## GitHub Tracking
@@ -291,7 +291,7 @@ Logging `str(exc)` may expose query/credential/request data; use exception type 
 - [x] CP3 — Targeted + full verification
 - [x] CP4 — Security / observability review
 - [x] CP5 — Knowledge + documentation sync
-- [ ] CP6 — PR delivery evidence
+- [x] CP6 — PR delivery evidence
 
 ## Supervisor Fallback Execution
 
@@ -467,20 +467,21 @@ Potential CP5 candidates, deduplicated first:
 
 ## Current State
 
-CP0–CP5 are complete.
+Engineering Issue #010 is complete and ready for delivery.
 
-Final Product/Test evidence before documentation-only synchronization:
+Final reviewed Product/Test Head before CP5 documentation:
 
-- Head: `bc6dd17e2256132417a97b6c030044bf2158869f`
+- `bc6dd17e2256132417a97b6c030044bf2158869f`
 - Backend regression: **208 passed**
 - Docker Compose database recovery: **1 passed**
-- Dispatcher / Branch Resolver: **87 passed**
-- PostgreSQL 16 + Alembic round-trip: PASS
+- Dispatcher / Branch Resolver Control Plane: **87 passed**
+- PostgreSQL 16 + Alembic upgrade / downgrade / re-upgrade: PASS
 - CP4 Security / Observability Review: PASS
 - CP5 Notion Knowledge Capture: complete
+- README / Project State synchronization: complete
 
-Supervisor approval marker: **CP5**.
+Supervisor approval marker: **CP6**.
 
-Next action: CP6 PR delivery.
+The final Delivery PR must run exact-head GitHub-hosted verification before Merge.
 
-No further Product Code change is authorized unless a new verification failure is discovered.
+No known merge-blocking finding remains.
