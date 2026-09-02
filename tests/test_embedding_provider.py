@@ -184,3 +184,100 @@ def test_provider_rejects_non_finite_vectors(
         InvalidEmbeddingProviderResponseError,
     ):
         provider.embed(["text"])
+
+
+
+@pytest.mark.parametrize(
+    "response",
+    [
+        SimpleNamespace(
+            usage=SimpleNamespace(total_tokens=1),
+        ),
+        SimpleNamespace(
+            data=[make_item(0)],
+        ),
+        SimpleNamespace(
+            data=[
+                SimpleNamespace(
+                    embedding=[0.1] * DIMENSIONS,
+                )
+            ],
+            usage=SimpleNamespace(total_tokens=1),
+        ),
+        SimpleNamespace(
+            data=[
+                SimpleNamespace(
+                    index=0,
+                )
+            ],
+            usage=SimpleNamespace(total_tokens=1),
+        ),
+    ],
+)
+def test_provider_rejects_missing_response_fields(
+    response,
+) -> None:
+    provider = OpenAIEmbeddingProvider(
+        api_key=None,
+        model="text-embedding-3-small",
+        dimensions=DIMENSIONS,
+        client=make_client(response),
+    )
+
+    with pytest.raises(
+        InvalidEmbeddingProviderResponseError,
+    ):
+        provider.embed(["text"])
+
+
+def test_provider_rejects_non_numeric_vector_value() -> None:
+    response = make_response(
+        [
+            SimpleNamespace(
+                index=0,
+                embedding=[
+                    "not-a-number"
+                ] * DIMENSIONS,
+            )
+        ]
+    )
+    provider = OpenAIEmbeddingProvider(
+        api_key=None,
+        model="text-embedding-3-small",
+        dimensions=DIMENSIONS,
+        client=make_client(response),
+    )
+
+    with pytest.raises(
+        InvalidEmbeddingProviderResponseError,
+    ):
+        provider.embed(["text"])
+
+
+@pytest.mark.parametrize(
+    "bad_usage",
+    [
+        None,
+        "not-an-integer",
+        -1,
+    ],
+)
+def test_provider_rejects_invalid_token_usage(
+    bad_usage,
+) -> None:
+    response = make_response(
+        [make_item(0)]
+    )
+    response.usage.total_tokens = bad_usage
+
+    provider = OpenAIEmbeddingProvider(
+        api_key=None,
+        model="text-embedding-3-small",
+        dimensions=DIMENSIONS,
+        client=make_client(response),
+    )
+
+    with pytest.raises(
+        InvalidEmbeddingProviderResponseError,
+    ):
+        provider.embed(["text"])
