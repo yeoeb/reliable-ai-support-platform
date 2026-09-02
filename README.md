@@ -276,6 +276,26 @@ Persisted Approval Tool-name / argument tampering is revalidated before executio
 
 Security fixtures never execute arbitrary shell, SQL, attacker HTTP, eval/exec, or live OpenAI calls
 
+Operational Metrics
+
+GET /metrics exposes only reviewed application metrics from a dedicated custom CollectorRegistry
+
+HTTP request totals use method, server-owned route template, and status class only
+
+HTTP latency uses method and route template with explicit bounded Histogram buckets
+
+RAG metrics expose grounded / insufficient_evidence / provider_failure outcomes
+
+Agent metrics expose completed / approval_required outcomes
+
+LLM token totals use only operation and input/output direction
+
+Request/User/Approval/Document/Chunk IDs, raw paths, prompts, answers, Tool arguments, model names, provider IDs, tokens, and secrets are forbidden as metric labels
+
+Metrics recording is best-effort and cannot change Product request semantics
+
+The /metrics scrape endpoint is hidden from OpenAPI, has no Product JWT/DB/OpenAI dependency, excludes self-scrape traffic from Product HTTP metrics, and should be network-restricted in production
+
 Testing
 
 pytest
@@ -623,9 +643,19 @@ No-side-effect assertions for rejected hostile AI-controlled input
 
 16-case synthetic security-v1 Eval corpus
 
+Operational Metrics / Monitoring foundation
+
+Custom Prometheus CollectorRegistry
+
+Low-cardinality HTTP request / latency metrics
+
+Bounded RAG / Agent outcome and aggregate token metrics
+
+Best-effort telemetry failure boundary
+
 Next
 
-Operational Metrics / Monitoring foundation
+CI / release hardening
 
 Planned Reliability & AI Safety
 

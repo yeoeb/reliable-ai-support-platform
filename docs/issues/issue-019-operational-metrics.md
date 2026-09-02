@@ -1,6 +1,6 @@
 # Engineering Issue #019 — Operational Metrics / Monitoring Foundation
 
-<!-- codex-dispatch-supervisor-approved-through: CP2 -->
+<!-- codex-dispatch-supervisor-approved-through: CP5 -->
 <!-- codex-dispatch-write-allow: ["requirements/base.txt","app/core/metrics.py","app/api/routes/metrics.py","app/api/middleware/request_logging.py","app/main.py","app/services/rag.py","app/services/agent.py","tests/test_metrics.py","tests/test_request_metrics.py","tests/test_ai_metrics.py","tests/test_metrics_api.py","docs/issues/issue-019-operational-metrics.md"] -->
 
 ## GitHub Tracking
@@ -490,9 +490,9 @@ No migration, model, repository, DB schema, Docker Compose, or GitHub workflow c
 - [x] CP0 — Observability / metric-surface inventory
 - [x] CP1 — Low-cardinality Prometheus metrics architecture
 - [x] CP2 — Bounded implementation
-- [ ] CP3 — Verification / cardinality & failure regression
-- [ ] CP4 — Observability / security review
-- [ ] CP5 — Knowledge / documentation
+- [x] CP3 — Verification / cardinality & failure regression
+- [x] CP4 — Observability / security review
+- [x] CP5 — Knowledge / documentation
 - [ ] CP6 — exact-Head delivery
 
 ## Current State
@@ -579,3 +579,105 @@ No blocking CP2 finding remains.
 Remote Supervisor approval: **CP2**.
 
 Next authorized action: **CP3 full GitHub-hosted verification / cardinality & failure regression**.
+
+
+## CP3 — Full Verification / Cardinality & Failure Regression
+
+Status: **completed**
+
+Verified Head:
+
+`795dbdd01cfb293a0e073dd4c6ac54018a5ed49b`
+
+GitHub-hosted results:
+
+- Backend Verification #185: **PASS**
+- backend regression: **467 passed**
+- Dispatcher Tests #143: **PASS**
+- control-plane regression: **87 passed**
+- PostgreSQL + pgvector: **PASS**
+- Alembic upgrade / downgrade / re-upgrade: **PASS**
+
+Database recovery first attempt:
+
+- restart recovery did not reach HTTP 200 within the existing 10-second polling window;
+- last readiness status was 503;
+- no #019 Product/DB/recovery code had changed.
+
+The failed `database-recovery` Job was re-run on the **same Branch Head** without a Product/Test commit.
+
+Same-Head retry:
+
+- database recovery: **1 passed**
+
+Conclusion:
+
+- the first failure was treated as an infrastructure/timing flake;
+- the recovery contract was not weakened;
+- no Product/recovery-test change was made to hide the failure.
+
+## CP4 — Observability / Security Review
+
+Status: **PASS**
+
+Confirmed:
+
+- metrics use a dedicated custom `CollectorRegistry`;
+- default Python/process metric families are not intentionally exposed;
+- HTTP Counter labels are only method / route / status_class;
+- HTTP latency labels are only method / route;
+- route uses the existing server-owned route template and unmatched requests collapse to `<unmatched>`;
+- unknown HTTP methods normalize to `OTHER`;
+- status codes collapse to fixed status classes;
+- `/metrics` self-scrape is excluded from Product HTTP request metrics;
+- RAG operation/outcome values are fixed and bounded;
+- Agent operation/outcome values are fixed and bounded;
+- token labels are fixed to operation / input-or-output direction;
+- metrics do not label by Request ID, User ID, Approval ID, Document/Chunk ID, raw URL/query/body, Prompt/Answer, Tool arguments, model name, provider response, token, or secret;
+- scrape endpoint is hidden from OpenAPI;
+- scrape endpoint has no Product JWT, DB Session, OpenAI, Tool, or Approval dependency;
+- Production deployment is expected to network-restrict the operational scrape endpoint;
+- telemetry failure is best-effort and cannot replace successful Product semantics;
+- RequestLoggingMiddleware additionally catches injected recorder failures;
+- existing Request ID lifecycle and structured logs remain active;
+- metrics are additive and do not replace durable Audit evidence;
+- no migration, DB model, Docker Compose, or GitHub workflow change is included.
+
+No merge-blocking Observability/Security finding remains.
+
+## CP5 — Knowledge / Documentation
+
+Status: **completed**
+
+Notion deduplication performed first.
+
+Created reusable Engineering Encyclopedia entry:
+
+**Operational Metrics：Prometheus Counter、Histogram、Cardinality 與 Best-Effort Telemetry**
+
+Created Work Log:
+
+**Issue #019 — Operational Metrics / Monitoring Foundation**
+
+Repository documentation synchronized before Final CI:
+
+- `README.md`
+- `docs/PROJECT_STATE.md`
+- this execution note
+
+## CP6 — Final Delivery
+
+Status: **final exact-Head verification pending**
+
+All planned Product/Test/Documentation Branch writes are complete.
+
+Next:
+
+```text
+FINAL HEAD
+→ exact-Head GitHub Actions
+→ PASS
+→ PR / Issue Comment evidence only
+→ no post-CI Branch commit
+→ Merge
+```

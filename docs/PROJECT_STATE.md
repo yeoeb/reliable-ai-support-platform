@@ -61,7 +61,10 @@ Engineering Issue ID #019 — Operational Metrics / Monitoring foundation
 - CP0 Observability / Metric Surface Inventory: completed
 - CP1 Low-Cardinality Prometheus Metrics Architecture: completed and Supervisor-approved
 - CP2 bounded metrics implementation: completed through Supervisor fallback and reviewed
-- Current Checkpoint: CP3 authorized
+- CP3 Verification / cardinality & failure regression: completed
+- CP4 Observability / Security Review: completed
+- CP5 Knowledge / Documentation: completed
+- Current Checkpoint: CP6 final exact-Head verification
 - Runtime dependency: prometheus-client
 - Registry: dedicated custom CollectorRegistry
 - HTTP metrics: request count + duration using route templates only
@@ -170,6 +173,14 @@ Service Layer owns transaction boundaries.
 - Security regression must assert both rejection/safe state and absence of unauthorized side effects.
 - Security Eval and Application Boundary regression are separate layers: safe model output does not replace server enforcement, and server enforcement does not replace model-safety tracking.
 - Adversarial security fixtures are synthetic data only; normal CI must never execute arbitrary shell, SQL, attacker HTTP, eval/exec, or live red-team Provider calls.
+- Operational Metrics complement Structured Logs and durable Audit; they do not replace either.
+- Prometheus metrics use a repository-owned custom CollectorRegistry and reviewed low-cardinality labels only.
+- HTTP metrics use server-owned route templates, normalized methods, and status classes; raw paths and Request IDs never become labels.
+- AI metrics expose only bounded RAG/Agent outcomes and aggregate input/output token totals.
+- User/Approval/Document/Chunk IDs, Prompt/Answer content, Tool arguments, model/provider identifiers, and secrets never become metric labels.
+- Metrics recording is best-effort telemetry and must not change Product response/error semantics.
+- GET /metrics has no Product DB/OpenAI/Tool/Approval dependency and is intentionally excluded from Product HTTP metrics.
+- Production access to the unauthenticated scrape endpoint must be restricted by deployment/network policy.
 
 ### Planned AI Boundary
 
