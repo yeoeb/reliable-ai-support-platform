@@ -6,6 +6,7 @@ from sqlalchemy.orm import Session
 
 from app.core.errors import (
     InvalidToolArgumentsError,
+    ToolExecutionError,
     ToolPermissionDeniedError,
     UnknownToolError,
 )
@@ -112,3 +113,36 @@ def test_unknown_tool_fails_closed(monkeypatch) -> None:
             arguments={},
         )
     permission.has_permission.assert_not_called()
+
+
+
+def test_direct_executor_refuses_approval_required_tool(
+    monkeypatch,
+) -> None:
+    service, session, permission = make_service(
+        monkeypatch,
+        allowed=True,
+    )
+    definition = service.registry.get(
+        "grant_support_agent_role"
+    )
+    approval_executor = MagicMock()
+    object.__setattr__(
+        definition,
+        "approval_executor",
+        approval_executor,
+    )
+
+    with pytest.raises(
+        ToolExecutionError,
+        match="cannot execute directly",
+    ):
+        service.execute(
+            actor_user_id=uuid4(),
+            tool_name="grant_support_agent_role",
+            arguments={"user_id": str(uuid4())},
+        )
+
+    permission.has_permission.assert_not_called()
+    approval_executor.assert_not_called()
+    session.rollback.assert_not_called()
