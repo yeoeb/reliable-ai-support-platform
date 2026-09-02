@@ -57,7 +57,7 @@ Engineering Issue ID #016 — Durable Human Approval for higher-risk Tool action
 - Active Branch: `feature/issue-016-human-approval`
 - CP0 Context Bootstrap: completed
 - CP1 Durable Approval Architecture: completed and Supervisor-approved
-- Current Checkpoint: CP2 authorized
+- Current Checkpoint: CP5 knowledge/documentation sync
 - V1 higher-risk Tool: `grant_support_agent_role(user_id)`
 - Fixed role: `support_agent`; model cannot choose arbitrary/admin role
 - Approval state: durable PostgreSQL record with expiry and one-time row-locked decision
