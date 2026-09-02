@@ -38,6 +38,14 @@ class ToolExecutionService:
     ) -> dict[str, str]:
         definition = self.registry.get(tool_name)
 
+        if (
+            definition.risk_level != "read_only"
+            or definition.executor is None
+        ):
+            raise ToolExecutionError(
+                "Approval-required Tool cannot execute directly"
+            )
+
         try:
             validated = definition.arguments_model.model_validate(
                 arguments
