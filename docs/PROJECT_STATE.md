@@ -27,6 +27,7 @@ It is intentionally concise and must stay synchronized with merged work.
 - #009 — Durable Security Audit Trail
 - #010 — Structured Logging / Observability foundation
 - #011 — Knowledge Ingestion foundation
+- #012 — Embedding Pipeline foundation
 
 ## Current Workflow Infrastructure
 
@@ -45,29 +46,22 @@ Required state surfaces:
 
 The Dispatcher uses Stable `codex exec` as its local execution boundary. It does not attempt to inject prompts into an already-open VS Code/Desktop Codex UI session.
 
-## Current Product Engineering Issue
+## Next Product Engineering Issue
 
-Engineering Issue ID #012 — Embedding Pipeline foundation
+Engineering Issue ID #013 — Retrieval / Vector Search foundation
 
-- GitHub tracking Issue: #54
-- Active Branch: `feature/issue-012-embedding-pipeline`
-- Current Checkpoint: CP6 delivery
-- CP0 Context Bootstrap: completed
-- CP1 Architecture / Scope: completed and Supervisor-approved
-- CP2 implementation: completed via bounded Supervisor fallback
-- CP3 verification: completed (306 backend + 1 recovery test; pgvector/Alembic round-trip PASS)
-- CP4 Security / Provider / Vector review: completed
-- CP5 Knowledge / Documentation synchronization: completed
-- Product boundary: deterministic chunking + OpenAI embedding + pgvector persistence; vector search/indexing/RAG remain deferred
-- External data boundary: Knowledge chunk text may be sent to configured OpenAI Embeddings API only when the endpoint is explicitly invoked
+- Status: not started
+- Normal base Branch: `develop`
+- Dependency baseline: Knowledge Ingestion, Embedding Pipeline, pgvector storage, RBAC, Audit, Structured Logging, and Backend Verification are complete
+- Input boundary: persisted KnowledgeChunk rows with vector(1536)
+- Product boundary must be defined by a new GitHub tracking Issue and CP0/CP1 before implementation
 
 Important: GitHub Issue/PR numbers are repository-wide platform sequence numbers and remain separate from Engineering Issue IDs.
 
 ## Planned Product Sequence
 
-Tentative order after #011:
+Tentative order after #012:
 
-- #012 — Embedding pipeline
 - #013 — Retrieval / Vector Search
 - #014 — RAG response with evidence/citations
 - #015 — Controlled Tool Calling
