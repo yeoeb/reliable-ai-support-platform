@@ -1,6 +1,6 @@
 # Engineering Issue #016 — Durable Human Approval for Higher-Risk Tool Actions
 
-<!-- codex-dispatch-supervisor-approved-through: CP4 -->
+<!-- codex-dispatch-supervisor-approved-through: CP5 -->
 <!-- codex-dispatch-write-allow: ["app/models/approval_request.py","app/models/__init__.py","app/repositories/approval.py","app/services/approval.py","app/services/rbac.py","app/services/agent.py","app/services/tool_execution.py","app/tools/registry.py","app/tools/system.py","app/tools/rbac.py","app/schemas/approval.py","app/schemas/agent.py","app/api/routes/approvals.py","app/api/routes/agent.py","app/core/errors.py","app/main.py","migrations/versions/*approval*.py","tests/test_approval_*.py","tests/test_agent_*.py","tests/test_tool_*.py","tests/test_rbac_service.py","tests/test_migrations.py","docs/issues/issue-016-human-approval.md"] -->
 
 ## GitHub Tracking
@@ -528,6 +528,34 @@ Findings:
 
 No merge-blocking finding remains.
 
+## CP5 Knowledge / Documentation
+
+Notion deduplication was completed before writing.
+
+Existing Glossary / Tool Safety pages already contain the generic HITL definition and the statement that higher-risk Tool actions require a separate approval boundary, so they were not duplicated.
+
+Created one deeper reusable Engineering Encyclopedia entry:
+
+**Human Approval / HITL：Durable Approval、Exact Action Binding、Row Lock 與 Approval-Time Authorization**
+
+Created one project Work Log:
+
+**Issue #016 — Durable Human Approval / Higher-Risk Tool Actions**
+
+The Work Log links to the reusable Knowledge entry and the Reliable AI Support Operations Platform project.
+
+Reusable lessons captured:
+
+- Model proposal, Human approval, and Server authorization are separate control planes.
+- Approval must bind to one canonical validated action and survive request boundaries.
+- Approval permission never substitutes for the underlying action permission.
+- Approval-time authorization prevents TOCTOU after permission revocation.
+- SELECT ... FOR UPDATE provides one-time decision serialization.
+- A real two-Session PostgreSQL concurrency test is stronger evidence than SQL-shape inspection alone.
+- Approval + mutation + durable Audits should commit atomically without a crash-prone intermediate approved state.
+- Transaction-participating inner Service methods enable larger atomic workflows without weakening existing public Service contracts.
+- Human Approval does not automatically imply four-eyes / separation-of-duties.
+
 ## Allowed Write Set
 
 The machine-readable marker at the top is authoritative.
@@ -564,14 +592,14 @@ Conceptual scope:
 - [x] CP2 — Bounded implementation
 - [x] CP3 — Verification
 - [x] CP4 — concurrency / authorization / transaction review
-- [ ] CP5 — Knowledge / documentation
+- [x] CP5 — Knowledge / documentation
 - [ ] CP6 — exact-Head delivery
 
 ## Current State
 
-CP0–CP4 are complete.
+CP0–CP5 are complete.
 
-Final reviewed Product/Test Head:
+Final reviewed Product/Test Head before CP5 documentation:
 
 - `6e80cd63a71cc392a1699f18f36a253035971dd2`
 - Backend regression: **424 passed**
@@ -580,9 +608,10 @@ Final reviewed Product/Test Head:
 - PostgreSQL / pgvector + Alembic round-trip: PASS
 - real two-Session concurrent approval: PASS
 - CP4 concurrency / authorization / transaction review: PASS
+- CP5 Notion Knowledge Capture: complete
 
-Supervisor approval marker: **CP4**.
+Supervisor approval marker: **CP5**.
 
-Next action: CP5 Knowledge / Documentation synchronization.
+Next action: CP6 exact-head delivery.
 
-No further Product Code change is authorized unless a new verification failure is discovered.
+No further Product Code change is authorized unless final exact-head verification discovers a failure.
