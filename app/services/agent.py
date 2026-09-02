@@ -5,7 +5,10 @@ from uuid import UUID
 
 from sqlalchemy.orm import Session
 
-from app.core.errors import NoAuthorizedToolError
+from app.core.errors import (
+    InvalidToolCallingProviderResponseError,
+    NoAuthorizedToolError,
+)
 from app.integrations.llm import ToolCallingProvider
 from app.repositories.rbac import RBACRepository
 from app.services.authorization import AuthorizationService
@@ -69,9 +72,15 @@ class AgentService:
         )
 
         if choice.tool_call is None:
-            assert choice.answer is not None
+            if (
+                not isinstance(choice.answer, str)
+                or not choice.answer.strip()
+            ):
+                raise InvalidToolCallingProviderResponseError(
+                    "Tool provider returned invalid direct answer"
+                )
             return AgentRunResult(
-                answer=choice.answer,
+                answer=choice.answer.strip(),
                 tool_used=None,
                 tool_status=None,
                 model=choice.model,

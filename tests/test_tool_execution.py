@@ -32,6 +32,10 @@ def make_service(monkeypatch, allowed=True):
 def test_execution_rechecks_permission_and_closes_transaction(
     monkeypatch,
 ) -> None:
+    monkeypatch.setattr(
+        "app.tools.system.check_database_connection",
+        lambda: None,
+    )
     service, session, permission = make_service(
         monkeypatch,
         allowed=True,
