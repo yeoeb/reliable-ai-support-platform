@@ -110,6 +110,15 @@ class RetrievalService:
                     "Embedding provider returned an invalid vector value"
                 )
 
+            norm_squared = math.fsum(
+                float(value) * float(value)
+                for value in vector
+            )
+            if norm_squared <= 0.0:
+                raise InvalidEmbeddingProviderResponseError(
+                    "Embedding provider returned a zero query vector"
+                )
+
             if (
                 not isinstance(token_usage, int)
                 or isinstance(token_usage, bool)
