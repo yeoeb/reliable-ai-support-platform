@@ -1,6 +1,6 @@
 # Engineering Issue #014 — Grounded RAG Response with Evidence Citations
 
-<!-- codex-dispatch-supervisor-approved-through: CP5 -->
+<!-- codex-dispatch-supervisor-approved-through: CP6 -->
 <!-- codex-dispatch-write-allow: ["app/integrations/llm.py","app/services/rag.py","app/schemas/rag.py","app/api/routes/rag.py","app/core/config.py","app/core/errors.py","app/main.py","tests/test_rag_*.py","tests/test_config.py","docs/issues/issue-014-rag-grounded-answer.md"] -->
 
 ## GitHub Tracking
@@ -380,7 +380,7 @@ GitHub Issue #65 is authoritative.
 - [x] CP3 — Targeted + regression verification
 - [x] CP4 — Diff / security / grounding review
 - [x] CP5 — Knowledge + documentation synchronization
-- [ ] CP6 — exact-Head delivery evidence
+- [x] CP6 — exact-Head delivery evidence
 
 ## CP2 Evidence Contract
 
@@ -521,19 +521,39 @@ Repository documentation updated before Final CI:
 
 ## CP6 — Final Delivery
 
-Status: **final exact-Head verification pending**
+Status: **completed**
 
-All planned branch-changing Product/Test/Documentation work is complete.
+Immutable Product Head:
 
-Per the exact-Head delivery policy:
+`92bb21ebac755e36ad082fa47ac448e7922ca62b`
 
-```text
-FINAL HEAD
-→ GitHub Actions
-→ PASS
-→ PR/Issue Comment evidence only
-→ no further Branch commit
-→ Merge
-```
+Final exact-Head verification:
 
-After the Final Head is created, CI evidence must not be committed back into this Branch.
+- Backend Verification #159 / run `33625499663`: **PASS**
+  - backend regression: **366 passed**
+  - PostgreSQL + pgvector: PASS
+  - Alembic upgrade / downgrade / re-upgrade: PASS
+  - database recovery integration: PASS
+- Dispatcher Tests #107 / run `33625499565`: **PASS**
+  - control-plane regression: **87 passed**
+
+The Connector Ready-for-Review mutation failed because of a GitHub GraphQL schema incompatibility. Draft PR #66 was therefore closed and replaced by non-draft PR #67 **without changing the Product Head**.
+
+Replacement PR required checks on the same immutable Head:
+
+- Backend Verification #160 / run `33625691733`: **PASS**
+- Dispatcher Tests #108 / run `33625691650`: **PASS**
+
+No Product Branch commit was created after Final CI.
+
+## Merge Evidence
+
+- Engineering Issue: #014
+- GitHub tracking Issue: #65 — Closed / Completed
+- Product PR: #67 — Merged
+- Superseded Draft PR: #66 — Closed only because Ready-for-Review mutation was incompatible
+- Verified Product Head: `92bb21ebac755e36ad082fa47ac448e7922ca62b`
+- Squash merge to `develop`: `8a11b897574f054984e02811dc7ccf757329a01b`
+- CP0–CP6: complete
+- Notion knowledge capture: complete
+- Next Product Engineering Issue: #015 Controlled Tool Calling
