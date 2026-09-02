@@ -53,17 +53,32 @@ Required state surfaces:
 
 The Dispatcher uses Stable `codex exec` as its local execution boundary. It does not attempt to inject prompts into an already-open VS Code/Desktop Codex UI session.
 
-## Next Product Engineering Issue
+## Current Product Engineering Issue
 
 Engineering Issue ID #020 — CI / Release Hardening foundation
 
-- Status: not started
-- Normal base Branch: `develop`
-- Dependency baseline: Product backend, AI safety boundaries, offline Evaluation, Security Regression, Operational Metrics, and GitHub-hosted verification are complete
-- V1 should harden the develop → main release path and make release evidence reproducible without weakening existing exact-Head gates
-- Release/version evidence must distinguish Product verification from deployment operations
-- Secrets, production credentials, cloud deployment, and automatic production rollout are not implied by CI/release hardening
-- Product/control-plane boundary must be defined by a new GitHub tracking Issue and CP0/CP1 before implementation begins
+- GitHub tracking Issue: #89
+- Duplicate GitHub Issue #90: closed / not planned
+- Active Branch: `feature/issue-020-release-hardening`
+- CP0 Release / Branch-State Inventory: completed
+- CP1 Release Promotion Architecture: completed and Supervisor-approved
+- CP2 Supervisor-controlled workflow/verifier implementation: completed and reviewed
+- CP3 GitHub-hosted verification: completed
+- CP4 Release / Security Review: completed
+- CP5 Knowledge / Documentation: completed
+- Current Checkpoint: CP6 final exact-Head verification
+- One-time ancestry reconciliation commit: `abe393dbe6a3b8b4f07301708f35fcaedab7add4`
+- Reconciliation preserved the exact pre-sync develop tree while adding main ancestry
+- Release contract: same-repo `develop → main`
+- Release verifier: exact Head/ref/version/tag/main-only-content checks
+- Branch protection/rulesets remain absent and are documented external platform-control debt
+- Workflow files remain hard-protected from Codex Safe Publish
+- #020 PR into develop must use merge commit, not squash/rebase, so historical main ancestry reconciliation survives
+- Release PR V1 is same-repository develop → main and re-runs full Backend + Dispatcher verification
+- Release verification binds the exact PR Head and rejects main-only content drift
+- Project version comes from pyproject.toml and must match the static FastAPI version
+- GitHub main/develop Branch Protection and Rulesets are currently absent; this remains external platform-control debt
+- Release verification proves repository promotion readiness only; it does not imply deployment, tag publication, or production rollout
 
 Important: GitHub Issue/PR numbers are repository-wide platform sequence numbers and remain separate from Engineering Issue IDs.
 

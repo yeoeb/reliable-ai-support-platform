@@ -1,7 +1,10 @@
 name: Dispatcher Tests
 
 on:
+  workflow_call:
   pull_request:
+    branches:
+      - develop
     paths:
       - "scripts/codex_dispatch.py"
       - "scripts/codex_watch.py"
@@ -33,7 +36,7 @@ on:
       - ".github/workflows/dispatcher-tests.yml"
 
 concurrency:
-  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  group: dispatcher-tests-${{ github.event.pull_request.number || github.ref }}
   cancel-in-progress: true
 
 permissions:
@@ -45,8 +48,10 @@ jobs:
     timeout-minutes: 10
 
     steps:
-      - name: Check out repository
+      - name: Check out exact verification source
         uses: actions/checkout@v7
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
 
       - name: Set up Python 3.11
         uses: actions/setup-python@v7

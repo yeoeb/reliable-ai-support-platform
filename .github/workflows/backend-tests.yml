@@ -1,7 +1,10 @@
 name: Backend Verification
 
 on:
+  workflow_call:
   pull_request:
+    branches:
+      - develop
     paths:
       - "app/**"
       - "migrations/**"
@@ -23,7 +26,7 @@ on:
       - ".github/workflows/backend-tests.yml"
 
 concurrency:
-  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  group: backend-verification-${{ github.event.pull_request.number || github.ref }}
   cancel-in-progress: true
 
 permissions:
@@ -61,8 +64,10 @@ jobs:
       ACCESS_TOKEN_EXPIRE_MINUTES: "30"
 
     steps:
-      - name: Check out repository
+      - name: Check out exact verification source
         uses: actions/checkout@v7
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
 
       - name: Set up Python 3.11
         uses: actions/setup-python@v7
@@ -124,8 +129,10 @@ jobs:
       ACCESS_TOKEN_EXPIRE_MINUTES: "30"
 
     steps:
-      - name: Check out repository
+      - name: Check out exact verification source
         uses: actions/checkout@v7
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
 
       - name: Set up Python 3.11
         uses: actions/setup-python@v7

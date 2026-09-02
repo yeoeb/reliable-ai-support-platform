@@ -653,9 +653,25 @@ Bounded RAG / Agent outcome and aggregate token metrics
 
 Best-effort telemetry failure boundary
 
+CI / Release Hardening foundation
+
+Reusable Backend / Dispatcher GitHub Actions verification
+
+Exact PR Head verification for Feature and Release candidates
+
+Release Verification gate for same-repository develop → main promotion
+
+Main-only content drift detection through merge-base comparison
+
+Project / FastAPI version consistency and existing-version-tag rejection
+
+Documented Branch Protection gap: main/develop protections are not currently enforced by repository settings
+
+Release Verification is repository promotion evidence, not production deployment
+
 Next
 
-CI / release hardening
+First hardened develop → main release promotion
 
 Planned Reliability & AI Safety
 
