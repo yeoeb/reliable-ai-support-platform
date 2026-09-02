@@ -208,6 +208,30 @@ def test_malformed_query_embedding_fails_closed(
     service.repository.search_exact_cosine.assert_not_called()
 
 
+def test_zero_query_vector_fails_closed() -> None:
+    service, session, _ = make_service(
+        provider=FakeProvider(
+            lambda _: EmbeddingBatchResult(
+                vectors=[[0.0] * DIMENSIONS],
+                token_usage=1,
+            )
+        )
+    )
+
+    with pytest.raises(
+        InvalidEmbeddingProviderResponseError,
+    ):
+        service.search(
+            actor_user_id=uuid4(),
+            request=make_request(),
+        )
+
+    service.repository.search_exact_cosine.assert_not_called()
+    service.audit_service.record_best_effort.assert_not_called()
+    session.commit.assert_not_called()
+    session.rollback.assert_called_once()
+
+
 def test_database_failure_rolls_back_and_translates() -> None:
     service, session, _ = make_service()
     service.repository.search_exact_cosine.side_effect = OperationalError(
