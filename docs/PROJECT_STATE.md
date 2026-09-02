@@ -45,15 +45,18 @@ Required state surfaces:
 
 The Dispatcher uses Stable `codex exec` as its local execution boundary. It does not attempt to inject prompts into an already-open VS Code/Desktop Codex UI session.
 
-## Next Product Engineering Issue
+## Current Product Engineering Issue
 
 Engineering Issue ID #012 — Embedding Pipeline foundation
 
-- Status: not started
-- Normal base Branch: `develop`
-- Dependency baseline: Knowledge Ingestion, RBAC, Audit, Structured Logging, and Backend Verification are complete
-- Input boundary: persisted normalized KnowledgeDocument content from #011
-- Product boundary must be defined by a new GitHub tracking Issue and CP0/CP1 before implementation
+- GitHub tracking Issue: #54
+- Active Branch: `feature/issue-012-embedding-pipeline`
+- Current Checkpoint: CP2 authorized
+- CP0 Context Bootstrap: completed
+- CP1 Architecture / Scope: completed and Supervisor-approved
+- CP2 implementation: pending Executor
+- Product boundary: deterministic chunking + OpenAI embedding + pgvector persistence; vector search/indexing/RAG remain deferred
+- External data boundary: Knowledge chunk text may be sent to configured OpenAI Embeddings API only when the endpoint is explicitly invoked
 
 Important: GitHub Issue/PR numbers are repository-wide platform sequence numbers and remain separate from Engineering Issue IDs.
 
