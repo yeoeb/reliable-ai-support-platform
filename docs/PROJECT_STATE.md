@@ -55,9 +55,11 @@ Engineering Issue ID #014 — Grounded RAG response with evidence / citations
 - Active Branch: `feature/issue-014-rag-grounded-answer`
 - CP0 Context Bootstrap: completed
 - CP1 Architecture / Plan: completed and Supervisor-approved
-- Current Checkpoint: CP3 authorized
 - CP2 bounded RAG implementation: completed and Supervisor-reviewed
-- CP3 Verification: authorized
+- CP3 Verification: completed
+- CP4 Grounding / Security Review: completed
+- CP5 Knowledge / Documentation: completed
+- Current Checkpoint: CP6 final exact-Head verification
 - Remote write Allowlist: configured
 - Retrieval evidence boundary: retrieved KnowledgeChunk content remains untrusted context
 - Tool Calling / hosted tools: explicitly out of scope
@@ -132,6 +134,13 @@ Service Layer owns transaction boundaries.
 - The shared request DB read transaction must be closed before the external query-embedding Provider wait.
 - Retrieved KnowledgeChunk content remains untrusted context; Retrieval does not grant instruction, policy, or tool-execution authority.
 - Exact Vector Search is the current correctness baseline; ANN indexes remain evidence-driven future optimization.
+- Grounded RAG reuses authorized Retrieval rather than bypassing its RBAC/provenance boundary.
+- RAG citations are server-owned: the model may reference only server-assigned source IDs, and final citation provenance is reconstructed from retrieved rows.
+- Zero-evidence RAG bypasses generation; the model is not allowed to fill missing evidence from pretrained knowledge.
+- Retrieved evidence remains untrusted data inside the generation context and does not gain instruction or tool authority.
+- Grounded generation uses structured Provider output plus server-side citation validation; schema-valid output alone is not treated as grounding proof.
+- RAG question/answer/chunk content, vectors, API keys, and raw Provider responses are excluded from Audit and runtime logs.
+- No Tool Calling or hosted model tools are enabled by the RAG foundation.
 
 ### Planned AI Boundary
 

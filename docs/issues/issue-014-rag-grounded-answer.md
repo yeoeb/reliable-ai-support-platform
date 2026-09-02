@@ -1,6 +1,6 @@
 # Engineering Issue #014 — Grounded RAG Response with Evidence Citations
 
-<!-- codex-dispatch-supervisor-approved-through: CP2 -->
+<!-- codex-dispatch-supervisor-approved-through: CP5 -->
 <!-- codex-dispatch-write-allow: ["app/integrations/llm.py","app/services/rag.py","app/schemas/rag.py","app/api/routes/rag.py","app/core/config.py","app/core/errors.py","app/main.py","tests/test_rag_*.py","tests/test_config.py","docs/issues/issue-014-rag-grounded-answer.md"] -->
 
 ## GitHub Tracking
@@ -377,9 +377,9 @@ GitHub Issue #65 is authoritative.
 - [x] CP0 — Context bootstrap / contradiction detection
 - [x] CP1 — Architecture + implementation plan validation
 - [x] CP2 — Bounded implementation
-- [ ] CP3 — Targeted + regression verification
-- [ ] CP4 — Diff / security / grounding review
-- [ ] CP5 — Knowledge + documentation synchronization
+- [x] CP3 — Targeted + regression verification
+- [x] CP4 — Diff / security / grounding review
+- [x] CP5 — Knowledge + documentation synchronization
 - [ ] CP6 — exact-Head delivery evidence
 
 ## CP2 Evidence Contract
@@ -456,3 +456,84 @@ CP2 bounded implementation has been produced through Supervisor fallback and pas
 Remote Supervisor approval: **CP2**.
 
 Next authorized action: **CP3 targeted + regression verification**.
+
+
+## CP3 — Verification Evidence
+
+Status: **completed**
+
+GitHub-hosted verification on Head:
+
+`09b4770e21b3b1f748af08b463095a9fadda0530`
+
+Results:
+
+- Backend regression: **366 passed**
+- Dispatcher Control Plane: **87 passed**
+- PostgreSQL + pgvector extension verification: **PASS**
+- Alembic upgrade: **PASS**
+- Alembic downgrade latest migration: **PASS**
+- Alembic re-upgrade to head: **PASS**
+- Database recovery integration: **PASS**
+
+No corrective Product write was required after this verification.
+
+## CP4 — Grounding / Security Review
+
+Status: **completed**
+
+Reviewed boundaries:
+
+- Existing RetrievalService is reused; Vector Search is not duplicated.
+- `knowledge:read` remains the authorization boundary.
+- Zero retrieved chunks bypass the generation Provider.
+- Server assigns deterministic `S1/S2/...` IDs.
+- Model output can reference source IDs only.
+- Unknown source IDs fail closed.
+- Final citation provenance is built from authoritative Retrieval results.
+- Grounded answers require at least one valid citation.
+- Insufficient-evidence results cannot carry citations.
+- Responses API call defines strict JSON Schema Structured Output.
+- No Tool Calling, hosted tools, Web Search, File Search, or function definitions are enabled.
+- Retrieved content is framed as untrusted evidence/data.
+- The shared Session is explicitly rolled back before the generation Provider wait.
+- Raw question, generated answer, retrieved content, vectors, API key, and raw Provider response are excluded from Audit/Runtime Log metadata.
+- Generic 503 translation hides Provider internals.
+
+No blocking CP4 finding remains.
+
+## CP5 — Knowledge / Documentation
+
+Status: **completed**
+
+Notion reusable knowledge updated:
+
+- `Exact Vector Retrieval：Cosine Distance、Config Consistency、Read Boundary 與 Untrusted Context`
+  - added Grounded RAG / Server-Owned Citation / Prompt Injection boundaries
+- Work Log created:
+  - `Issue #014 — Grounded RAG Response / Evidence Citations`
+
+Repository documentation updated before Final CI:
+
+- this Issue execution note
+- `docs/PROJECT_STATE.md`
+- `README.md`
+
+## CP6 — Final Delivery
+
+Status: **final exact-Head verification pending**
+
+All planned branch-changing Product/Test/Documentation work is complete.
+
+Per the exact-Head delivery policy:
+
+```text
+FINAL HEAD
+→ GitHub Actions
+→ PASS
+→ PR/Issue Comment evidence only
+→ no further Branch commit
+→ Merge
+```
+
+After the Final Head is created, CI evidence must not be committed back into this Branch.

@@ -4,7 +4,7 @@ Production-oriented internal AI support platform built with FastAPI, PostgreSQL,
 
 The project is being developed incrementally toward a complete AI support system with RAG, controlled tool calling, human approval, evaluation, security testing, and observability.
 
-Current status: backend foundation, persistence, migrations, authentication, database-backed RBAC, durable security audit logging, structured request-correlated logging, bounded knowledge ingestion, deterministic chunking, OpenAI embedding integration behind an explicit provider boundary, pgvector vector persistence, authorized exact vector retrieval, and GitHub-hosted backend verification are implemented. LLM-backed RAG with evidence/citations remains planned.
+Current status: backend foundation, persistence, migrations, authentication, database-backed RBAC, durable security audit logging, structured request-correlated logging, bounded knowledge ingestion, deterministic chunking, OpenAI embedding integration behind an explicit provider boundary, pgvector vector persistence, authorized exact vector retrieval, grounded RAG answer generation with server-validated evidence citations, and GitHub-hosted backend verification are implemented. Controlled Tool Calling remains the next AI execution boundary.
 
 Why This Project
 
@@ -188,7 +188,29 @@ Best-effort read Audit and safe structured retrieval logs
 
 Retrieved chunk content returned as untrusted evidence without exposing vectors
 
-No HNSW/IVFFlat/ANN, reranking, or RAG generation in this milestone
+No HNSW/IVFFlat/ANN or reranking in this milestone
+
+Grounded RAG
+
+POST /knowledge/answer reuses the existing knowledge:read and RetrievalService boundaries
+
+Zero Retrieval results return deterministic insufficient_evidence without calling the generation model
+
+Explicit GroundedAnswerProvider boundary with OpenAI Responses API adapter
+
+Strict JSON Schema Structured Output for answerability / answer / cited source IDs
+
+Server-assigned S1 / S2 / ... evidence IDs with fail-closed unknown citation validation
+
+Final citation provenance reconstructed by the server from authoritative Retrieval results
+
+Retrieved KnowledgeChunk content treated as untrusted evidence, never as policy or tool instruction
+
+No Tool Calling, hosted tools, Web Search, or File Search in the RAG milestone
+
+Shared request DB transaction closed before external generation-provider wait
+
+Raw question, generated answer, chunk content, vectors, API keys, and raw Provider responses excluded from Audit/runtime logs
 
 Testing
 
@@ -234,9 +256,11 @@ AI Integration
 
 OpenAI Embeddings API
 
+OpenAI Responses API for grounded generation
+
 text-embedding-3-small
 
-Provider Protocol / Adapter boundary
+EmbeddingProvider and GroundedAnswerProvider Protocol / Adapter boundaries
 
 Security
 
@@ -369,7 +393,15 @@ V1 grants raw internal Retrieval to `support_agent` and `admin`, not the default
 
 Search uses exact pgvector cosine distance over the current embedding configuration, applies a bounded similarity threshold / top_k, joins KnowledgeDocument provenance, and returns chunk content as untrusted evidence without returning stored vectors.
 
-RAG answer generation is not implemented yet.
+Grounded RAG Answer
+
+POST /knowledge/answer
+
+This endpoint requires the same database-backed `knowledge:read` permission as raw Retrieval.
+
+The server retrieves bounded evidence, assigns deterministic source IDs such as `S1`, calls the generation Provider without enabling tools, validates every returned citation ID against the retrieved set, and reconstructs final citation provenance from authoritative Retrieval rows.
+
+If Retrieval returns no evidence, generation is skipped and the API returns `insufficient_evidence`. Retrieved content remains untrusted data and cannot grant instruction, policy, or tool-execution authority.
 
 Reliability & Security Principles
 
@@ -469,13 +501,19 @@ knowledge:read least-privilege retrieval access
 
 Current-config cosine search with provenance
 
+Grounded RAG response with evidence / citations
+
+Server-owned citation validation
+
+Zero-evidence generation bypass
+
 Next
 
-RAG response with evidence / citations
+Controlled Tool Calling
 
 Planned AI Layer
 
-RAG answer generation
+Grounded RAG answer generation
 
 Agent tool calling
 
