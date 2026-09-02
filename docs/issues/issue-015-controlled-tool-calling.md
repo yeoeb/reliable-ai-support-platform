@@ -1,6 +1,6 @@
 # Engineering Issue #015 — Controlled Read-Only Tool Calling Foundation
 
-<!-- codex-dispatch-supervisor-approved-through: CP5 -->
+<!-- codex-dispatch-supervisor-approved-through: CP6 -->
 <!-- codex-dispatch-write-allow: ["app/tools/__init__.py","app/tools/registry.py","app/tools/system.py","app/integrations/llm.py","app/services/tool_execution.py","app/services/agent.py","app/schemas/agent.py","app/api/routes/agent.py","app/core/errors.py","app/main.py","migrations/versions/*tool*.py","tests/test_tool_*.py","tests/test_agent_*.py","tests/test_retrieval_migration.py","docs/issues/issue-015-controlled-tool-calling.md"] -->
 
 ## GitHub Tracking
@@ -8,7 +8,8 @@
 - GitHub Issue: #69
 - Engineering Issue ID: #015
 - Branch: `feature/issue-015-controlled-tool-calling`
-- Product PR: #70
+- Product PR: #71
+- Superseded Draft PR: #70
 
 ## Goal
 
@@ -49,7 +50,7 @@ The final generation step receives no Tool definitions.
 - [x] CP3 — Verification
 - [x] CP4 — Security / authorization review
 - [x] CP5 — Knowledge / documentation
-- [ ] CP6 — exact-Head delivery
+- [x] CP6 — exact-Head delivery
 
 ## CP2 Evidence
 
@@ -130,12 +131,46 @@ Repository documentation synchronized:
 - `docs/PROJECT_STATE.md`
 - this execution snapshot
 
+## CP6 Final Delivery
+
+Status: **completed**
+
+Verified immutable Product Head:
+
+`23c41fac583d9a8c771759066a5c61ceae60c3ca`
+
+Final exact-Head checks:
+
+- Backend Verification #165 / run `33628024422`: PASS
+- Backend regression: 388 passed
+- Dispatcher Tests #115 / run `33628024359`: PASS
+- Control Plane: 87 passed
+- Database recovery: PASS
+- PostgreSQL / pgvector verification: PASS
+- Alembic upgrade / downgrade / re-upgrade: PASS
+
+Draft PR #70 was replaced by non-draft PR #71 without changing the Product Head because the connector Ready-for-Review transition is incompatible with the current GitHub GraphQL schema.
+
+Replacement PR checks on the same immutable Head:
+
+- Backend Verification #166 / run `33628235090`: PASS
+- Dispatcher Tests #116 / run `33628235057`: PASS
+
+No Product Branch commit occurred after Final CI.
+
+## Merge Evidence
+
+- Engineering Issue: #015
+- GitHub Issue #69: Closed / Completed
+- Product PR #71: Merged
+- Product Head: `23c41fac583d9a8c771759066a5c61ceae60c3ca`
+- Product squash merge: `7b27a6e8133fa1775e4ea8cd26fafdaa077be4ef`
+- CP0–CP6: complete
+- Notion knowledge capture: complete
+- Next Product Engineering Issue: #016 Human Approval
+
 ## Current State
 
-Remote Supervisor approval: **CP5**.
+Remote Supervisor approval: **CP6**.
 
-Next action: **CP6 exact-Head GitHub Actions only**.
-
-No further Product or repository documentation write is planned before Final CI.
-
-After Final CI passes, verification evidence must be stored in GitHub PR / Issue comments without changing the verified Branch Head.
+Engineering Issue #015 is complete.

@@ -308,7 +308,7 @@ Copy-Item .env.example .env
 
 Fill in the local PostgreSQL and JWT settings in .env.
 
-OPENAI_API_KEY is optional for normal application startup. It is required when an embedding request or grounded RAG answer must call the real OpenAI provider.
+OPENAI_API_KEY is optional for normal application startup. It is required when embeddings, grounded RAG generation, or controlled Tool Calling must call the real OpenAI provider.
 
 5. Start PostgreSQL
 
@@ -402,6 +402,14 @@ This endpoint requires the same database-backed `knowledge:read` permission as r
 The server retrieves bounded evidence, assigns deterministic source IDs such as `S1`, calls the generation Provider without enabling tools, validates every returned citation ID against the retrieved set, and reconstructs final citation provenance from authoritative Retrieval rows.
 
 If Retrieval returns no evidence, generation is skipped and the API returns `insufficient_evidence`. Retrieved content remains untrusted data and cannot grant instruction, policy, or tool-execution authority.
+
+Controlled Tool Calling API
+
+POST /agent/run
+
+The endpoint requires authentication. The server filters available Tool definitions using current database-backed permissions, validates model-proposed arguments against server-owned schemas, re-checks permission immediately before execution, and executes at most one read-only Tool per request.
+
+V1 exposes only `platform_readiness`, protected by `system:read` for support_agent and admin. Finalization receives no Tool definitions.
 
 Reliability & Security Principles
 
