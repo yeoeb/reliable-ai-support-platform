@@ -52,17 +52,24 @@ Required state surfaces:
 
 The Dispatcher uses Stable `codex exec` as its local execution boundary. It does not attempt to inject prompts into an already-open VS Code/Desktop Codex UI session.
 
-## Next Product Engineering Issue
+## Current Product Engineering Issue
 
 Engineering Issue ID #019 — Operational Metrics / Monitoring foundation
 
-- Status: not started
-- Normal base Branch: `develop`
-- Dependency baseline: Structured Logging, Request IDs, durable Audit, RAG, Tool Calling, Human Approval, Offline Evaluation, and AI Security Regression are complete
-- V1 should define bounded operational metrics for HTTP and AI application paths without recording sensitive request/content data
-- Metrics must complement, not replace, structured logs and durable Audit Events
-- Metric labels must be low-cardinality and must not contain raw user IDs, request text, document/chunk content, Tool arguments, Approval payloads, tokens, or secrets
-- Monitoring/metrics Product boundary and dependency choice must be defined by a new GitHub tracking Issue and CP0/CP1 before implementation begins
+- GitHub tracking Issue: #85
+- Active Branch: `feature/issue-019-operational-metrics`
+- CP0 Observability / Metric Surface Inventory: completed
+- CP1 Low-Cardinality Prometheus Metrics Architecture: completed and Supervisor-approved
+- Current Checkpoint: CP2 authorized
+- Runtime dependency: prometheus-client
+- Registry: dedicated custom CollectorRegistry
+- HTTP metrics: request count + duration using route templates only
+- AI metrics: RAG/Agent bounded outcomes + aggregate token totals
+- Scrape endpoint: GET /metrics, hidden from OpenAPI, no Product JWT/DB/OpenAI dependency
+- High-cardinality/sensitive labels: forbidden
+- Metrics recording: best-effort; must not change Product semantics
+- /metrics self-scrape: excluded from Product HTTP metrics
+- Remote write Allowlist: configured
 
 Important: GitHub Issue/PR numbers are repository-wide platform sequence numbers and remain separate from Engineering Issue IDs.
 
