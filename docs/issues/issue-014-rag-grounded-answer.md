@@ -1,6 +1,6 @@
 # Engineering Issue #014 — Grounded RAG Response with Evidence Citations
 
-<!-- codex-dispatch-supervisor-approved-through: CP1 -->
+<!-- codex-dispatch-supervisor-approved-through: CP2 -->
 <!-- codex-dispatch-write-allow: ["app/integrations/llm.py","app/services/rag.py","app/schemas/rag.py","app/api/routes/rag.py","app/core/config.py","app/core/errors.py","app/main.py","tests/test_rag_*.py","tests/test_config.py","docs/issues/issue-014-rag-grounded-answer.md"] -->
 
 ## GitHub Tracking
@@ -376,7 +376,7 @@ GitHub Issue #65 is authoritative.
 
 - [x] CP0 — Context bootstrap / contradiction detection
 - [x] CP1 — Architecture + implementation plan validation
-- [ ] CP2 — Bounded implementation
+- [x] CP2 — Bounded implementation
 - [ ] CP3 — Targeted + regression verification
 - [ ] CP4 — Diff / security / grounding review
 - [ ] CP5 — Knowledge + documentation synchronization
@@ -451,6 +451,8 @@ Verification status:
 
 CP0 and CP1 are complete.
 
-CP2 bounded implementation has been produced through Supervisor fallback and awaits CP2 review / CP3 verification authorization.
+CP2 bounded implementation has been produced through Supervisor fallback and passed Supervisor scope / grounding / transaction review.
 
-Remote Supervisor approval remains **CP1** until the CP2 diff is reviewed.
+Remote Supervisor approval: **CP2**.
+
+Next authorized action: **CP3 targeted + regression verification**.

@@ -55,7 +55,9 @@ Engineering Issue ID #014 — Grounded RAG response with evidence / citations
 - Active Branch: `feature/issue-014-rag-grounded-answer`
 - CP0 Context Bootstrap: completed
 - CP1 Architecture / Plan: completed and Supervisor-approved
-- Current Checkpoint: CP2 authorized
+- Current Checkpoint: CP3 authorized
+- CP2 bounded RAG implementation: completed and Supervisor-reviewed
+- CP3 Verification: authorized
 - Remote write Allowlist: configured
 - Retrieval evidence boundary: retrieved KnowledgeChunk content remains untrusted context
 - Tool Calling / hosted tools: explicitly out of scope
