@@ -31,6 +31,7 @@ It is intentionally concise and must stay synchronized with merged work.
 - #013 — Retrieval / Vector Search foundation
 - #014 — Grounded RAG response with evidence / citations
 - #015 — Controlled read-only Tool Calling foundation
+- #016 — Durable Human Approval for higher-risk Tool actions
 
 ## Current Workflow Infrastructure
 
@@ -49,29 +50,24 @@ Required state surfaces:
 
 The Dispatcher uses Stable `codex exec` as its local execution boundary. It does not attempt to inject prompts into an already-open VS Code/Desktop Codex UI session.
 
-## Current Product Engineering Issue
+## Next Product Engineering Issue
 
-Engineering Issue ID #016 — Durable Human Approval for higher-risk Tool actions
+Engineering Issue ID #017 — LLM Evaluation foundation
 
-- GitHub tracking Issue: #73
-- Active Branch: `feature/issue-016-human-approval`
-- CP0 Context Bootstrap: completed
-- CP1 Durable Approval Architecture: completed and Supervisor-approved
-- Current Checkpoint: CP6 exact-head delivery
-- V1 higher-risk Tool: `grant_support_agent_role(user_id)`
-- Fixed role: `support_agent`; model cannot choose arbitrary/admin role
-- Approval state: durable PostgreSQL record with expiry and one-time row-locked decision
-- Approval permission: `approval:decide` admin-only
-- Action permission remains `rbac:manage`
-- Approve path must atomically commit Approval state + RBAC mutation + Audits
-- Mandatory four-eyes distinct approver: deferred, not claimed
-- Remote write Allowlist: configured
+- Status: not started
+- Normal base Branch: `develop`
+- Dependency baseline: Grounded RAG, Tool Calling, Human Approval, durable Audit, and GitHub-hosted verification are complete
+- Evaluation must be deterministic where possible and must not depend on live OpenAI calls in normal CI
+- V1 should establish a versioned offline evaluation-case format plus measurable pass/fail metrics for grounded answers and Tool decisions
+- Evaluation data must not become Product runtime state
+- Prompt/model/provider changes should be comparable against the same evaluation corpus
+- Product boundary must be defined by a new GitHub tracking Issue and CP0/CP1 before implementation begins
 
 Important: GitHub Issue/PR numbers are repository-wide platform sequence numbers and remain separate from Engineering Issue IDs.
 
 ## Planned Product Sequence
 
-Tentative order after #015:
+Tentative order after #016:
 
 - #014 — RAG response with evidence/citations
 - #015 — Controlled Tool Calling

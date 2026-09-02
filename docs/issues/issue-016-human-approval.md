@@ -1,6 +1,6 @@
 # Engineering Issue #016 — Durable Human Approval for Higher-Risk Tool Actions
 
-<!-- codex-dispatch-supervisor-approved-through: CP5 -->
+<!-- codex-dispatch-supervisor-approved-through: CP6 -->
 <!-- codex-dispatch-write-allow: ["app/models/approval_request.py","app/models/__init__.py","app/repositories/approval.py","app/services/approval.py","app/services/rbac.py","app/services/agent.py","app/services/tool_execution.py","app/tools/registry.py","app/tools/system.py","app/tools/rbac.py","app/schemas/approval.py","app/schemas/agent.py","app/api/routes/approvals.py","app/api/routes/agent.py","app/core/errors.py","app/main.py","migrations/versions/*approval*.py","tests/test_approval_*.py","tests/test_agent_*.py","tests/test_tool_*.py","tests/test_rbac_service.py","tests/test_migrations.py","docs/issues/issue-016-human-approval.md"] -->
 
 ## GitHub Tracking
@@ -593,25 +593,45 @@ Conceptual scope:
 - [x] CP3 — Verification
 - [x] CP4 — concurrency / authorization / transaction review
 - [x] CP5 — Knowledge / documentation
-- [ ] CP6 — exact-Head delivery
+- [x] CP6 — exact-Head delivery
+
+## CP6 Final Delivery
+
+Status: **completed**
+
+Verified immutable Product Head:
+
+`78e3b28c9909adf6faf7304021c8c2c1533d29d8`
+
+Final checks on the same exact Head:
+
+- Backend Verification #174: PASS
+- Dispatcher Tests #126: PASS
+- Backend Verification #175 / run `33632260867`: PASS — **424 passed**
+- Dispatcher Tests #127 / run `33632260852`: PASS — **87 passed**
+- Database recovery: PASS
+- PostgreSQL / pgvector: PASS
+- Alembic upgrade / downgrade -1 / re-upgrade: PASS
+- real two-Session concurrent approval: PASS
+
+Draft PR #74 was replaced by non-draft PR #75 without changing the Product Head because the connector Ready-for-Review transition is incompatible with the current GitHub GraphQL schema.
+
+No Product/Docs Branch commit occurred after exact-Head verification.
+
+## Merge Evidence
+
+- Engineering Issue: #016
+- GitHub Issue #73: Closed / Completed
+- Product PR #75: Merged
+- Superseded Draft PR #74: Closed
+- Product Head: `78e3b28c9909adf6faf7304021c8c2c1533d29d8`
+- Product squash merge: `1166d464b275653e551f4dabdc303b5e7ddbb035`
+- CP0–CP6: complete
+- Notion knowledge capture: complete
+- Next Product Engineering Issue: #017 LLM Evaluation foundation
 
 ## Current State
 
-CP0–CP5 are complete.
+Remote Supervisor approval: **CP6**.
 
-Final reviewed Product/Test Head before CP5 documentation:
-
-- `6e80cd63a71cc392a1699f18f36a253035971dd2`
-- Backend regression: **424 passed**
-- Database recovery: **1 passed**
-- Dispatcher / Branch Resolver: **87 passed**
-- PostgreSQL / pgvector + Alembic round-trip: PASS
-- real two-Session concurrent approval: PASS
-- CP4 concurrency / authorization / transaction review: PASS
-- CP5 Notion Knowledge Capture: complete
-
-Supervisor approval marker: **CP5**.
-
-Next action: CP6 exact-head delivery.
-
-No further Product Code change is authorized unless final exact-head verification discovers a failure.
+Engineering Issue #016 is complete.
