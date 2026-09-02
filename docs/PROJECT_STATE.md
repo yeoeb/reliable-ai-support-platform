@@ -34,6 +34,7 @@ It is intentionally concise and must stay synchronized with merged work.
 - #016 — Durable Human Approval for higher-risk Tool actions
 - #017 — Offline LLM Evaluation foundation
 - #018 — AI Security Regression foundation
+- #019 — Operational Metrics / Monitoring foundation
 
 ## Current Workflow Infrastructure
 
@@ -52,34 +53,23 @@ Required state surfaces:
 
 The Dispatcher uses Stable `codex exec` as its local execution boundary. It does not attempt to inject prompts into an already-open VS Code/Desktop Codex UI session.
 
-## Current Product Engineering Issue
+## Next Product Engineering Issue
 
-Engineering Issue ID #019 — Operational Metrics / Monitoring foundation
+Engineering Issue ID #020 — CI / Release Hardening foundation
 
-- GitHub tracking Issue: #85
-- Active Branch: `feature/issue-019-operational-metrics`
-- CP0 Observability / Metric Surface Inventory: completed
-- CP1 Low-Cardinality Prometheus Metrics Architecture: completed and Supervisor-approved
-- CP2 bounded metrics implementation: completed through Supervisor fallback and reviewed
-- CP3 Verification / cardinality & failure regression: completed
-- CP4 Observability / Security Review: completed
-- CP5 Knowledge / Documentation: completed
-- Current Checkpoint: CP6 final exact-Head verification
-- Runtime dependency: prometheus-client
-- Registry: dedicated custom CollectorRegistry
-- HTTP metrics: request count + duration using route templates only
-- AI metrics: RAG/Agent bounded outcomes + aggregate token totals
-- Scrape endpoint: GET /metrics, hidden from OpenAPI, no Product JWT/DB/OpenAI dependency
-- High-cardinality/sensitive labels: forbidden
-- Metrics recording: best-effort; must not change Product semantics
-- /metrics self-scrape: excluded from Product HTTP metrics
-- Remote write Allowlist: configured
+- Status: not started
+- Normal base Branch: `develop`
+- Dependency baseline: Product backend, AI safety boundaries, offline Evaluation, Security Regression, Operational Metrics, and GitHub-hosted verification are complete
+- V1 should harden the develop → main release path and make release evidence reproducible without weakening existing exact-Head gates
+- Release/version evidence must distinguish Product verification from deployment operations
+- Secrets, production credentials, cloud deployment, and automatic production rollout are not implied by CI/release hardening
+- Product/control-plane boundary must be defined by a new GitHub tracking Issue and CP0/CP1 before implementation begins
 
 Important: GitHub Issue/PR numbers are repository-wide platform sequence numbers and remain separate from Engineering Issue IDs.
 
 ## Planned Product Sequence
 
-Tentative order after #018:
+Tentative order after #019:
 
 - #014 — RAG response with evidence/citations
 - #015 — Controlled Tool Calling

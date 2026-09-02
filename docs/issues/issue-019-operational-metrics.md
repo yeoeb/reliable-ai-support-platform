@@ -1,6 +1,6 @@
 # Engineering Issue #019 — Operational Metrics / Monitoring Foundation
 
-<!-- codex-dispatch-supervisor-approved-through: CP5 -->
+<!-- codex-dispatch-supervisor-approved-through: CP6 -->
 <!-- codex-dispatch-write-allow: ["requirements/base.txt","app/core/metrics.py","app/api/routes/metrics.py","app/api/middleware/request_logging.py","app/main.py","app/services/rag.py","app/services/agent.py","tests/test_metrics.py","tests/test_request_metrics.py","tests/test_ai_metrics.py","tests/test_metrics_api.py","docs/issues/issue-019-operational-metrics.md"] -->
 
 ## GitHub Tracking
@@ -493,7 +493,7 @@ No migration, model, repository, DB schema, Docker Compose, or GitHub workflow c
 - [x] CP3 — Verification / cardinality & failure regression
 - [x] CP4 — Observability / security review
 - [x] CP5 — Knowledge / documentation
-- [ ] CP6 — exact-Head delivery
+- [x] CP6 — exact-Head delivery
 
 ## Current State
 
@@ -667,17 +667,38 @@ Repository documentation synchronized before Final CI:
 
 ## CP6 — Final Delivery
 
-Status: **final exact-Head verification pending**
+Status: **completed**
 
-All planned Product/Test/Documentation Branch writes are complete.
+Verified immutable Product Head:
 
-Next:
+`56983c5c8d10a9b6638923a6caa861794ba672e5`
 
-```text
-FINAL HEAD
-→ exact-Head GitHub Actions
-→ PASS
-→ PR / Issue Comment evidence only
-→ no post-CI Branch commit
-→ Merge
-```
+Final exact-Head checks:
+
+- Backend Verification #186 / run `33648950981`: PASS — **467 passed**
+- Dispatcher Tests #144 / run `33648950836`: PASS — **87 passed**
+- database recovery: PASS
+- PostgreSQL + pgvector: PASS
+- Alembic upgrade / downgrade / re-upgrade: PASS
+
+Draft PR #86 was replaced by non-draft PR #87 without changing the Product Head because the connector Ready-for-Review transition is incompatible with the current GitHub GraphQL schema.
+
+Replacement PR checks on the same immutable Head:
+
+- Backend Verification #187 / run `33649152948`: PASS
+- Dispatcher Tests #145 / run `33649152825`: PASS
+- database recovery: PASS
+
+No Product/Test/Docs commit occurred on the Product Branch after Final CI.
+
+## Merge Evidence
+
+- Engineering Issue: #019
+- GitHub Issue #85: Closed / Completed
+- Product PR #87: Merged
+- Superseded Draft PR #86: Closed
+- Product Head: `56983c5c8d10a9b6638923a6caa861794ba672e5`
+- Product squash merge: `d938be5f1b80013a778a05ff7775f66606d9d8c5`
+- CP0–CP6: complete
+- Notion knowledge capture: complete
+- Next Product Engineering Issue: #020 CI / Release Hardening foundation
