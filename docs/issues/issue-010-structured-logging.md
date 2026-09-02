@@ -1,6 +1,6 @@
 # Engineering Issue #010 — Structured Logging / Request Correlation
 
-<!-- codex-dispatch-supervisor-approved-through: CP3 -->
+<!-- codex-dispatch-supervisor-approved-through: CP5 -->
 <!-- codex-dispatch-write-allow: [".env.example","app/core/logging.py","app/core/request_context.py","app/api/middleware/__init__.py","app/api/middleware/request_logging.py","app/main.py","app/core/config.py","app/services/user.py","app/services/rbac.py","app/services/audit.py","app/api/dependencies/auth.py","app/api/dependencies/authorization.py","tests/test_logging.py","tests/test_request_logging.py","tests/test_config.py","docs/issues/issue-010-structured-logging.md"] -->
 
 ## GitHub Tracking
@@ -289,8 +289,8 @@ Logging `str(exc)` may expose query/credential/request data; use exception type 
 - [x] CP1 — Architecture + Scope validation
 - [x] CP2 — Bounded implementation
 - [x] CP3 — Targeted + full verification
-- [ ] CP4 — Security / observability review
-- [ ] CP5 — Knowledge + documentation sync
+- [x] CP4 — Security / observability review
+- [x] CP5 — Knowledge + documentation sync
 - [ ] CP6 — PR delivery evidence
 
 ## Supervisor Fallback Execution
@@ -407,6 +407,52 @@ Dispatcher / Resolver: PASS
 Alembic upgrade → downgrade -1 → re-upgrade: PASS
 ```
 
+## CP4 Security / Observability Review
+
+Status: **PASS**
+
+Final reviewed Product/Test Head before CP5 documentation:
+
+`bc6dd17e2256132417a97b6c030044bf2158869f`
+
+Verification:
+
+```text
+Backend regression: 208 passed
+Database recovery:   1 passed
+Control Plane:      87 passed
+PostgreSQL 16 + Alembic round-trip: PASS
+```
+
+Review findings:
+
+- Runtime Application Logs do not replace durable Audit Events.
+- Existing Audit schema and transaction behavior are unchanged.
+- Server-generated Request ID is authoritative inside the active Request Context.
+- Caller-provided structured `request_id` cannot override the active ContextVar Request ID.
+- Client-provided `X-Request-ID` is ignored.
+- ContextVar is reset in `finally`.
+- Normal responses and generic unhandled 500 responses return `X-Request-ID`.
+- Failure logging exposes exception type only, not arbitrary exception text.
+- HTTP lifecycle events use route templates; unmatched routes use `<unmatched>`.
+- Raw Request Body, Query String, Authorization Header, Cookie, Client IP, and User-Agent are not collected by the middleware.
+- Sensitive structured keys are redacted across case/separator variants, including `passwordHash`, `apiKey`, and `connectionString`.
+- `token_usage` remains a safe non-secret metric field and is not over-redacted.
+- Logging configuration is idempotent for owned handlers and does not destroy unrelated root handlers.
+- No external logging dependency was introduced.
+
+No merge-blocking finding remains.
+
+## CP5 Knowledge / Documentation
+
+Notion deduplication completed.
+
+Created one new reusable Knowledge entry because no equivalent Structured Logging page existed:
+
+**Structured Logging：JSON Event、Request Correlation、ContextVar 與敏感資料邊界**
+
+The existing Audit Logging page remains separate to preserve the runtime-observability vs durable-accountability distinction.
+
 ## Knowledge Candidates
 
 Do not create new Notion entries during CP2.
@@ -421,24 +467,20 @@ Potential CP5 candidates, deduplicated first:
 
 ## Current State
 
-CP0–CP3 are complete.
+CP0–CP5 are complete.
 
-CP2 implementation was performed through a recorded bounded Supervisor fallback because no Local Watcher/Codex Executor consumed the remote gate.
+Final Product/Test evidence before documentation-only synchronization:
 
-Final CP2/CP3 exact-head evidence on Draft PR #47:
-
-- Product/Test Head: `ed12b7d01bffdfedf07ff0228ad2604be3747288`
-- Backend regression: **207 passed**
+- Head: `bc6dd17e2256132417a97b6c030044bf2158869f`
+- Backend regression: **208 passed**
 - Docker Compose database recovery: **1 passed**
-- Dispatcher / Branch Resolver Control Plane: PASS
-- PostgreSQL 16: PASS
-- Alembic upgrade head: PASS
-- Alembic downgrade -1: PASS
-- Alembic re-upgrade head: PASS
-- unhandled 500 response Request-ID coverage: PASS
+- Dispatcher / Branch Resolver: **87 passed**
+- PostgreSQL 16 + Alembic round-trip: PASS
+- CP4 Security / Observability Review: PASS
+- CP5 Notion Knowledge Capture: complete
 
-Supervisor approval marker: **CP3**.
+Supervisor approval marker: **CP5**.
 
-Next action: CP4 Security / Observability / Diff Review.
+Next action: CP6 PR delivery.
 
-Do not begin CP5 until the Supervisor completes CP4.
+No further Product Code change is authorized unless a new verification failure is discovered.
