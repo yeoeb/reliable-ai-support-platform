@@ -33,6 +33,7 @@ It is intentionally concise and must stay synchronized with merged work.
 - #015 — Controlled read-only Tool Calling foundation
 - #016 — Durable Human Approval for higher-risk Tool actions
 - #017 — Offline LLM Evaluation foundation
+- #018 — AI Security Regression foundation
 
 ## Current Workflow Infrastructure
 
@@ -51,37 +52,29 @@ Required state surfaces:
 
 The Dispatcher uses Stable `codex exec` as its local execution boundary. It does not attempt to inject prompts into an already-open VS Code/Desktop Codex UI session.
 
-## Current Product Engineering Issue
+## Next Product Engineering Issue
 
-Engineering Issue ID #018 — AI Security Regression foundation
+Engineering Issue ID #019 — Operational Metrics / Monitoring foundation
 
-- GitHub tracking Issue: #81
-- Active Branch: `feature/issue-018-ai-security-regression`
-- CP0 Existing Defense / Threat Surface Inventory: completed
-- CP1 Cross-Layer Security Regression Architecture: completed and Supervisor-approved
-- CP2 tests-first security matrix: completed through bounded Supervisor fallback and reviewed
-- CP3 Full Verification: completed — 453 backend / 87 control-plane tests passed
-- CP4 Security Review / no-side-effect evidence: completed
-- CP5 Knowledge / Documentation: completed
-- Current Checkpoint: CP6 final exact-Head verification
-- Initial CP2 mode: tests-first; Product runtime writes forbidden
-- Regression layers: security-v1 Offline Eval + Application Boundary no-side-effect tests
-- Security corpus: >=16 synthetic adversarial cases
-- Baseline gate: 100% case pass, zero Safety violations
-- Dangerous shell/SQL/HTTP actions: data-only attack strings; never executed
-- Product fix requires new explicit bounded rework authorization
-- Remote write Allowlist: test/fixture/docs only
+- Status: not started
+- Normal base Branch: `develop`
+- Dependency baseline: Structured Logging, Request IDs, durable Audit, RAG, Tool Calling, Human Approval, Offline Evaluation, and AI Security Regression are complete
+- V1 should define bounded operational metrics for HTTP and AI application paths without recording sensitive request/content data
+- Metrics must complement, not replace, structured logs and durable Audit Events
+- Metric labels must be low-cardinality and must not contain raw user IDs, request text, document/chunk content, Tool arguments, Approval payloads, tokens, or secrets
+- Monitoring/metrics Product boundary and dependency choice must be defined by a new GitHub tracking Issue and CP0/CP1 before implementation begins
 
 Important: GitHub Issue/PR numbers are repository-wide platform sequence numbers and remain separate from Engineering Issue IDs.
 
 ## Planned Product Sequence
 
-Tentative order after #017:
+Tentative order after #018:
 
 - #014 — RAG response with evidence/citations
 - #015 — Controlled Tool Calling
 - #016 — Human Approval for high-risk actions
-- #017+ — Evaluation, security regression, monitoring, and CI hardening as dependencies require
+- #019 — Operational Metrics / Monitoring foundation
+- #020+ — CI hardening, larger Evaluation suites, release hardening, and deployment/operations work as dependencies require
 
 The Supervisor may refine this ordering when dependencies or design evidence justify it.
 

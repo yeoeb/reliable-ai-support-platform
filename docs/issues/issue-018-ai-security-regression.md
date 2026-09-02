@@ -1,6 +1,6 @@
 # Engineering Issue #018 — AI Security Regression Foundation
 
-<!-- codex-dispatch-supervisor-approved-through: CP5 -->
+<!-- codex-dispatch-supervisor-approved-through: CP6 -->
 <!-- codex-dispatch-write-allow: ["evals/README.md","evals/suites/security-v1/suite.json","evals/suites/security-v1/cases.jsonl","evals/suites/security-v1/baseline_results.jsonl","tests/test_ai_security_regression.py","tests/test_ai_security_api.py","docs/issues/issue-018-ai-security-regression.md"] -->
 
 ## GitHub Tracking
@@ -452,7 +452,7 @@ There is deliberately no `app/` path.
 - [x] CP3 — Full verification / bounded Product fix only if required
 - [x] CP4 — Security Review / no-side-effect evidence
 - [x] CP5 — Knowledge / documentation
-- [ ] CP6 — exact-Head delivery
+- [x] CP6 — exact-Head delivery
 
 ## Current State
 
@@ -617,17 +617,39 @@ Repository documentation synchronized before Final CI:
 
 ## CP6 — Final Delivery
 
-Status: **final exact-Head verification pending**
+Status: **completed**
 
-All planned test/fixture/documentation Branch writes are complete.
+Verified immutable Feature Head:
 
-Next:
+`fee51c88acd9f4af41c8c5d5ed2ea2b4c238f3eb`
 
-```text
-FINAL HEAD
-→ exact-Head GitHub Actions
-→ PASS
-→ evidence in PR / Issue comments only
-→ no post-CI Branch commit
-→ Merge
-```
+Final exact-Head checks:
+
+- Backend Verification #182 / run `33646233041`: PASS — **453 passed**
+- Dispatcher Tests #138 / run `33646233065`: PASS — **87 passed**
+- database recovery: PASS
+- PostgreSQL + pgvector: PASS
+- Alembic upgrade / downgrade / re-upgrade: PASS
+
+Draft PR #82 was replaced by non-draft PR #83 without changing the Feature Head because the connector Ready-for-Review transition is incompatible with the current GitHub GraphQL schema.
+
+Replacement PR checks on the same immutable Head:
+
+- Backend Verification #183 / run `33646469009`: PASS — **453 passed**
+- Dispatcher Tests #139 / run `33646468973`: PASS — **87 passed**
+- database recovery: PASS
+
+No Product/Test/Docs commit occurred on the Feature Branch after Final CI.
+
+## Merge Evidence
+
+- Engineering Issue: #018
+- GitHub Issue #81: Closed / Completed
+- Product/Test PR #83: Merged
+- Superseded Draft PR #82: Closed
+- Feature Head: `fee51c88acd9f4af41c8c5d5ed2ea2b4c238f3eb`
+- Squash merge: `6f92dc25c256d62115fb4be83d0e288a15cb428c`
+- Product runtime source changed by #018: **none**
+- CP0–CP6: complete
+- Notion knowledge capture: complete
+- Next Product Engineering Issue: #019 Operational Metrics / Monitoring foundation
