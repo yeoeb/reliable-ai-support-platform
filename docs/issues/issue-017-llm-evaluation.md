@@ -1,6 +1,6 @@
 # Engineering Issue #017 — Offline LLM Evaluation Foundation
 
-<!-- codex-dispatch-supervisor-approved-through: CP2 -->
+<!-- codex-dispatch-supervisor-approved-through: CP5 -->
 <!-- codex-dispatch-write-allow: ["app/evaluation/__init__.py","app/evaluation/schemas.py","app/evaluation/loader.py","app/evaluation/scorer.py","app/evaluation/runner.py","app/evaluation/prompt_fingerprints.py","app/integrations/llm.py","evals/README.md","evals/suites/v1/suite.json","evals/suites/v1/cases.jsonl","evals/suites/v1/baseline_results.jsonl","tests/test_evaluation_*.py","docs/issues/issue-017-llm-evaluation.md"] -->
 
 ## GitHub Tracking
@@ -534,9 +534,9 @@ No Product DB schema or runtime API change is required.
 - [x] CP0 — Evaluation surface discovery
 - [x] CP1 — Offline evaluation architecture
 - [x] CP2 — Bounded implementation
-- [ ] CP3 — Verification / negative-case regression
-- [ ] CP4 — Evaluation validity / safety review
-- [ ] CP5 — Knowledge / documentation
+- [x] CP3 — Verification / negative-case regression
+- [x] CP4 — Evaluation validity / safety review
+- [x] CP5 — Knowledge / documentation
 - [ ] CP6 — exact-Head delivery
 
 ## Current State
@@ -625,3 +625,93 @@ No blocking CP2 finding remains.
 Remote Supervisor approval: **CP2**.
 
 Next authorized action: **CP3 full verification / negative-case regression**.
+
+
+## CP3 — Verification Evidence
+
+Status: **completed**
+
+GitHub-hosted verification on Head:
+
+`8365fa1e1ead891840dee3a4d34a8e41326bfe73`
+
+Results:
+
+- Backend Verification #177: **PASS**
+- backend regression: **441 passed**
+- Dispatcher Tests #131: **PASS**
+- control-plane regression: **87 passed**
+- database recovery: **PASS**
+- PostgreSQL + pgvector verification: **PASS**
+- Alembic upgrade / downgrade / re-upgrade: **PASS**
+
+The committed baseline and focused negative Evaluation tests executed as part of the full Backend regression.
+
+No corrective Product write was required after CP3.
+
+## CP4 — Evaluation Validity / Safety Review
+
+Status: **PASS**
+
+Confirmed:
+
+- Grounded RAG Provider Prompt body is byte-for-byte unchanged from `develop`.
+- Tool-choice Provider Prompt body is byte-for-byte unchanged from `develop`.
+- Prompt IDs/fingerprints are additive identity metadata only.
+- Prompt fingerprint drift fails before scoring.
+- Evaluation Case/Result sets require exact ID reconciliation.
+- Duplicate, missing, unknown, malformed, and case-type-mismatched records fail as invalid Eval input.
+- Loader bounds files to 1 MiB and JSONL to 1000 records.
+- Suite case paths are resolved and constrained inside the Suite directory.
+- Strict schemas reject unknown fields.
+- RAG scoring does not claim full semantic equivalence.
+- Required answer fragments are documented only as coarse deterministic smoke checks.
+- Unauthorized Tool selection is explicitly visible and increments Safety violations.
+- Safety-critical failures are counted once per Case.
+- Eval runner never executes Product Tools or Approval actions.
+- Production `app/evaluation/` source has no SQLAlchemy, ToolExecutionService, ApprovalService, subprocess, shell, dynamic import, arbitrary HTTP, eval, or exec path.
+- Baseline 100% is documented as scorer-fixture behavior, not live model performance.
+- Valid quality regression exits 1; malformed evaluation infrastructure/input exits 2.
+- No GitHub workflow file or Product DB schema was modified.
+
+No merge-blocking finding remains.
+
+## CP5 — Knowledge / Documentation
+
+Status: **completed**
+
+Notion deduplication performed first.
+
+Existing RAG Evaluation knowledge remains focused on Retrieval / Groundedness metrics.
+
+Created reusable Engineering Encyclopedia entry:
+
+**Offline LLM Evaluation：Versioned Dataset、Prompt Fingerprint、Deterministic Scorer 與 Safety Regression**
+
+Created Work Log:
+
+**Issue #017 — Offline LLM Evaluation Foundation**
+
+Repository documentation synchronized before Final CI:
+
+- `evals/README.md`
+- `README.md`
+- `docs/PROJECT_STATE.md`
+- this execution note
+
+## CP6 — Final Delivery
+
+Status: **final exact-Head verification pending**
+
+All planned Product/Test/Repository documentation writes are complete.
+
+Next:
+
+```text
+FINAL HEAD
+→ exact-Head GitHub Actions
+→ PASS
+→ PR / Issue Comment evidence only
+→ no further Branch commit
+→ Merge
+```

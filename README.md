@@ -4,7 +4,7 @@ Production-oriented internal AI support platform built with FastAPI, PostgreSQL,
 
 The project is being developed incrementally toward a complete AI support system with RAG, controlled tool calling, human approval, evaluation, security testing, and observability.
 
-Current status: backend foundation, persistence, migrations, authentication, database-backed RBAC, durable security audit logging, structured request-correlated logging, bounded knowledge ingestion, deterministic chunking, OpenAI embedding integration behind an explicit provider boundary, pgvector vector persistence, authorized exact vector retrieval, grounded RAG answer generation with server-validated evidence citations, controlled Tool Calling, durable Human Approval for a fixed higher-risk action, and GitHub-hosted backend verification are implemented.
+Current status: backend foundation, persistence, migrations, authentication, database-backed RBAC, durable security audit logging, structured request-correlated logging, bounded knowledge ingestion, deterministic chunking, OpenAI embedding integration behind an explicit provider boundary, pgvector vector persistence, authorized exact vector retrieval, grounded RAG answer generation with server-validated evidence citations, controlled Tool Calling, durable Human Approval for a fixed higher-risk action, deterministic offline LLM Evaluation, and GitHub-hosted backend verification are implemented.
 
 Why This Project
 
@@ -235,6 +235,30 @@ Transaction-participating RBAC mutation with one atomic Approval + RBAC + Audit 
 Real two-Session PostgreSQL concurrency test proving one execute + one conflict
 
 V1 self-approval allowed; four-eyes separation is explicitly not claimed
+
+Offline LLM Evaluation
+
+Versioned synthetic Eval suite for Grounded RAG and Tool-choice normalized outputs
+
+Strict Case / Result reconciliation prevents missing or silently dropped Cases
+
+Stable Prompt IDs + SHA-256 fingerprints detect Prompt drift
+
+Deterministic RAG metrics cover answerability, citation integrity, required citation coverage, and coarse answer fragments
+
+Deterministic Tool metrics cover direct/tool decision, exact Tool name, exact arguments, and unauthorized Tool selection
+
+Safety violations are gated separately from aggregate case pass rate
+
+Committed v1 corpus contains 12 synthetic Cases
+
+Committed baseline fixture requires 100% case pass rate and zero Safety violations
+
+Baseline fixture is scorer test data, not a measured live-model score
+
+CLI distinguishes quality regression from malformed Eval input with exit codes 0 / 1 / 2
+
+Normal CI performs no live OpenAI call, Product DB mutation, Tool execution, or Approval execution
 
 Testing
 
@@ -567,9 +591,13 @@ Row-locked one-time decision with approval-time permission re-check
 
 Atomic support_agent mutation + Approval / RBAC Audit transaction
 
-Next
+Offline LLM Evaluation foundation
 
-LLM Evaluation foundation
+Versioned RAG / Tool-choice Eval corpus
+
+Prompt fingerprint regression guard
+
+Deterministic Safety / threshold gate
 
 Planned Reliability & AI Safety
 

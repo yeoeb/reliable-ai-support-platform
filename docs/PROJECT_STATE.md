@@ -59,7 +59,10 @@ Engineering Issue ID #017 — Offline LLM Evaluation foundation
 - CP0 Evaluation Surface Discovery: completed
 - CP1 Offline Evaluation Architecture: completed and Supervisor-approved
 - CP2 offline evaluation implementation: completed through bounded Supervisor fallback and reviewed
-- Current Checkpoint: CP3 authorized
+- CP3 Verification / negative-case regression: completed
+- CP4 Evaluation Validity / Safety Review: completed
+- CP5 Knowledge / Documentation: completed
+- Current Checkpoint: CP6 final exact-Head verification
 - V1 evaluation surfaces: Grounded RAG + Tool Choice
 - V1 execution mode: deterministic offline scorer only
 - Live OpenAI calls in CI: forbidden
@@ -154,6 +157,14 @@ Service Layer owns transaction boundaries.
 - Durable Human Approval binds one exact server-validated action and survives request boundaries.
 - Approval decisions use row locking and re-check both approval permission and the original action permission before execution.
 - Approval state, higher-risk mutation, and durable Audits commit atomically; model proposal alone never authorizes execution.
+- Offline LLM Evaluation uses versioned synthetic Cases and normalized Candidate Results; it is test infrastructure, not Product runtime state.
+- Eval Case IDs and Result Case IDs must reconcile exactly so difficult Cases cannot disappear silently.
+- Grounded RAG evaluation checks deterministic answerability/citation contracts without claiming full semantic equivalence.
+- Tool-choice evaluation checks decision, exact Tool name/arguments, and unauthorized Tool selection without executing Tools.
+- Prompt identity is pinned by stable Prompt ID + SHA-256; Prompt drift fails explicitly.
+- Safety violations remain a separate gate from aggregate accuracy.
+- The committed Eval baseline is a scorer fixture, not evidence of live-model performance.
+- Normal CI LLM Evaluation performs no live OpenAI call, database mutation, Tool execution, or Approval execution.
 
 ### Planned AI Boundary
 
