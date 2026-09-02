@@ -50,18 +50,27 @@ Required state surfaces:
 
 The Dispatcher uses Stable `codex exec` as its local execution boundary. It does not attempt to inject prompts into an already-open VS Code/Desktop Codex UI session.
 
-## Next Product Engineering Issue
+## Current Product Engineering Issue
 
-Engineering Issue ID #017 — LLM Evaluation foundation
+Engineering Issue ID #017 — Offline LLM Evaluation foundation
 
-- Status: not started
-- Normal base Branch: `develop`
-- Dependency baseline: Grounded RAG, Tool Calling, Human Approval, durable Audit, and GitHub-hosted verification are complete
-- Evaluation must be deterministic where possible and must not depend on live OpenAI calls in normal CI
-- V1 should establish a versioned offline evaluation-case format plus measurable pass/fail metrics for grounded answers and Tool decisions
-- Evaluation data must not become Product runtime state
-- Prompt/model/provider changes should be comparable against the same evaluation corpus
-- Product boundary must be defined by a new GitHub tracking Issue and CP0/CP1 before implementation begins
+- GitHub tracking Issue: #77
+- Active Branch: `feature/issue-017-llm-evaluation`
+- CP0 Evaluation Surface Discovery: completed
+- CP1 Offline Evaluation Architecture: completed and Supervisor-approved
+- CP2 offline evaluation implementation: completed through bounded Supervisor fallback and reviewed
+- CP3 Verification / negative-case regression: completed
+- CP4 Evaluation Validity / Safety Review: completed
+- CP5 Knowledge / Documentation: completed
+- Current Checkpoint: CP6 final exact-Head verification
+- V1 evaluation surfaces: Grounded RAG + Tool Choice
+- V1 execution mode: deterministic offline scorer only
+- Live OpenAI calls in CI: forbidden
+- Evaluation Tool/Approval execution: forbidden
+- Seed corpus: minimum 12 synthetic cases
+- Baseline thresholds: 100% case pass, zero safety violations
+- Prompt identity: stable IDs + SHA-256 fingerprints
+- Remote write Allowlist: configured
 
 Important: GitHub Issue/PR numbers are repository-wide platform sequence numbers and remain separate from Engineering Issue IDs.
 
@@ -148,6 +157,14 @@ Service Layer owns transaction boundaries.
 - Durable Human Approval binds one exact server-validated action and survives request boundaries.
 - Approval decisions use row locking and re-check both approval permission and the original action permission before execution.
 - Approval state, higher-risk mutation, and durable Audits commit atomically; model proposal alone never authorizes execution.
+- Offline LLM Evaluation uses versioned synthetic Cases and normalized Candidate Results; it is test infrastructure, not Product runtime state.
+- Eval Case IDs and Result Case IDs must reconcile exactly so difficult Cases cannot disappear silently.
+- Grounded RAG evaluation checks deterministic answerability/citation contracts without claiming full semantic equivalence.
+- Tool-choice evaluation checks decision, exact Tool name/arguments, and unauthorized Tool selection without executing Tools.
+- Prompt identity is pinned by stable Prompt ID + SHA-256; Prompt drift fails explicitly.
+- Safety violations remain a separate gate from aggregate accuracy.
+- The committed Eval baseline is a scorer fixture, not evidence of live-model performance.
+- Normal CI LLM Evaluation performs no live OpenAI call, database mutation, Tool execution, or Approval execution.
 
 ### Planned AI Boundary
 
