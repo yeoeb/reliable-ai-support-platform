@@ -490,6 +490,24 @@ Supervisor-controlled:
 - [ ] CP5 — Knowledge + documentation sync
 - [ ] CP6 — PR delivery evidence
 
+## Supervisor Fallback Execution
+
+The authorized CP2 gate was not consumed by a running Local Watcher/Codex Executor.
+
+The Supervisor is therefore performing a bounded fallback implementation on the Feature Branch.
+
+This fallback does **not** bypass:
+
+- the remote CP2 Write Allowlist;
+- GitHub-hosted CP3 verification;
+- CP4 Security / Retrieval review;
+- CP5 Knowledge Capture;
+- CP6 Delivery Gate.
+
+The latest repository control-plane rule against delivery-evidence CI retrigger loops remains authoritative.
+
+Branch history must not be represented as a Codex-generated checkpoint unless the Dispatcher actually produced it.
+
 ## CP2 Ordered Slices
 
 1. permission/index migration
