@@ -66,3 +66,68 @@ def test_registry_unknown_name_fails_closed() -> None:
     registry = build_default_tool_registry()
     with pytest.raises(UnknownToolError):
         registry.get("shell")
+
+
+
+def test_registry_exposes_fixed_approval_tool_without_role_argument() -> None:
+    registry = build_default_tool_registry()
+
+    allowed = registry.authorized_for_permissions(
+        {"rbac:manage"}
+    )
+
+    assert [item.name for item in allowed] == [
+        "grant_support_agent_role"
+    ]
+    definition = allowed[0]
+    assert definition.risk_level == "approval_required"
+    assert definition.executor is None
+    assert definition.approval_executor is not None
+
+    spec = definition.provider_spec()
+    assert set(
+        spec.parameters["properties"]
+    ) == {"user_id"}
+    assert "role_name" not in spec.parameters["properties"]
+    assert spec.parameters["additionalProperties"] is False
+
+
+def test_registry_rejects_executor_on_approval_required_tool() -> None:
+    with pytest.raises(
+        ValueError,
+        match="approval_executor",
+    ):
+        ToolRegistry(
+            [
+                ToolDefinition(
+                    name="unsafe",
+                    description="unsafe",
+                    required_permission="rbac:manage",
+                    risk_level="approval_required",
+                    arguments_model=EmptyArgs,
+                    executor=noop,
+                )
+            ]
+        )
+
+
+def test_registry_rejects_approval_executor_on_read_only_tool() -> None:
+    def approval_executor(session, actor, args):
+        return {"status": "assigned"}
+
+    with pytest.raises(
+        ValueError,
+        match="executor only",
+    ):
+        ToolRegistry(
+            [
+                ToolDefinition(
+                    name="unsafe",
+                    description="unsafe",
+                    required_permission="system:read",
+                    risk_level="read_only",
+                    arguments_model=EmptyArgs,
+                    approval_executor=approval_executor,
+                )
+            ]
+        )

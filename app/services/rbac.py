@@ -24,6 +24,44 @@ class RBACService:
         self.user_repository = UserRepository(session)
         self.audit_service = AuditService(session)
 
+    def assign_role_in_transaction(
+        self,
+        *,
+        actor_user_id: UUID,
+        user_id: UUID,
+        role_name: str,
+    ) -> bool:
+        user = self.user_repository.get_by_id(user_id)
+
+        if user is None:
+            raise UserNotFoundError
+
+        role = self.rbac_repository.get_role_by_name(
+            role_name
+        )
+
+        if role is None:
+            raise RoleNotFoundError
+
+        created = self.rbac_repository.assign_role(
+            user_id=user.id,
+            role_id=role.id,
+        )
+
+        self.audit_service.record(
+            actor_user_id=actor_user_id,
+            action="rbac.role.assign",
+            target_type="user",
+            target_id=str(user.id),
+            outcome="success",
+            event_metadata={
+                "role": role.name,
+                "changed": created,
+            },
+        )
+
+        return created
+
     def assign_role(
         self,
         *,
@@ -32,33 +70,10 @@ class RBACService:
         role_name: str,
     ) -> None:
         try:
-            user = self.user_repository.get_by_id(user_id)
-
-            if user is None:
-                raise UserNotFoundError
-
-            role = self.rbac_repository.get_role_by_name(
-                role_name
-            )
-
-            if role is None:
-                raise RoleNotFoundError
-
-            created = self.rbac_repository.assign_role(
-                user_id=user.id,
-                role_id=role.id,
-            )
-
-            self.audit_service.record(
+            created = self.assign_role_in_transaction(
                 actor_user_id=actor_user_id,
-                action="rbac.role.assign",
-                target_type="user",
-                target_id=str(user.id),
-                outcome="success",
-                event_metadata={
-                    "role": role.name,
-                    "changed": created,
-                },
+                user_id=user_id,
+                role_name=role_name,
             )
 
             self.session.commit()
@@ -67,8 +82,8 @@ class RBACService:
                 "RBAC role assigned",
                 extra={
                     "event": "rbac.role.assigned",
-                    "user_id": str(user.id),
-                    "role": role.name,
+                    "user_id": str(user_id),
+                    "role": role_name,
                     "changed": created,
                 },
             )

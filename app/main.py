@@ -5,6 +5,7 @@ from app.api.middleware.request_logging import (
     unhandled_exception_response,
 )
 from app.api.routes.admin import router as admin_router
+from app.api.routes.approvals import router as approvals_router
 from app.api.routes.agent import router as agent_router
 from app.api.routes.auth import router as auth_router
 from app.api.routes.health import router as health_router
@@ -34,6 +35,7 @@ app.include_router(health_router)
 app.include_router(users_router)
 app.include_router(auth_router)
 app.include_router(admin_router)
+app.include_router(approvals_router)
 app.include_router(knowledge_router)
 
 app.include_router(retrieval_router)

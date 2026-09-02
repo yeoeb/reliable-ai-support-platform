@@ -11,6 +11,7 @@ from app.core.errors import (
 )
 from app.integrations.llm import ToolCallingProvider
 from app.repositories.rbac import RBACRepository
+from app.services.approval import ApprovalService
 from app.services.authorization import AuthorizationService
 from app.services.tool_execution import ToolExecutionService
 from app.tools.registry import ToolRegistry
@@ -18,6 +19,8 @@ from app.tools.registry import ToolRegistry
 
 @dataclass(frozen=True)
 class AgentRunResult:
+    status: str
+    approval_id: UUID | None
     answer: str
     tool_used: str | None
     tool_status: str | None
@@ -37,6 +40,10 @@ class AgentService:
         self.registry = registry
         self.provider = provider
         self.tool_execution = ToolExecutionService(
+            session,
+            registry,
+        )
+        self.approval_service = ApprovalService(
             session,
             registry,
         )
@@ -80,9 +87,32 @@ class AgentService:
                     "Tool provider returned invalid direct answer"
                 )
             return AgentRunResult(
+                status="completed",
+                approval_id=None,
                 answer=choice.answer.strip(),
                 tool_used=None,
                 tool_status=None,
+                model=choice.model,
+                input_tokens=choice.input_tokens,
+                output_tokens=choice.output_tokens,
+            )
+
+        definition = self.registry.get(
+            choice.tool_call.name
+        )
+
+        if definition.risk_level == "approval_required":
+            approval = self.approval_service.request_action(
+                actor_user_id=actor_user_id,
+                tool_name=choice.tool_call.name,
+                arguments=choice.tool_call.arguments,
+            )
+            return AgentRunResult(
+                status="approval_required",
+                approval_id=approval.id,
+                answer="Human approval required.",
+                tool_used=choice.tool_call.name,
+                tool_status="approval_required",
                 model=choice.model,
                 input_tokens=choice.input_tokens,
                 output_tokens=choice.output_tokens,
@@ -100,6 +130,8 @@ class AgentService:
             tool_result=result,
         )
         return AgentRunResult(
+            status="completed",
+            approval_id=None,
             answer=final.answer,
             tool_used=choice.tool_call.name,
             tool_status=result["status"],

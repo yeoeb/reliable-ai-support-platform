@@ -9,6 +9,7 @@ from app.core.errors import (
     InvalidToolArgumentsError,
     InvalidToolCallingProviderResponseError,
     NoAuthorizedToolError,
+    PersistenceUnavailableError,
     ToolCallingProviderError,
     ToolExecutionError,
     ToolPermissionDeniedError,
@@ -75,6 +76,7 @@ def run_agent(
         UnknownToolError,
         InvalidToolArgumentsError,
         ToolExecutionError,
+        PersistenceUnavailableError,
     ) as exc:
         raise HTTPException(
             status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
@@ -82,6 +84,8 @@ def run_agent(
         ) from exc
 
     return AgentRunResponse(
+        status=result.status,
+        approval_id=result.approval_id,
         answer=result.answer,
         tool_used=result.tool_used,
         tool_status=result.tool_status,

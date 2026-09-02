@@ -98,3 +98,16 @@ class ToolPermissionDeniedError(Exception):
 
 class ToolExecutionError(Exception):
     pass
+
+
+
+class ApprovalNotFoundError(Exception):
+    pass
+
+
+class ApprovalStateConflictError(Exception):
+    pass
+
+
+class ApprovalPermissionDeniedError(Exception):
+    pass

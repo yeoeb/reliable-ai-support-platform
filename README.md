@@ -4,7 +4,7 @@ Production-oriented internal AI support platform built with FastAPI, PostgreSQL,
 
 The project is being developed incrementally toward a complete AI support system with RAG, controlled tool calling, human approval, evaluation, security testing, and observability.
 
-Current status: backend foundation, persistence, migrations, authentication, database-backed RBAC, durable security audit logging, structured request-correlated logging, bounded knowledge ingestion, deterministic chunking, OpenAI embedding integration behind an explicit provider boundary, pgvector vector persistence, authorized exact vector retrieval, grounded RAG answer generation with server-validated evidence citations, controlled read-only Tool Calling, and GitHub-hosted backend verification are implemented. Human Approval for higher-risk Tool actions remains the next AI execution boundary.
+Current status: backend foundation, persistence, migrations, authentication, database-backed RBAC, durable security audit logging, structured request-correlated logging, bounded knowledge ingestion, deterministic chunking, OpenAI embedding integration behind an explicit provider boundary, pgvector vector persistence, authorized exact vector retrieval, grounded RAG answer generation with server-validated evidence citations, controlled Tool Calling, durable Human Approval for a fixed higher-risk action, and GitHub-hosted backend verification are implemented.
 
 Why This Project
 
@@ -212,6 +212,30 @@ Shared request DB transaction closed before external generation-provider wait
 
 Raw question, generated answer, chunk content, vectors, API keys, and raw Provider responses excluded from Audit/runtime logs
 
+Durable Human Approval
+
+Server-owned approval_required Tool risk separate from read_only execution
+
+Fixed higher-risk grant_support_agent_role(user_id) action with no model-controlled role_name
+
+Durable ApprovalRequest storing exact canonical validated Tool name + arguments
+
+15-minute pending Approval expiry
+
+Admin-only approval:decide permission kept separate from rbac:manage action permission
+
+Human inspect / approve / reject API
+
+SELECT ... FOR UPDATE row locking for one-time decisions
+
+Approval-time re-check of approver permission and original requester action permission
+
+Transaction-participating RBAC mutation with one atomic Approval + RBAC + Audit commit
+
+Real two-Session PostgreSQL concurrency test proving one execute + one conflict
+
+V1 self-approval allowed; four-eyes separation is explicitly not claimed
+
 Testing
 
 pytest
@@ -407,9 +431,21 @@ Controlled Tool Calling API
 
 POST /agent/run
 
-The endpoint requires authentication. The server filters available Tool definitions using current database-backed permissions, validates model-proposed arguments against server-owned schemas, re-checks permission immediately before execution, and executes at most one read-only Tool per request.
+The endpoint requires authentication. The server filters available Tool definitions using current database-backed permissions and validates model-proposed arguments against server-owned schemas.
 
-V1 exposes only `platform_readiness`, protected by `system:read` for support_agent and admin. Finalization receives no Tool definitions.
+Read-only `platform_readiness` still executes immediately after a current permission re-check.
+
+The fixed higher-risk `grant_support_agent_role(user_id)` proposal never executes in the model request. It creates a durable pending Approval and returns `status=approval_required` with an approval ID. The model cannot provide a role name or approve its own action.
+
+Human Approval endpoints:
+
+GET /approvals/{approval_id}
+
+POST /approvals/{approval_id}/approve
+
+POST /approvals/{approval_id}/reject
+
+Approval decisions require the admin-only `approval:decide` permission, lock the exact Approval row, re-check current permissions, and atomically commit the fixed support_agent mutation with durable Audit evidence.
 
 Reliability & Security Principles
 
@@ -523,13 +559,15 @@ Execution-time database-backed permission re-check
 
 Single-Tool execution bound with no Tool access during finalization
 
-Next
+Durable Human Approval for higher-risk Tool actions
 
-Human Approval for higher-risk Tool actions
+Exact action binding and 15-minute approval expiry
+
+Row-locked one-time decision with approval-time permission re-check
+
+Atomic support_agent mutation + Approval / RBAC Audit transaction
 
 Planned AI Layer
-
-Human confirmation for higher-risk Tool actions
 
 Planned Reliability & AI Safety
 

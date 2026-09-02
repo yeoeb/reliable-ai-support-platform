@@ -1,3 +1,4 @@
+from types import SimpleNamespace
 from unittest.mock import MagicMock
 from uuid import uuid4
 
@@ -115,3 +116,85 @@ def test_agent_executes_at_most_one_tool_and_finalizes_without_loop(
     assert result.tool_status == "ready"
     assert result.input_tokens == 5
     assert result.output_tokens == 3
+
+
+
+def test_approval_required_tool_creates_pending_action_without_execution(
+    monkeypatch,
+) -> None:
+    service, session, provider = make_service(
+        monkeypatch,
+        {"rbac:manage"},
+    )
+    target = uuid4()
+    approval_id = uuid4()
+    provider.choose.return_value = ToolChoiceResult(
+        answer=None,
+        tool_call=ToolCallRequest(
+            name="grant_support_agent_role",
+            arguments={
+                "user_id": str(target),
+            },
+        ),
+        input_tokens=4,
+        output_tokens=2,
+        model="gpt-5.6-terra",
+    )
+    service.approval_service = MagicMock()
+    service.approval_service.request_action.return_value = (
+        SimpleNamespace(id=approval_id)
+    )
+
+    result = service.run(
+        actor_user_id=uuid4(),
+        request="Make this user support staff.",
+    )
+
+    service.approval_service.request_action.assert_called_once()
+    service.tool_execution.execute.assert_not_called()
+    provider.finalize.assert_not_called()
+
+    assert result.status == "approval_required"
+    assert result.approval_id == approval_id
+    assert result.answer == "Human approval required."
+    assert result.tool_used == "grant_support_agent_role"
+    assert result.tool_status == "approval_required"
+    assert result.input_tokens == 4
+    assert result.output_tokens == 2
+
+
+def test_read_only_tool_path_remains_completed(
+    monkeypatch,
+) -> None:
+    service, _, provider = make_service(
+        monkeypatch,
+        {"system:read"},
+    )
+    provider.choose.return_value = ToolChoiceResult(
+        answer=None,
+        tool_call=ToolCallRequest(
+            name="platform_readiness",
+            arguments={},
+        ),
+        input_tokens=2,
+        output_tokens=1,
+        model="gpt-5.6-terra",
+    )
+    service.tool_execution.execute.return_value = {
+        "status": "ready"
+    }
+    provider.finalize.return_value = ToolFinalResult(
+        answer="Ready.",
+        input_tokens=1,
+        output_tokens=1,
+        model="gpt-5.6-terra",
+    )
+
+    result = service.run(
+        actor_user_id=uuid4(),
+        request="Check readiness",
+    )
+
+    assert result.status == "completed"
+    assert result.approval_id is None
+    provider.finalize.assert_called_once()

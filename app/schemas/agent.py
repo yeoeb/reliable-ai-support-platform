@@ -1,3 +1,6 @@
+from typing import Literal
+from uuid import UUID
+
 from pydantic import BaseModel, ConfigDict, Field, field_validator
 
 
@@ -34,6 +37,8 @@ class AgentRunRequest(BaseModel):
 class AgentRunResponse(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
+    status: Literal["completed", "approval_required"]
+    approval_id: UUID | None
     answer: str
     tool_used: str | None
     tool_status: str | None

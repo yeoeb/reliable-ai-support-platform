@@ -145,3 +145,36 @@ def test_assign_role_rolls_back_when_role_missing() -> None:
 
     session.commit.assert_not_called()
     session.rollback.assert_called_once()
+
+
+
+def test_assign_role_in_transaction_never_commits() -> None:
+    session = MagicMock()
+    service = RBACService(session)
+
+    user = SimpleNamespace(id=uuid4())
+    role = SimpleNamespace(
+        id=uuid4(),
+        name="support_agent",
+    )
+    service.user_repository.get_by_id = MagicMock(
+        return_value=user
+    )
+    service.rbac_repository.get_role_by_name = MagicMock(
+        return_value=role
+    )
+    service.rbac_repository.assign_role = MagicMock(
+        return_value=True
+    )
+    service.audit_service = MagicMock()
+
+    changed = service.assign_role_in_transaction(
+        actor_user_id=uuid4(),
+        user_id=user.id,
+        role_name="support_agent",
+    )
+
+    assert changed is True
+    service.audit_service.record.assert_called_once()
+    session.commit.assert_not_called()
+    session.rollback.assert_not_called()
