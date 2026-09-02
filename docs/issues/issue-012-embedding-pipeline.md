@@ -802,28 +802,20 @@ Deduplicate in CP5:
 
 ## Current State
 
-Engineering Issue #012 is complete and ready for Delivery.
+CP0–CP4 are complete.
 
-Final reviewed Product/Test Head before CP5 documentation:
+Final reviewed Product/Test Head:
 
-- `95660212a8bce4fcfc15c2545cc8c992c5b83a40`
-- Backend regression: **306 passed**
+- `bffc74828159880d091ede96485892d4d39351ed`
+- Backend regression: **303 passed**
 - Database recovery: **1 passed**
 - Dispatcher / Branch Resolver: **87 passed**
-- PostgreSQL + pgvector extension: PASS
+- PostgreSQL 16 + pgvector extension: PASS
 - Alembic upgrade/downgrade/re-upgrade: PASS
 - CP4 Security / Provider / Vector Review: PASS
-- CP5 Notion Knowledge Capture: complete
-- README / Project State synchronization: complete
 
-Documentation-inclusive CP5 Head also passed:
+Supervisor approval marker: **CP4**.
 
-- Backend regression: **306 passed**
-- Database recovery: **1 passed**
-- Dispatcher / Branch Resolver: **87 passed**
+Next action: CP5 Knowledge / Documentation synchronization.
 
-Supervisor approval marker: **CP6**.
-
-The final non-Draft Delivery PR must run exact-head GitHub-hosted verification before Merge.
-
-No known merge-blocking finding remains.
+No further Product Code change is authorized unless a new verification failure is discovered.
