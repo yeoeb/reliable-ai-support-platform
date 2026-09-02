@@ -1,6 +1,6 @@
 # Engineering Issue #012 — Embedding Pipeline Foundation
 
-<!-- codex-dispatch-supervisor-approved-through: CP2 -->
+<!-- codex-dispatch-supervisor-approved-through: CP4 -->
 <!-- codex-dispatch-write-allow: ["compose.yaml",".github/workflows/backend-tests.yml","requirements/base.txt",".env.example","app/core/config.py","app/core/errors.py","app/models/knowledge_chunk.py","app/models/__init__.py","app/repositories/knowledge.py","app/repositories/embedding.py","app/services/chunking.py","app/services/embedding.py","app/integrations/__init__.py","app/integrations/embeddings.py","app/schemas/embedding.py","app/api/routes/knowledge.py","migrations/versions/*embedding*.py","tests/test_config.py","tests/test_chunking.py","tests/test_embedding_provider.py","tests/test_embedding_model.py","tests/test_embedding_repository.py","tests/test_embedding_service.py","tests/test_embedding_api.py","tests/test_embedding_migration.py","tests/test_knowledge_migration.py","tests/test_migrations.py","docs/issues/issue-012-embedding-pipeline.md"] -->
 
 ## GitHub Tracking
@@ -618,8 +618,8 @@ Supervisor-controlled:
 - [x] CP0 — Context bootstrap / contradiction detection
 - [x] CP1 — Architecture + Scope validation
 - [x] CP2 — Bounded implementation
-- [ ] CP3 — Targeted + full verification
-- [ ] CP4 — Security / provider / vector review
+- [x] CP3 — Targeted + full verification
+- [x] CP4 — Security / provider / vector review
 - [ ] CP5 — Knowledge + documentation sync
 - [ ] CP6 — PR delivery evidence
 
@@ -672,6 +672,80 @@ python -m pytest -q
 
 GitHub-hosted pgvector PostgreSQL/Alembic Backend Verification remains authoritative.
 
+## CP3 Verification Evidence
+
+Initial Draft verification established that:
+
+- pgvector PostgreSQL image boots correctly;
+- Alembic upgrade enables the `vector` extension;
+- Database Recovery passes;
+- Control Plane tests pass.
+
+The first full regression run had one test-only failure in migration introspection: an Alembic `UniqueConstraint` is not yet attached to a Table inside the mocked `op.create_table()` call, so `.columns` is empty. The migration itself was correct. The test was fixed to inspect pending column arguments.
+
+Subsequent exact-head verification passed:
+
+```text
+Backend regression: 289 passed
+Database recovery:   1 passed
+Control Plane:      87 passed
+pgvector extension: PASS
+Alembic downgrade / re-upgrade: PASS
+```
+
+CP4 hardening then added malformed external-provider response tests and service-level Protocol validation.
+
+Final reviewed Product/Test Head:
+
+`95660212a8bce4fcfc15c2545cc8c992c5b83a40`
+
+Final exact-head evidence:
+
+```text
+Backend regression: 306 passed
+Database recovery:   1 passed
+Control Plane:      87 passed
+PostgreSQL + pgvector: PASS
+Alembic upgrade:     PASS
+Alembic downgrade:   PASS
+Alembic re-upgrade:  PASS
+```
+
+## CP4 Security / Provider / Vector Review
+
+Status: **PASS**
+
+Findings:
+
+- OpenAI API key remains optional at application startup and is only required if the real provider is actually invoked.
+- A COMPLETE idempotent embedding state does not call the provider and therefore does not require an API key.
+- A MISSING state with no API key fails explicitly at the provider boundary.
+- OpenAI SDK-specific code is isolated in `app/integrations/embeddings.py`.
+- Service Layer depends on an SDK-independent Provider Protocol.
+- Provider request explicitly sets model, dimensions=1536, and `encoding_format="float"`.
+- Provider output count, indexes, vector dimensions, numeric finiteness, required fields, and integer token usage are validated.
+- Malformed provider responses fail closed as domain errors rather than leaking AttributeError/TypeError/ValueError.
+- Service independently validates Provider Protocol results, including dimensions, finite numeric values, and token usage type.
+- Automated tests use Fake/Mock providers and clients; no live OpenAI request is made.
+- Initial DB read transaction is explicitly ended before any external provider wait.
+- Provider failure creates no KnowledgeChunk rows and no success Audit Event.
+- COMPLETE state skips the provider.
+- PARTIAL / inconsistent state fails closed.
+- After provider return, persisted state is re-read to handle concurrent completion.
+- Database uniqueness prevents duplicate chunk sets for the same document/config.
+- New KnowledgeChunk rows + Audit Event commit atomically.
+- Audit failure rolls back chunk persistence.
+- API response excludes chunk text and vectors.
+- Audit metadata and runtime logs exclude chunk text, vectors, API key, and raw provider response.
+- pgvector storage is `vector(1536)` in both ORM model and migration.
+- No HNSW / IVFFlat vector index exists.
+- No cosine/L2/nearest-neighbor retrieval query exists.
+- No Retrieval, Reranking, RAG, Citation, or LLM-generation path was introduced.
+- Migration downgrade removes the feature table/index but does not destructively DROP the shared vector extension.
+- Development Compose and GitHub Backend Verification use the same pinned pgvector PostgreSQL image.
+
+No merge-blocking finding remains.
+
 ## CP4 Review Focus
 
 - no API key/content/vector leakage
@@ -700,27 +774,20 @@ Deduplicate in CP5:
 
 ## Current State
 
-CP0–CP2 are complete.
+CP0–CP4 are complete.
 
-Implemented Product boundary:
+Final reviewed Product/Test Head:
 
-- pgvector PostgreSQL 16 development/CI image
-- vector extension migration
-- KnowledgeChunk vector(1536) persistence
-- deterministic char-v1 chunking + config hash
-- SDK-independent EmbeddingProvider Protocol
-- OpenAI text-embedding-3-small adapter with explicit 1536 dimensions
-- bounded batch size
-- Service-owned external-call / DB transaction boundary
-- idempotent COMPLETE path with no provider call
-- partial-state fail-closed behavior
-- concurrent post-provider recheck
-- atomic KnowledgeChunk + Audit transaction
-- metadata-only admin API
-- focused Unit/API/Migration tests
+- `95660212a8bce4fcfc15c2545cc8c992c5b83a40`
+- Backend regression: **306 passed**
+- Database recovery: **1 passed**
+- Dispatcher / Branch Resolver: **87 passed**
+- PostgreSQL + pgvector extension: PASS
+- Alembic upgrade/downgrade/re-upgrade: PASS
+- CP4 Security / Provider / Vector Review: PASS
 
-Supervisor approval marker: **CP2**.
+Supervisor approval marker: **CP4**.
 
-Next action: CP3 GitHub-hosted exact-head verification.
+Next action: CP5 Knowledge / Documentation synchronization.
 
-No #013 vector search/indexing is authorized.
+No further Product Code change is authorized unless a new verification failure is discovered.
