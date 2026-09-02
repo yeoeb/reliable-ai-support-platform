@@ -28,6 +28,7 @@ It is intentionally concise and must stay synchronized with merged work.
 - #010 — Structured Logging / Observability foundation
 - #011 — Knowledge Ingestion foundation
 - #012 — Embedding Pipeline foundation
+- #013 — Retrieval / Vector Search foundation
 
 ## Current Workflow Infrastructure
 
@@ -46,29 +47,22 @@ Required state surfaces:
 
 The Dispatcher uses Stable `codex exec` as its local execution boundary. It does not attempt to inject prompts into an already-open VS Code/Desktop Codex UI session.
 
-## Current Product Engineering Issue
+## Next Product Engineering Issue
 
-Engineering Issue ID #013 — Retrieval / Vector Search foundation
+Engineering Issue ID #014 — RAG response with evidence / citations
 
-- GitHub tracking Issue: #60
-- Active Branch: `feature/issue-013-vector-retrieval`
-- Current Checkpoint: CP6 delivery
-- CP0 Context Bootstrap: completed
-- CP1 Architecture / Scope: completed and Supervisor-approved
-- CP2 implementation: completed via bounded Supervisor fallback
-- CP3 verification: completed (344 backend + 1 recovery test; pgvector/Alembic round-trip PASS)
-- CP4 Security / Retrieval review: completed
-- CP5 Knowledge / Documentation synchronization: completed
-- Product boundary: exact cosine retrieval over current embedding config; HNSW/IVFFlat/RAG remain deferred
-- Access boundary: raw retrieval results require `knowledge:read` and are intended for support_agent/admin only
+- Status: not started
+- Normal base Branch: `develop`
+- Dependency baseline: Knowledge Ingestion, Embedding Pipeline, Exact Retrieval, RBAC, Audit, Structured Logging, and Backend Verification are complete
+- Retrieval evidence boundary: retrieved KnowledgeChunk content remains untrusted context
+- Product boundary must be defined by a new GitHub tracking Issue and CP0/CP1 before implementation begins
 
 Important: GitHub Issue/PR numbers are repository-wide platform sequence numbers and remain separate from Engineering Issue IDs.
 
 ## Planned Product Sequence
 
-Tentative order after #012:
+Tentative order after #013:
 
-- #013 — Retrieval / Vector Search
 - #014 — RAG response with evidence/citations
 - #015 — Controlled Tool Calling
 - #016 — Human Approval for high-risk actions
