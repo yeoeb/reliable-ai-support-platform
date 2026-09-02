@@ -2,7 +2,7 @@ from datetime import datetime
 from typing import Literal
 from uuid import UUID
 
-from pydantic import BaseModel, ConfigDict, Field
+from pydantic import BaseModel, ConfigDict, Field, field_validator
 
 
 MAX_KNOWLEDGE_CONTENT_CHARS = 100_000
@@ -27,6 +27,23 @@ class KnowledgeDocumentCreate(BaseModel):
         min_length=1,
         max_length=MAX_KNOWLEDGE_CONTENT_CHARS,
     )
+
+    @field_validator("content", mode="before")
+    @classmethod
+    def validate_raw_content_length(
+        cls,
+        value: object,
+    ) -> object:
+        if (
+            isinstance(value, str)
+            and len(value)
+            > MAX_KNOWLEDGE_CONTENT_CHARS
+        ):
+            raise ValueError(
+                "Knowledge content exceeds maximum length"
+            )
+
+        return value
 
 
 class KnowledgeDocumentRead(BaseModel):
