@@ -1,6 +1,6 @@
 # Engineering Issue #011 — Knowledge Document Ingestion Foundation
 
-<!-- codex-dispatch-supervisor-approved-through: CP4 -->
+<!-- codex-dispatch-supervisor-approved-through: CP5 -->
 <!-- codex-dispatch-write-allow: ["app/models/knowledge_document.py","app/models/__init__.py","app/repositories/knowledge.py","app/services/knowledge.py","app/schemas/knowledge.py","app/api/routes/knowledge.py","app/main.py","app/core/errors.py","migrations/versions/*knowledge*.py","tests/test_knowledge_model.py","tests/test_knowledge_repository.py","tests/test_knowledge_service.py","tests/test_knowledge_api.py","tests/test_knowledge_migration.py","tests/test_migrations.py","docs/issues/issue-011-knowledge-ingestion.md"] -->
 
 ## GitHub Tracking
@@ -348,7 +348,7 @@ Supervisor-controlled only:
 - [x] CP2 — Bounded implementation
 - [x] CP3 — Targeted + full verification
 - [x] CP4 — Security / ingestion review
-- [ ] CP5 — Knowledge + documentation sync
+- [x] CP5 — Knowledge + documentation sync
 - [ ] CP6 — PR delivery evidence
 
 ## Supervisor Fallback Execution
@@ -478,6 +478,34 @@ No merge-blocking finding remains.
 - no fetch/execute/LLM path exists
 - model/migration alignment
 
+## CP5 Knowledge / Documentation
+
+Notion deduplication was completed before writing.
+
+Existing Glossary entries already define Ingestion, Document, Chunk, Embedding, and Idempotency at dictionary level, so they were not duplicated.
+
+Created one deeper reusable Engineering Encyclopedia entry:
+
+**Knowledge Ingestion：Normalization、Content Hash、Provenance、Idempotency 與 Untrusted Data Boundary**
+
+Created one project Work Log:
+
+**Issue #011 — Knowledge Ingestion Foundation**
+
+The Work Log links to the reusable Knowledge entry and the Reliable AI Support Operations Platform project.
+
+Reusable lessons captured:
+
+- Ingestion is a separate reliability/security stage from Embedding and Retrieval.
+- Normalize deterministically before hashing.
+- Content Hash is useful for identity/change detection but is not Encryption.
+- Provenance labels must not automatically become filesystem paths or fetch URLs.
+- Application pre-checks do not replace a Database Unique Constraint for concurrent idempotency.
+- SAVEPOINT / nested transaction recovery can turn a concurrent duplicate insert into `changed=false`.
+- Knowledge Admin mutations are appropriate for atomic Audit rather than best-effort Audit.
+- Knowledge content remains untrusted data even when it comes from internal documents.
+- Raw input limits must be enforced before trimming can shrink the payload.
+
 ## Knowledge Candidates
 
 Deduplicate in CP5:
@@ -490,19 +518,20 @@ Deduplicate in CP5:
 
 ## Current State
 
-CP0–CP4 are complete.
+CP0–CP5 are complete.
 
-Final reviewed Product/Test Head:
+Final reviewed Product/Test Head before CP5 documentation:
 
 - `6f1e2a468e09991efd859ceb815ae45964a5aeaf`
 - Backend regression: **235 passed**
-- Docker Compose database recovery: **1 passed**
+- Database recovery: **1 passed**
 - Dispatcher / Branch Resolver: **87 passed**
 - PostgreSQL 16 + Alembic upgrade/downgrade/re-upgrade: PASS
 - CP4 Security / Ingestion Review: PASS
+- CP5 Notion Knowledge Capture: complete
 
-Supervisor approval marker: **CP4**.
+Supervisor approval marker: **CP5**.
 
-Next action: CP5 Knowledge / Documentation synchronization.
+Next action: CP6 PR delivery.
 
-No further Product Code change is authorized unless a new verification failure is discovered.
+No further Product Code change is authorized unless final exact-head verification discovers a failure.
