@@ -1,6 +1,6 @@
 # Engineering Issue #012 — Embedding Pipeline Foundation
 
-<!-- codex-dispatch-supervisor-approved-through: CP4 -->
+<!-- codex-dispatch-supervisor-approved-through: CP5 -->
 <!-- codex-dispatch-write-allow: ["compose.yaml",".github/workflows/backend-tests.yml","requirements/base.txt",".env.example","app/core/config.py","app/core/errors.py","app/models/knowledge_chunk.py","app/models/__init__.py","app/repositories/knowledge.py","app/repositories/embedding.py","app/services/chunking.py","app/services/embedding.py","app/integrations/__init__.py","app/integrations/embeddings.py","app/schemas/embedding.py","app/api/routes/knowledge.py","migrations/versions/*embedding*.py","tests/test_config.py","tests/test_chunking.py","tests/test_embedding_provider.py","tests/test_embedding_model.py","tests/test_embedding_repository.py","tests/test_embedding_service.py","tests/test_embedding_api.py","tests/test_embedding_migration.py","tests/test_knowledge_migration.py","tests/test_migrations.py","docs/issues/issue-012-embedding-pipeline.md"] -->
 
 ## GitHub Tracking
@@ -620,7 +620,7 @@ Supervisor-controlled:
 - [x] CP2 — Bounded implementation
 - [x] CP3 — Targeted + full verification
 - [x] CP4 — Security / provider / vector review
-- [ ] CP5 — Knowledge + documentation sync
+- [x] CP5 — Knowledge + documentation sync
 - [ ] CP6 — PR delivery evidence
 
 ## Supervisor Fallback Execution
@@ -761,6 +761,34 @@ No merge-blocking finding remains.
 - no vector search or vector index exists
 - model/migration/CI/compose agree on pgvector
 
+## CP5 Knowledge / Documentation
+
+Notion deduplication was completed before writing.
+
+Existing pages already mention Embedding, Chunking and pgvector at glossary/interview level, but no page covered the complete Engineering boundary delivered by #012.
+
+Created one reusable Engineering Encyclopedia entry:
+
+**Embedding Pipeline：External Provider Boundary、Deterministic Chunking、pgvector 與 Transaction Boundary**
+
+Created one project Work Log:
+
+**Issue #012 — Embedding Pipeline Foundation**
+
+Captured reusable concepts include:
+
+- Embedding Pipeline is separate from Retrieval / RAG.
+- External AI Provider calls introduce a new data-processing boundary.
+- Provider SDK code belongs behind an integration adapter / Protocol.
+- Deterministic Chunking + canonical Config Hash make persisted vectors reproducible.
+- DB read transactions should not remain open during external API waits.
+- Provider return requires a DB re-check for concurrent completion.
+- Database uniqueness is still the final idempotency correctness backstop.
+- Provider output is untrusted input and must be shape/type/dimension validated.
+- Missing provider credentials should fail at the capability boundary, not global app startup.
+- pgvector storage and vector indexing/query design are separate concerns.
+- Automated tests should use Fake/Mock providers; real vector storage should be verified against PostgreSQL+pgvector.
+
 ## Knowledge Candidates
 
 Deduplicate in CP5:
@@ -774,9 +802,9 @@ Deduplicate in CP5:
 
 ## Current State
 
-CP0–CP4 are complete.
+CP0–CP5 are complete.
 
-Final reviewed Product/Test Head:
+Final reviewed Product/Test Head before CP5 docs:
 
 - `95660212a8bce4fcfc15c2545cc8c992c5b83a40`
 - Backend regression: **306 passed**
@@ -785,9 +813,10 @@ Final reviewed Product/Test Head:
 - PostgreSQL + pgvector extension: PASS
 - Alembic upgrade/downgrade/re-upgrade: PASS
 - CP4 Security / Provider / Vector Review: PASS
+- CP5 Notion Knowledge Capture: complete
 
-Supervisor approval marker: **CP4**.
+Supervisor approval marker: **CP5**.
 
-Next action: CP5 Knowledge / Documentation synchronization.
+Next action: CP6 PR delivery.
 
-No further Product Code change is authorized unless a new verification failure is discovered.
+No further Product Code change is authorized unless final exact-head verification discovers a failure.
