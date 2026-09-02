@@ -1,6 +1,6 @@
 # Engineering Issue #018 — AI Security Regression Foundation
 
-<!-- codex-dispatch-supervisor-approved-through: CP2 -->
+<!-- codex-dispatch-supervisor-approved-through: CP5 -->
 <!-- codex-dispatch-write-allow: ["evals/README.md","evals/suites/security-v1/suite.json","evals/suites/security-v1/cases.jsonl","evals/suites/security-v1/baseline_results.jsonl","tests/test_ai_security_regression.py","tests/test_ai_security_api.py","docs/issues/issue-018-ai-security-regression.md"] -->
 
 ## GitHub Tracking
@@ -449,9 +449,9 @@ There is deliberately no `app/` path.
 - [x] CP0 — Existing-defense / threat-surface inventory
 - [x] CP1 — Cross-layer Security Regression architecture
 - [x] CP2 — Tests-first security matrix implementation
-- [ ] CP3 — Full verification / bounded Product fix only if required
-- [ ] CP4 — Security Review / no-side-effect evidence
-- [ ] CP5 — Knowledge / documentation
+- [x] CP3 — Full verification / bounded Product fix only if required
+- [x] CP4 — Security Review / no-side-effect evidence
+- [x] CP5 — Knowledge / documentation
 - [ ] CP6 — exact-Head delivery
 
 ## Current State
@@ -527,3 +527,107 @@ Remote Supervisor approval: **CP2**.
 Next authorized action: **CP3 full GitHub-hosted verification**.
 
 If CP3 exposes a real Product boundary defect, preserve the failing security test and require explicit bounded Product rework authorization.
+
+
+## CP3 — Full Verification
+
+Status: **completed**
+
+Verified Head:
+
+`b195751b7e03e644d917cfc5b49baf00283f7c29`
+
+GitHub-hosted results:
+
+- Backend Verification #181: **PASS**
+- backend regression: **453 passed**
+- Dispatcher Tests #137: **PASS**
+- control-plane regression: **87 passed**
+- database recovery: **PASS**
+- PostgreSQL + pgvector: **PASS**
+- Alembic upgrade / downgrade / re-upgrade: **PASS**
+
+The full Backend suite includes the new AI Security regression plus the existing RAG, Tool, RBAC, Approval, concurrency, Audit, Logging, and #017 Evaluation tests.
+
+No new security regression failed.
+
+Therefore:
+
+- no Product runtime defect was demonstrated;
+- no Product write Scope expansion was required;
+- no bounded Product rework was opened;
+- the original tests-first boundary remained intact.
+
+## CP4 — Security Review / No-Side-Effect Evidence
+
+Status: **PASS**
+
+Confirmed:
+
+- PR changes contain no Product Runtime `app/` source.
+- `security-v1` reuses the #017 deterministic Eval infrastructure rather than introducing a second scorer.
+- 16 synthetic adversarial Cases are safety-critical and exactly reconcile to 16 baseline Results.
+- baseline requires 100% pass and zero Safety violations.
+- baseline is documented as deterministic fixture evidence, not live red-team/model performance.
+- hostile RAG evidence cannot create unknown Citation provenance.
+- zero evidence still bypasses generation.
+- unanswerable Provider output cannot smuggle Citations.
+- synthetic Prompt/Evidence/Provider attack strings remain absent from safe RAG failure metadata.
+- hallucinated Tool names fail before Tool execution, Approval persistence, or Provider finalization.
+- read-only argument injection fails before executor/finalization.
+- admin `role_name` injection fails before Approval persistence, approval executor, commit, or finalization.
+- caller with no current Tool permission does not reach Provider choice.
+- persisted Approval Tool-name tampering fails before execution/commit.
+- persisted Approval argument tampering fails before execution/commit.
+- existing requester/approver permission-revocation, replay, expiry, reject, two-Session concurrency, JWT/DB RBAC, and request-log redaction tests remain green in the full suite.
+- API attack failures return bounded generic service errors without echoing hostile/private details.
+- tests never execute arbitrary shell, SQL, attacker HTTP, eval/exec, dynamic import, or live OpenAI calls.
+
+Security conclusion:
+
+```text
+hostile AI-controlled data
+→ trusted Application boundary
+→ fail closed
+→ no unauthorized side effect
+```
+
+No merge-blocking Security finding remains.
+
+## CP5 — Knowledge / Documentation
+
+Status: **completed**
+
+Notion deduplication was performed first.
+
+Created reusable Engineering Encyclopedia entry:
+
+**AI Security Regression：Threat Matrix、Fail-Closed 與 No-Side-Effect Assertions**
+
+Created Work Log:
+
+**Issue #018 — AI Security Regression Foundation**
+
+Repository documentation synchronized before Final CI:
+
+- `evals/README.md`
+- `README.md`
+- `docs/PROJECT_STATE.md`
+- this execution note
+
+## CP6 — Final Delivery
+
+Status: **final exact-Head verification pending**
+
+All planned test/fixture/documentation Branch writes are complete.
+
+Next:
+
+```text
+FINAL HEAD
+→ exact-Head GitHub Actions
+→ PASS
+→ evidence in PR / Issue comments only
+→ no post-CI Branch commit
+→ Merge
+```

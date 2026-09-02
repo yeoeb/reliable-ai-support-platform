@@ -60,7 +60,10 @@ Engineering Issue ID #018 — AI Security Regression foundation
 - CP0 Existing Defense / Threat Surface Inventory: completed
 - CP1 Cross-Layer Security Regression Architecture: completed and Supervisor-approved
 - CP2 tests-first security matrix: completed through bounded Supervisor fallback and reviewed
-- Current Checkpoint: CP3 authorized
+- CP3 Full Verification: completed — 453 backend / 87 control-plane tests passed
+- CP4 Security Review / no-side-effect evidence: completed
+- CP5 Knowledge / Documentation: completed
+- Current Checkpoint: CP6 final exact-Head verification
 - Initial CP2 mode: tests-first; Product runtime writes forbidden
 - Regression layers: security-v1 Offline Eval + Application Boundary no-side-effect tests
 - Security corpus: >=16 synthetic adversarial cases
@@ -162,6 +165,10 @@ Service Layer owns transaction boundaries.
 - Safety violations remain a separate gate from aggregate accuracy.
 - The committed Eval baseline is a scorer fixture, not evidence of live-model performance.
 - Normal CI LLM Evaluation performs no live OpenAI call, database mutation, Tool execution, or Approval execution.
+- AI Security Regression treats attacker-controlled Prompt, Evidence, Citation, Tool proposal, Arguments, and persisted Approval state as untrusted test inputs.
+- Security regression must assert both rejection/safe state and absence of unauthorized side effects.
+- Security Eval and Application Boundary regression are separate layers: safe model output does not replace server enforcement, and server enforcement does not replace model-safety tracking.
+- Adversarial security fixtures are synthetic data only; normal CI must never execute arbitrary shell, SQL, attacker HTTP, eval/exec, or live red-team Provider calls.
 
 ### Planned AI Boundary
 

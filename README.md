@@ -260,6 +260,22 @@ CLI distinguishes quality regression from malformed Eval input with exit codes 0
 
 Normal CI performs no live OpenAI call, Product DB mutation, Tool execution, or Approval execution
 
+AI Security Regression
+
+Cross-layer adversarial regression treats LLM / RAG / Tool / Approval inputs as untrusted
+
+security-v1 adds 16 synthetic Prompt Injection, Citation Forgery, Tool Hallucination, Privilege Escalation, and Approval-bypass cases
+
+Negative tests assert both fail-closed behavior and absence of unauthorized side effects
+
+Hallucinated Tool names fail before execution / Approval / finalization
+
+Strict Tool arguments reject shell-command and role_name=admin injection before execution or persistence
+
+Persisted Approval Tool-name / argument tampering is revalidated before execution
+
+Security fixtures never execute arbitrary shell, SQL, attacker HTTP, eval/exec, or live OpenAI calls
+
 Testing
 
 pytest
@@ -599,9 +615,15 @@ Prompt fingerprint regression guard
 
 Deterministic Safety / threshold gate
 
-Next
-
 AI Security Regression foundation
+
+Cross-layer Prompt Injection / Citation / Tool / Approval adversarial regression
+
+No-side-effect assertions for rejected hostile AI-controlled input
+
+16-case synthetic security-v1 Eval corpus
+
+Next
 
 Prompt-injection regression cases
 
