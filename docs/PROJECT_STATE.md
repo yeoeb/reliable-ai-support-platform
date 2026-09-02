@@ -57,7 +57,7 @@ Engineering Issue ID #016 — Durable Human Approval for higher-risk Tool action
 - Active Branch: `feature/issue-016-human-approval`
 - CP0 Context Bootstrap: completed
 - CP1 Durable Approval Architecture: completed and Supervisor-approved
-- Current Checkpoint: CP5 knowledge/documentation sync
+- Current Checkpoint: CP6 exact-head delivery
 - V1 higher-risk Tool: `grant_support_agent_role(user_id)`
 - Fixed role: `support_agent`; model cannot choose arbitrary/admin role
 - Approval state: durable PostgreSQL record with expiry and one-time row-locked decision
@@ -149,6 +149,9 @@ Service Layer owns transaction boundaries.
 - V1 executes at most one read-only Tool per request and exposes no Tool definitions during finalization.
 - Tool results remain untrusted data and cannot grant additional capability.
 - Higher-risk or mutating actions require a separate Human Approval boundary.
+- Durable Human Approval binds one exact server-validated action and survives request boundaries.
+- Approval decisions use row locking and re-check both approval permission and the original action permission before execution.
+- Approval state, higher-risk mutation, and durable Audits commit atomically; model proposal alone never authorizes execution.
 
 ### Planned AI Boundary
 
