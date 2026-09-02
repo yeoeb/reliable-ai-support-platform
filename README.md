@@ -308,7 +308,7 @@ Copy-Item .env.example .env
 
 Fill in the local PostgreSQL and JWT settings in .env.
 
-OPENAI_API_KEY is optional for normal application startup and existing non-embedding features. It is required only when a new embedding request must call the real OpenAI provider.
+OPENAI_API_KEY is optional for normal application startup. It is required when an embedding request or grounded RAG answer must call the real OpenAI provider.
 
 5. Start PostgreSQL
 
@@ -513,9 +513,7 @@ Controlled Tool Calling
 
 Planned AI Layer
 
-Grounded RAG answer generation
-
-Agent tool calling
+Controlled agent tool calling
 
 Tool parameter validation
 

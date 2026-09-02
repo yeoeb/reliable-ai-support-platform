@@ -29,6 +29,7 @@ It is intentionally concise and must stay synchronized with merged work.
 - #011 — Knowledge Ingestion foundation
 - #012 — Embedding Pipeline foundation
 - #013 — Retrieval / Vector Search foundation
+- #014 — Grounded RAG response with evidence / citations
 
 ## Current Workflow Infrastructure
 
@@ -47,28 +48,23 @@ Required state surfaces:
 
 The Dispatcher uses Stable `codex exec` as its local execution boundary. It does not attempt to inject prompts into an already-open VS Code/Desktop Codex UI session.
 
-## Current Product Engineering Issue
+## Next Product Engineering Issue
 
-Engineering Issue ID #014 — Grounded RAG response with evidence / citations
+Engineering Issue ID #015 — Controlled Tool Calling foundation
 
-- GitHub tracking Issue: #65
-- Active Branch: `feature/issue-014-rag-grounded-answer`
-- CP0 Context Bootstrap: completed
-- CP1 Architecture / Plan: completed and Supervisor-approved
-- CP2 bounded RAG implementation: completed and Supervisor-reviewed
-- CP3 Verification: completed
-- CP4 Grounding / Security Review: completed
-- CP5 Knowledge / Documentation: completed
-- Current Checkpoint: CP6 final exact-Head verification
-- Remote write Allowlist: configured
-- Retrieval evidence boundary: retrieved KnowledgeChunk content remains untrusted context
-- Tool Calling / hosted tools: explicitly out of scope
+- Status: not started
+- Normal base Branch: `develop`
+- Dependency baseline: Grounded RAG, exact Retrieval, RBAC, durable Audit, Structured Logging, and Backend Verification are complete
+- Model output is not authorization: any Tool Request must pass a server-owned Tool Registry, parameter validation, and permission checks before execution
+- Arbitrary shell/code/database execution is not implied by Tool Calling
+- High-risk Human Approval remains a separate #016 boundary
+- Product boundary must be defined by a new GitHub tracking Issue and CP0/CP1 before implementation begins
 
 Important: GitHub Issue/PR numbers are repository-wide platform sequence numbers and remain separate from Engineering Issue IDs.
 
 ## Planned Product Sequence
 
-Tentative order after #013:
+Tentative order after #014:
 
 - #014 — RAG response with evidence/citations
 - #015 — Controlled Tool Calling
