@@ -8,12 +8,8 @@ from fastapi import HTTPException
 from fastapi.testclient import TestClient
 
 from app.api.dependencies import authorization
-from app.api.routes import knowledge
 from app.api.routes.knowledge import require_knowledge_manage
-from app.core.errors import (
-    InvalidKnowledgeContentError,
-    PersistenceUnavailableError,
-)
+from app.core.errors import PersistenceUnavailableError
 from app.db.session import get_db
 from app.main import app
 from app.models.knowledge_document import KnowledgeDocument
@@ -158,18 +154,7 @@ def test_duplicate_returns_200_changed_false(
     assert response.json()["changed"] is False
 
 
-def test_route_translates_empty_normalized_content(
-    monkeypatch,
-) -> None:
-    def raise_invalid(self, **kwargs):
-        raise InvalidKnowledgeContentError
-
-    monkeypatch.setattr(
-        KnowledgeService,
-        "ingest",
-        raise_invalid,
-    )
-
+def test_whitespace_only_content_is_rejected_by_request_validation() -> None:
     app.dependency_overrides[
         require_knowledge_manage
     ] = override_knowledge_manager
@@ -187,12 +172,13 @@ def test_route_translates_empty_normalized_content(
         app.dependency_overrides.clear()
 
     assert response.status_code == 422
-    assert response.json() == {
-        "detail": (
-            "Knowledge content is empty "
-            "after normalization"
-        )
-    }
+
+    detail = response.json()["detail"]
+    assert any(
+        error["loc"] == ["body", "content"]
+        and error["type"] == "string_too_short"
+        for error in detail
+    )
 
 
 def test_route_translates_persistence_failure(
