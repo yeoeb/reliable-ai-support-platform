@@ -4,7 +4,7 @@ Production-oriented internal AI support platform built with FastAPI, PostgreSQL,
 
 The project is being developed incrementally toward a complete AI support system with RAG, controlled tool calling, human approval, evaluation, security testing, and observability.
 
-Current status: backend foundation, persistence, migrations, authentication, database-backed RBAC, durable security audit logging, structured request-correlated logging, bounded knowledge ingestion, deterministic chunking, OpenAI embedding integration behind an explicit provider boundary, pgvector vector persistence, authorized exact vector retrieval, grounded RAG answer generation with server-validated evidence citations, controlled Tool Calling, durable Human Approval for a fixed higher-risk action, deterministic offline LLM Evaluation, and GitHub-hosted backend verification are implemented.
+Current status: backend foundation, persistence, migrations, authentication, database-backed RBAC, durable security audit logging, structured request-correlated logging, bounded knowledge ingestion, deterministic chunking, OpenAI embedding integration behind an explicit provider boundary, pgvector vector persistence, authorized exact vector retrieval, grounded RAG answer generation with server-validated evidence citations, controlled Tool Calling, durable Human Approval for a fixed higher-risk action, deterministic offline LLM Evaluation with 120 expanded synthetic V2 cases, and GitHub-hosted backend verification are implemented.
 
 Why This Project
 
@@ -251,6 +251,14 @@ Deterministic Tool metrics cover direct/tool decision, exact Tool name, exact ar
 Safety violations are gated separately from aggregate case pass rate
 
 Committed v1 corpus contains 12 synthetic Cases
+
+Expanded v2 corpus contains 80 Cases (40 RAG / 40 Tool)
+
+Expanded security-v2 corpus contains 40 adversarial Cases (20 RAG / 20 Tool)
+
+Bounded manifest tag_minimums fail closed when required case families are absent or under-covered
+
+A deterministic stdlib generator reproduces all V2 manifests, Cases, and baseline fixtures byte-for-byte
 
 Committed baseline fixture requires 100% case pass rate and zero Safety violations
 
@@ -635,6 +643,14 @@ Prompt fingerprint regression guard
 
 Deterministic Safety / threshold gate
 
+Expanded deterministic Evaluation Coverage
+
+120-case V2 corpus: 80 normal + 40 adversarial Cases
+
+Bounded tag-minimum coverage contract with backward-compatible manifests
+
+Byte-for-byte deterministic fixture generation and drift check
+
 AI Security Regression foundation
 
 Cross-layer Prompt Injection / Citation / Tool / Approval adversarial regression
@@ -671,13 +687,13 @@ Release Verification is repository promotion evidence, not production deployment
 
 Next
 
-Expanded LLM Evaluation Suite / Prompt Comparison
+Candidate / Prompt Comparison
 
 Planned Reliability & AI Safety
 
 Metrics / distributed tracing / external log aggregation
 
-100+ LLM evaluation cases
+Broader semantic-diversity and live-candidate Evaluation under separately approved scope
 
 Prompt version comparison
 
