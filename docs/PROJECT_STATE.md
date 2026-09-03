@@ -81,17 +81,24 @@ External platform-control debt remains:
 - develop Branch Protection: disabled
 - repository Rulesets: none
 
-## Next Product Engineering Issue
+## Current Product Engineering Issue
 
 Engineering Issue ID #023 — Candidate / Prompt Comparison
 
-- Status: not started
-- Normal base Branch: `develop`
+- GitHub tracking Issue: #100
+- Active Branch: `feature/issue-023-candidate-comparison`
+- CP0 Existing Comparison Gap Inventory: completed
+- CP1 Candidate / Prompt Comparison Architecture: completed and Supervisor-approved
+- Current Checkpoint: CP2 bounded comparison implementation
 - Dependency baseline: #017 Offline LLM Evaluation, #018 AI Security Regression, and #022 Expanded Evaluation Coverage are complete
 - Current deterministic corpus: v2 = 80 cases; security-v2 = 40 cases; combined = 120
-- Candidate / Prompt comparison must preserve Prompt identity, exact Case/Result reconciliation, separate Safety gating, and offline-by-default CI
-- Exact comparison metadata, reporting semantics, acceptance thresholds, and write scope require fresh CP0/CP1 before implementation
-- Broader semantic diversity and live-model robustness remain separately governed Evaluation debt unless explicitly admitted into #023 scope
+- Comparison uses one Suite and two exactly reconciled normalized Candidate result files
+- Candidate-declared Prompt fingerprints are preserved as provenance metadata and compared explicitly
+- Report must include metric deltas plus deterministic improved/regressed Case IDs
+- Static bounded policy must prevent Safety regressions from being hidden by aggregate movement
+- Existing scorer, single-Candidate runner, Product prompts/runtime, and workflows are frozen
+- Normal CI remains offline with no live Model, Tool, Approval, Database, or production-data execution
+- Broader semantic diversity and live-model robustness remain separately governed Evaluation debt
 
 Important: GitHub Issue/PR numbers are repository-wide platform sequence numbers and remain separate from Engineering Issue IDs.
 
