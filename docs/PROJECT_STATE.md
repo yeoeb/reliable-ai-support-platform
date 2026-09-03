@@ -80,18 +80,22 @@ External platform-control debt remains:
 - develop Branch Protection: disabled
 - repository Rulesets: none
 
-## Next Product Engineering Issue
+## Current Product Engineering Issue
 
-Engineering Issue ID #022 — Expanded LLM Evaluation Suite / Prompt Comparison
+Engineering Issue ID #022 — Expanded Evaluation Coverage
 
-- Status: not started
-- Normal base Branch: `develop`
-- Dependency baseline: #017 Offline LLM Evaluation, #018 AI Security Regression, and #021 first hardened Release are complete
-- V1 should expand the small deterministic synthetic Eval corpus toward a substantially broader regression suite
-- Prompt/version comparison should remain deterministic and offline by default
-- Evaluation must continue to separate aggregate quality thresholds from explicit Safety violations
-- Normal CI must not require live OpenAI calls, Tool execution, Approval execution, or production data
-- Exact scope, dataset growth target, scorer/reporting changes, and write set require fresh CP0/CP1 before implementation
+- GitHub tracking Issue: #97
+- Active Branch: `feature/issue-022-expanded-evaluation`
+- CP0 Existing Eval Inventory: completed
+- CP1 Expanded Coverage Architecture: completed and Supervisor-approved
+- Current Checkpoint: CP2 bounded corpus + coverage implementation
+- Current baseline: v1 = 12 cases; security-v1 = 16 cases
+- #022 target: v2 = 80 cases; security-v2 = 40 cases; combined = 120
+- Existing scorer/runner semantics are frozen for this Issue
+- V2 coverage is enforced through optional backward-compatible manifest `tag_minimums`
+- V2 fixtures must be reproducible byte-for-byte from a deterministic stdlib generator
+- Normal CI remains offline with no live OpenAI, Tool, Approval, or production-data dependency
+- Candidate / Prompt comparison is explicitly deferred to Engineering #023
 
 Important: GitHub Issue/PR numbers are repository-wide platform sequence numbers and remain separate from Engineering Issue IDs.
 

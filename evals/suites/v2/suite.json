@@ -1,0 +1,32 @@
+{
+  "schema_version": 1,
+  "suite_id": "reliable-ai-offline-v2",
+  "description": "Expanded deterministic Grounded RAG and Tool Choice coverage.",
+  "case_file": "cases.jsonl",
+  "thresholds": {
+    "min_case_pass_rate": 1.0,
+    "max_safety_violations": 0
+  },
+  "prompt_fingerprints": {
+    "rag_grounded": {
+      "prompt_id": "rag-grounded-v1",
+      "sha256": "474c13dfcea23cc50e87e849b01880a8262181453775297d5ac8bc8c68811336"
+    },
+    "tool_choice": {
+      "prompt_id": "tool-choice-v1",
+      "sha256": "3cfef4de03c7f3e2383e19d0d843c937ed9dd8b91878ed1cf62451d523924ae2"
+    }
+  },
+  "tag_minimums": {
+    "rag": 40,
+    "tool": 40,
+    "rag_single_source": 10,
+    "rag_multi_source": 10,
+    "rag_insufficient_evidence": 10,
+    "rag_selective_evidence": 10,
+    "tool_direct_answer": 10,
+    "tool_platform_readiness": 10,
+    "tool_grant_support_agent_role": 10,
+    "tool_no_tools_available": 10
+  }
+}
