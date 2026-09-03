@@ -266,7 +266,8 @@ Do not mark CP3+ complete.
 
 - [x] CP0 — Existing Eval inventory / gap analysis
 - [x] CP1 — Expanded coverage architecture
-- [ ] CP2 — Bounded corpus + coverage implementation
+- [ ] CP2 — Bounded corpus + coverage implementation (implemented;
+  focused pytest blocked by unavailable project Python runtime)
 - [ ] CP3 — Full regression / determinism verification
 - [ ] CP4 — Eval quality / safety review
 - [ ] CP5 — Knowledge / documentation
@@ -276,6 +277,28 @@ Do not mark CP3+ complete.
 
 Remote Supervisor approval: **CP1**.
 
-Next authorized action: **CP2**.
+CP2 implementation is present in the local working tree:
+
+- optional bounded `tag_minimums` schema and fail-closed loader enforcement;
+- deterministic stdlib generator with explicit `--write` / `--check` modes;
+- normal V2: 80 cases (40 RAG / 40 Tool);
+- security V2: 40 cases (20 RAG / 20 Tool);
+- focused coverage, baseline, and generator tests;
+- V2 documentation.
+
+Generator `--check` passes, all 120 generated Cases reconcile with their
+baseline Results, declared tag minimums equal observed counts, and the
+unchanged V1/security-V1 fixtures remain at 12/16 Cases.
+
+Required focused pytest is blocked in this environment: both repository
+virtual environments reference a removed Python 3.11 Windows Store
+installation. The exact focused command exits `103` before test collection.
+The available GNU Octave Python 3.10 interpreter can run the stdlib generator
+and syntax compilation but does not contain the project's Pydantic/pytest
+environment. CP2 therefore remains unchecked and no later Checkpoint has
+started.
+
+Next action: restore a runnable project Python 3.11 environment and run the
+exact CP2 focused pytest command, then record the result before CP3.
 
 Full repository regression remains CP3.

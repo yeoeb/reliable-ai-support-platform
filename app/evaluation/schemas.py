@@ -4,10 +4,19 @@ import math
 import re
 from typing import Any, Literal
 
-from pydantic import BaseModel, ConfigDict, Field, model_validator
+from pydantic import (
+    BaseModel,
+    ConfigDict,
+    Field,
+    StrictInt,
+    model_validator,
+)
 
 
 MAX_TEXT_CHARS = 20_000
+MAX_TAG_MINIMUMS = 50
+MAX_TAG_CHARS = 100
+MAX_TAG_MINIMUM = 1000
 SHA256_RE = re.compile(r"^[0-9a-f]{64}$")
 
 
@@ -47,6 +56,25 @@ class SuiteManifest(StrictModel):
     case_file: str = Field(min_length=1, max_length=300)
     thresholds: Thresholds
     prompt_fingerprints: PromptFingerprintSet
+    tag_minimums: dict[str, StrictInt] = Field(
+        default_factory=dict,
+        max_length=MAX_TAG_MINIMUMS,
+    )
+
+    @model_validator(mode="after")
+    def validate_tag_minimums(self) -> "SuiteManifest":
+        for tag, minimum in self.tag_minimums.items():
+            if not tag.strip() or len(tag) > MAX_TAG_CHARS:
+                raise ValueError(
+                    "tag minimum keys must be non-empty and at most "
+                    f"{MAX_TAG_CHARS} characters"
+                )
+            if minimum < 1 or minimum > MAX_TAG_MINIMUM:
+                raise ValueError(
+                    "tag minimum counts must be between 1 and "
+                    f"{MAX_TAG_MINIMUM}"
+                )
+        return self
 
 
 class RagSource(StrictModel):

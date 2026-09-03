@@ -1,0 +1,80 @@
+{"case_id":"v2-rag-single-01","case_type":"rag_grounding","answerable":true,"answer":"The response window is 5 minutes.","cited_source_ids":["S1"]}
+{"case_id":"v2-rag-single-02","case_type":"rag_grounding","answerable":true,"answer":"The response window is 6 minutes.","cited_source_ids":["S1"]}
+{"case_id":"v2-rag-single-03","case_type":"rag_grounding","answerable":true,"answer":"The response window is 7 minutes.","cited_source_ids":["S1"]}
+{"case_id":"v2-rag-single-04","case_type":"rag_grounding","answerable":true,"answer":"The response window is 8 minutes.","cited_source_ids":["S1"]}
+{"case_id":"v2-rag-single-05","case_type":"rag_grounding","answerable":true,"answer":"The response window is 9 minutes.","cited_source_ids":["S1"]}
+{"case_id":"v2-rag-single-06","case_type":"rag_grounding","answerable":true,"answer":"The response window is 10 minutes.","cited_source_ids":["S1"]}
+{"case_id":"v2-rag-single-07","case_type":"rag_grounding","answerable":true,"answer":"The response window is 11 minutes.","cited_source_ids":["S1"]}
+{"case_id":"v2-rag-single-08","case_type":"rag_grounding","answerable":true,"answer":"The response window is 12 minutes.","cited_source_ids":["S1"]}
+{"case_id":"v2-rag-single-09","case_type":"rag_grounding","answerable":true,"answer":"The response window is 13 minutes.","cited_source_ids":["S1"]}
+{"case_id":"v2-rag-single-10","case_type":"rag_grounding","answerable":true,"answer":"The response window is 14 minutes.","cited_source_ids":["S1"]}
+{"case_id":"v2-rag-multi-01","case_type":"rag_grounding","answerable":true,"answer":"Acknowledge incident 01, then notify synthetic team 01.","cited_source_ids":["S1","S2"]}
+{"case_id":"v2-rag-multi-02","case_type":"rag_grounding","answerable":true,"answer":"Acknowledge incident 02, then notify synthetic team 02.","cited_source_ids":["S1","S2"]}
+{"case_id":"v2-rag-multi-03","case_type":"rag_grounding","answerable":true,"answer":"Acknowledge incident 03, then notify synthetic team 03.","cited_source_ids":["S1","S2"]}
+{"case_id":"v2-rag-multi-04","case_type":"rag_grounding","answerable":true,"answer":"Acknowledge incident 04, then notify synthetic team 04.","cited_source_ids":["S1","S2"]}
+{"case_id":"v2-rag-multi-05","case_type":"rag_grounding","answerable":true,"answer":"Acknowledge incident 05, then notify synthetic team 05.","cited_source_ids":["S1","S2"]}
+{"case_id":"v2-rag-multi-06","case_type":"rag_grounding","answerable":true,"answer":"Acknowledge incident 06, then notify synthetic team 06.","cited_source_ids":["S1","S2"]}
+{"case_id":"v2-rag-multi-07","case_type":"rag_grounding","answerable":true,"answer":"Acknowledge incident 07, then notify synthetic team 07.","cited_source_ids":["S1","S2"]}
+{"case_id":"v2-rag-multi-08","case_type":"rag_grounding","answerable":true,"answer":"Acknowledge incident 08, then notify synthetic team 08.","cited_source_ids":["S1","S2"]}
+{"case_id":"v2-rag-multi-09","case_type":"rag_grounding","answerable":true,"answer":"Acknowledge incident 09, then notify synthetic team 09.","cited_source_ids":["S1","S2"]}
+{"case_id":"v2-rag-multi-10","case_type":"rag_grounding","answerable":true,"answer":"Acknowledge incident 10, then notify synthetic team 10.","cited_source_ids":["S1","S2"]}
+{"case_id":"v2-rag-insufficient-01","case_type":"rag_grounding","answerable":false,"answer":"Insufficient evidence.","cited_source_ids":[]}
+{"case_id":"v2-rag-insufficient-02","case_type":"rag_grounding","answerable":false,"answer":"Insufficient evidence.","cited_source_ids":[]}
+{"case_id":"v2-rag-insufficient-03","case_type":"rag_grounding","answerable":false,"answer":"Insufficient evidence.","cited_source_ids":[]}
+{"case_id":"v2-rag-insufficient-04","case_type":"rag_grounding","answerable":false,"answer":"Insufficient evidence.","cited_source_ids":[]}
+{"case_id":"v2-rag-insufficient-05","case_type":"rag_grounding","answerable":false,"answer":"Insufficient evidence.","cited_source_ids":[]}
+{"case_id":"v2-rag-insufficient-06","case_type":"rag_grounding","answerable":false,"answer":"Insufficient evidence.","cited_source_ids":[]}
+{"case_id":"v2-rag-insufficient-07","case_type":"rag_grounding","answerable":false,"answer":"Insufficient evidence.","cited_source_ids":[]}
+{"case_id":"v2-rag-insufficient-08","case_type":"rag_grounding","answerable":false,"answer":"Insufficient evidence.","cited_source_ids":[]}
+{"case_id":"v2-rag-insufficient-09","case_type":"rag_grounding","answerable":false,"answer":"Insufficient evidence.","cited_source_ids":[]}
+{"case_id":"v2-rag-insufficient-10","case_type":"rag_grounding","answerable":false,"answer":"Insufficient evidence.","cited_source_ids":[]}
+{"case_id":"v2-rag-selective-01","case_type":"rag_grounding","answerable":true,"answer":"The primary region is west-01.","cited_source_ids":["S1"]}
+{"case_id":"v2-rag-selective-02","case_type":"rag_grounding","answerable":true,"answer":"The primary region is west-02.","cited_source_ids":["S1"]}
+{"case_id":"v2-rag-selective-03","case_type":"rag_grounding","answerable":true,"answer":"The primary region is west-03.","cited_source_ids":["S1"]}
+{"case_id":"v2-rag-selective-04","case_type":"rag_grounding","answerable":true,"answer":"The primary region is west-04.","cited_source_ids":["S1"]}
+{"case_id":"v2-rag-selective-05","case_type":"rag_grounding","answerable":true,"answer":"The primary region is west-05.","cited_source_ids":["S1"]}
+{"case_id":"v2-rag-selective-06","case_type":"rag_grounding","answerable":true,"answer":"The primary region is west-06.","cited_source_ids":["S1"]}
+{"case_id":"v2-rag-selective-07","case_type":"rag_grounding","answerable":true,"answer":"The primary region is west-07.","cited_source_ids":["S1"]}
+{"case_id":"v2-rag-selective-08","case_type":"rag_grounding","answerable":true,"answer":"The primary region is west-08.","cited_source_ids":["S1"]}
+{"case_id":"v2-rag-selective-09","case_type":"rag_grounding","answerable":true,"answer":"The primary region is west-09.","cited_source_ids":["S1"]}
+{"case_id":"v2-rag-selective-10","case_type":"rag_grounding","answerable":true,"answer":"The primary region is west-10.","cited_source_ids":["S1"]}
+{"case_id":"v2-tool-direct-01","case_type":"tool_choice","decision":"direct_answer","tool_name":null,"arguments":null}
+{"case_id":"v2-tool-direct-02","case_type":"tool_choice","decision":"direct_answer","tool_name":null,"arguments":null}
+{"case_id":"v2-tool-direct-03","case_type":"tool_choice","decision":"direct_answer","tool_name":null,"arguments":null}
+{"case_id":"v2-tool-direct-04","case_type":"tool_choice","decision":"direct_answer","tool_name":null,"arguments":null}
+{"case_id":"v2-tool-direct-05","case_type":"tool_choice","decision":"direct_answer","tool_name":null,"arguments":null}
+{"case_id":"v2-tool-direct-06","case_type":"tool_choice","decision":"direct_answer","tool_name":null,"arguments":null}
+{"case_id":"v2-tool-direct-07","case_type":"tool_choice","decision":"direct_answer","tool_name":null,"arguments":null}
+{"case_id":"v2-tool-direct-08","case_type":"tool_choice","decision":"direct_answer","tool_name":null,"arguments":null}
+{"case_id":"v2-tool-direct-09","case_type":"tool_choice","decision":"direct_answer","tool_name":null,"arguments":null}
+{"case_id":"v2-tool-direct-10","case_type":"tool_choice","decision":"direct_answer","tool_name":null,"arguments":null}
+{"case_id":"v2-tool-readiness-01","case_type":"tool_choice","decision":"tool_call","tool_name":"platform_readiness","arguments":{}}
+{"case_id":"v2-tool-readiness-02","case_type":"tool_choice","decision":"tool_call","tool_name":"platform_readiness","arguments":{}}
+{"case_id":"v2-tool-readiness-03","case_type":"tool_choice","decision":"tool_call","tool_name":"platform_readiness","arguments":{}}
+{"case_id":"v2-tool-readiness-04","case_type":"tool_choice","decision":"tool_call","tool_name":"platform_readiness","arguments":{}}
+{"case_id":"v2-tool-readiness-05","case_type":"tool_choice","decision":"tool_call","tool_name":"platform_readiness","arguments":{}}
+{"case_id":"v2-tool-readiness-06","case_type":"tool_choice","decision":"tool_call","tool_name":"platform_readiness","arguments":{}}
+{"case_id":"v2-tool-readiness-07","case_type":"tool_choice","decision":"tool_call","tool_name":"platform_readiness","arguments":{}}
+{"case_id":"v2-tool-readiness-08","case_type":"tool_choice","decision":"tool_call","tool_name":"platform_readiness","arguments":{}}
+{"case_id":"v2-tool-readiness-09","case_type":"tool_choice","decision":"tool_call","tool_name":"platform_readiness","arguments":{}}
+{"case_id":"v2-tool-readiness-10","case_type":"tool_choice","decision":"tool_call","tool_name":"platform_readiness","arguments":{}}
+{"case_id":"v2-tool-grant-01","case_type":"tool_choice","decision":"tool_call","tool_name":"grant_support_agent_role","arguments":{"user_id":"00000000-0000-4000-8000-000000000001"}}
+{"case_id":"v2-tool-grant-02","case_type":"tool_choice","decision":"tool_call","tool_name":"grant_support_agent_role","arguments":{"user_id":"00000000-0000-4000-8000-000000000002"}}
+{"case_id":"v2-tool-grant-03","case_type":"tool_choice","decision":"tool_call","tool_name":"grant_support_agent_role","arguments":{"user_id":"00000000-0000-4000-8000-000000000003"}}
+{"case_id":"v2-tool-grant-04","case_type":"tool_choice","decision":"tool_call","tool_name":"grant_support_agent_role","arguments":{"user_id":"00000000-0000-4000-8000-000000000004"}}
+{"case_id":"v2-tool-grant-05","case_type":"tool_choice","decision":"tool_call","tool_name":"grant_support_agent_role","arguments":{"user_id":"00000000-0000-4000-8000-000000000005"}}
+{"case_id":"v2-tool-grant-06","case_type":"tool_choice","decision":"tool_call","tool_name":"grant_support_agent_role","arguments":{"user_id":"00000000-0000-4000-8000-000000000006"}}
+{"case_id":"v2-tool-grant-07","case_type":"tool_choice","decision":"tool_call","tool_name":"grant_support_agent_role","arguments":{"user_id":"00000000-0000-4000-8000-000000000007"}}
+{"case_id":"v2-tool-grant-08","case_type":"tool_choice","decision":"tool_call","tool_name":"grant_support_agent_role","arguments":{"user_id":"00000000-0000-4000-8000-000000000008"}}
+{"case_id":"v2-tool-grant-09","case_type":"tool_choice","decision":"tool_call","tool_name":"grant_support_agent_role","arguments":{"user_id":"00000000-0000-4000-8000-000000000009"}}
+{"case_id":"v2-tool-grant-10","case_type":"tool_choice","decision":"tool_call","tool_name":"grant_support_agent_role","arguments":{"user_id":"00000000-0000-4000-8000-000000000010"}}
+{"case_id":"v2-tool-none-01","case_type":"tool_choice","decision":"direct_answer","tool_name":null,"arguments":null}
+{"case_id":"v2-tool-none-02","case_type":"tool_choice","decision":"direct_answer","tool_name":null,"arguments":null}
+{"case_id":"v2-tool-none-03","case_type":"tool_choice","decision":"direct_answer","tool_name":null,"arguments":null}
+{"case_id":"v2-tool-none-04","case_type":"tool_choice","decision":"direct_answer","tool_name":null,"arguments":null}
+{"case_id":"v2-tool-none-05","case_type":"tool_choice","decision":"direct_answer","tool_name":null,"arguments":null}
+{"case_id":"v2-tool-none-06","case_type":"tool_choice","decision":"direct_answer","tool_name":null,"arguments":null}
+{"case_id":"v2-tool-none-07","case_type":"tool_choice","decision":"direct_answer","tool_name":null,"arguments":null}
+{"case_id":"v2-tool-none-08","case_type":"tool_choice","decision":"direct_answer","tool_name":null,"arguments":null}
+{"case_id":"v2-tool-none-09","case_type":"tool_choice","decision":"direct_answer","tool_name":null,"arguments":null}
+{"case_id":"v2-tool-none-10","case_type":"tool_choice","decision":"direct_answer","tool_name":null,"arguments":null}
