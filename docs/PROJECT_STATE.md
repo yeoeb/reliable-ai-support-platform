@@ -1,6 +1,6 @@
 # Reliable AI Support Operations Platform — Project State
 
-Last verified: 2026-09-02
+Last verified: 2026-09-03
 
 ## Purpose
 
@@ -37,6 +37,7 @@ It is intentionally concise and must stay synchronized with merged work.
 - #019 — Operational Metrics / Monitoring foundation
 - #020 — CI / Release Hardening foundation
 - #021 — First Hardened Release Promotion
+- #022 — Expanded Evaluation Coverage
 
 ## Current Workflow Infrastructure
 
@@ -80,34 +81,25 @@ External platform-control debt remains:
 - develop Branch Protection: disabled
 - repository Rulesets: none
 
-## Current Product Engineering Issue
+## Next Product Engineering Issue
 
-Engineering Issue ID #022 — Expanded Evaluation Coverage
+Engineering Issue ID #023 — Candidate / Prompt Comparison
 
-- GitHub tracking Issue: #97
-- Active Branch: `feature/issue-022-expanded-evaluation`
-- CP0 Existing Eval Inventory: completed
-- CP1 Expanded Coverage Architecture: completed and Supervisor-approved
-- Current Checkpoint: CP2 bounded corpus + coverage implementation
-- Current baseline: v1 = 12 cases; security-v1 = 16 cases
-- #022 target: v2 = 80 cases; security-v2 = 40 cases; combined = 120
-- Existing scorer/runner semantics are frozen for this Issue
-- V2 coverage is enforced through optional backward-compatible manifest `tag_minimums`
-- V2 fixtures must be reproducible byte-for-byte from a deterministic stdlib generator
-- Normal CI remains offline with no live OpenAI, Tool, Approval, or production-data dependency
-- Candidate / Prompt comparison is explicitly deferred to Engineering #023
+- Status: not started
+- Normal base Branch: `develop`
+- Dependency baseline: #017 Offline LLM Evaluation, #018 AI Security Regression, and #022 Expanded Evaluation Coverage are complete
+- Current deterministic corpus: v2 = 80 cases; security-v2 = 40 cases; combined = 120
+- Candidate / Prompt comparison must preserve Prompt identity, exact Case/Result reconciliation, separate Safety gating, and offline-by-default CI
+- Exact comparison metadata, reporting semantics, acceptance thresholds, and write scope require fresh CP0/CP1 before implementation
+- Broader semantic diversity and live-model robustness remain separately governed Evaluation debt unless explicitly admitted into #023 scope
 
 Important: GitHub Issue/PR numbers are repository-wide platform sequence numbers and remain separate from Engineering Issue IDs.
 
 ## Planned Product Sequence
 
-Tentative order after #021:
-
-- #014 — RAG response with evidence/citations
-- #015 — Controlled Tool Calling
-- #016 — Human Approval for high-risk actions
-- #019 — Operational Metrics / Monitoring foundation
-- #020+ — CI hardening, larger Evaluation suites, release hardening, and deployment/operations work as dependencies require
+- #023 — Candidate / Prompt Comparison
+- later Evaluation work — broader semantic diversity, recorded/live candidate evidence, latency, and cost only under separately approved scope
+- deployment/operations work — scheduled when environment and platform controls are defined
 
 The Supervisor may refine this ordering when dependencies or design evidence justify it.
 
@@ -190,6 +182,10 @@ Service Layer owns transaction boundaries.
 - Prompt identity is pinned by stable Prompt ID + SHA-256; Prompt drift fails explicitly.
 - Safety violations remain a separate gate from aggregate accuracy.
 - The committed Eval baseline is a scorer fixture, not evidence of live-model performance.
+- Expanded V2 Evaluation contains 120 synthetic cases: normal v2 = 80 (40 RAG / 40 Tool) and security-v2 = 40 (20 RAG / 20 Tool).
+- Optional bounded `tag_minimums` fail closed when declared Evaluation families are absent or under-covered while preserving V1 manifest compatibility.
+- V2 fixtures are byte-for-byte reproducible from a deterministic stdlib generator with explicit write/check modes and no import-time write side effect.
+- Structural tag coverage and scorer-fixture correctness do not prove semantic diversity, Candidate quality, or live-model robustness.
 - Normal CI LLM Evaluation performs no live OpenAI call, database mutation, Tool execution, or Approval execution.
 - AI Security Regression treats attacker-controlled Prompt, Evidence, Citation, Tool proposal, Arguments, and persisted Approval state as untrusted test inputs.
 - Security regression must assert both rejection/safe state and absence of unauthorized side effects.
