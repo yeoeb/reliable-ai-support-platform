@@ -58,6 +58,36 @@ suites. For example:
 python -m app.evaluation.runner --suite evals/suites/v2/suite.json --results evals/suites/v2/baseline_results.jsonl --candidate baseline-v2
 ```
 
+## Compare two candidates
+
+A versioned comparison manifest binds one Suite to exactly two normalized
+Candidate result files. It records each Candidate's declared Prompt IDs and
+SHA-256 fingerprints as provenance, reports challenger-minus-baseline metric
+deltas, and lists improved and regressed Case IDs deterministically.
+
+Run the committed neutral V2 reference comparison with:
+
+```powershell
+python -m app.evaluation.comparison_runner --root evals --comparison comparisons/v2-reference.json
+```
+
+The reference compares the existing V2 scorer fixture with itself under two
+distinct Candidate labels. Its zero-delta passing report proves comparison
+behavior only; it is not measured Model or Prompt quality.
+
+All manifest, Suite, and result paths must be relative to the explicit
+Evaluation root and remain inside it. The bounded policy can require the
+challenger's Suite thresholds and limit Case pass-rate drop, Safety violation
+increase, and newly failed Cases. A newly failing Safety Case is always a gate
+failure, even when another Safety Case improves and aggregate counts do not
+change.
+
+Comparison exit codes:
+
+- `0`: valid comparison and gate pass
+- `1`: valid comparison and gate fail
+- `2`: malformed comparison input or CLI usage
+
 ## Reproduce V2 fixtures
 
 The V2 suite manifests, cases, and scorer baselines are rendered by a

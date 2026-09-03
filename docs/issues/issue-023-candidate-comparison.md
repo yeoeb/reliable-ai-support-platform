@@ -169,7 +169,8 @@ Do not mark CP3+ complete.
 
 - [x] CP0 — Existing comparison-gap inventory
 - [x] CP1 — Candidate / Prompt comparison architecture
-- [ ] CP2 — Bounded comparison implementation
+- [ ] CP2 — Bounded comparison implementation (implemented locally;
+  focused verification blocked before collection by stale Python environment)
 - [ ] CP3 — Full regression / determinism verification
 - [ ] CP4 — Comparison validity / safety review
 - [ ] CP5 — Knowledge / documentation
@@ -179,6 +180,20 @@ Do not mark CP3+ complete.
 
 Remote Supervisor approval: **CP1**.
 
-Next authorized action: **CP2 — bounded comparison implementation**.
+CP2 implementation is present in the local Working Tree within the approved
+write allowlist. It includes strict Comparison schemas, root-contained loading,
+challenger-minus-baseline reporting and bounded Safety-aware gating, the
+deterministic CLI, the neutral V2 reference manifest, focused tests, and Eval
+usage documentation.
+
+Focused verification has not completed. Both `.venv` and `.venv-1` reference
+the removed interpreter path
+`C:\Users\88693\AppData\Local\Microsoft\WindowsApps\PythonSoftwareFoundation.Python.3.11_qbz5n2kfra8p0\python.exe`.
+The initial three-module comparison pytest command and the specified
+seven-module focused pytest command therefore exited before Test collection
+with `No Python at ...`. One reference CLI invocation failed at the same
+launcher boundary, so the required two-run stdout byte comparison could not be
+performed. CP2 remains incomplete until the Python environment is restored and
+the specified focused verification passes.
 
 No later Checkpoint has started.
