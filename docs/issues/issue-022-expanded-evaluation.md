@@ -181,7 +181,7 @@ Existing scorer semantics must remain unchanged.
 
 ### Prompt Identity
 
-V2 and security-v2 pin the same current Product prompt IDs / SHA-256 fingerprints as v1/security-v1.
+V2 and security-v2 pin the same current Product Prompt IDs / SHA-256 fingerprints as v1/security-v1.
 
 Do not modify Product prompt text or provider code.
 
@@ -266,8 +266,7 @@ Do not mark CP3+ complete.
 
 - [x] CP0 — Existing Eval inventory / gap analysis
 - [x] CP1 — Expanded coverage architecture
-- [ ] CP2 — Bounded corpus + coverage implementation (implemented;
-  focused pytest blocked by unavailable project Python runtime)
+- [x] CP2 — Bounded corpus + coverage implementation
 - [ ] CP3 — Full regression / determinism verification
 - [ ] CP4 — Eval quality / safety review
 - [ ] CP5 — Knowledge / documentation
@@ -275,30 +274,32 @@ Do not mark CP3+ complete.
 
 ## Current State
 
-Remote Supervisor approval: **CP1**.
+Remote Supervisor approval: **CP2**.
 
-CP2 implementation is present in the local working tree:
+Published CP2 implementation Head:
+
+`5d6cddd028fb9c9c32cc110623cbe1f52cf4e69b`
+
+Verified:
 
 - optional bounded `tag_minimums` schema and fail-closed loader enforcement;
 - deterministic stdlib generator with explicit `--write` / `--check` modes;
 - normal V2: 80 cases (40 RAG / 40 Tool);
 - security V2: 40 cases (20 RAG / 20 Tool);
-- focused coverage, baseline, and generator tests;
-- V2 documentation.
+- all changed files remain inside the remote write allowlist;
+- scorer, runner, Product prompts, Product runtime, migrations, and workflows are unchanged;
+- no live Provider, Tool, Approval, network, or production-data execution was introduced.
 
-Generator `--check` passes, all 120 generated Cases reconcile with their
-baseline Results, declared tag minimums equal observed counts, and the
-unchanged V1/security-V1 fixtures remain at 12/16 Cases.
+Host PowerShell exact-Head verification:
 
-Required focused pytest is blocked in this environment: both repository
-virtual environments reference a removed Python 3.11 Windows Store
-installation. The exact focused command exits `103` before test collection.
-The available GNU Octave Python 3.10 interpreter can run the stdlib generator
-and syntax compilation but does not contain the project's Pydantic/pytest
-environment. CP2 therefore remains unchecked and no later Checkpoint has
-started.
+- Working Tree: clean
+- Generator `--check`: PASS
+- focused pytest: **36 passed in 10.37s**
+- Python: 3.11.9
+- pytest: 8.4.2
 
-Next action: restore a runnable project Python 3.11 environment and run the
-exact CP2 focused pytest command, then record the result before CP3.
+The earlier Codex Sandbox exit `103` was isolated to Sandbox access to the Microsoft Store Python runtime. Host verification confirms the project virtual environment and dependencies are runnable.
 
-Full repository regression remains CP3.
+Next authorized action: **CP3 — full repository regression / determinism verification**.
+
+No later Checkpoint has started.
