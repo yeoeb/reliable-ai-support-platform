@@ -1,6 +1,6 @@
 # Engineering Issue #022 — Expanded Evaluation Coverage
 
-<!-- codex-dispatch-supervisor-approved-through: CP4 -->
+<!-- codex-dispatch-supervisor-approved-through: CP5 -->
 <!-- codex-dispatch-write-allow: ["app/evaluation/schemas.py","app/evaluation/loader.py","scripts/generate_eval_suite_v2.py","evals/README.md","evals/suites/v2/**","evals/suites/security-v2/**","tests/test_evaluation_coverage.py","tests/test_evaluation_v2_baseline.py","tests/test_evaluation_generator.py","docs/issues/issue-022-expanded-evaluation.md"] -->
 
 ## Tracking
@@ -269,12 +269,12 @@ Do not mark CP3+ complete.
 - [x] CP2 — Bounded corpus + coverage implementation
 - [x] CP3 — Full regression / determinism verification
 - [x] CP4 — Eval quality / safety review
-- [ ] CP5 — Knowledge / documentation
+- [x] CP5 — Knowledge / documentation
 - [ ] CP6 — exact-Head delivery
 
 ## Current State
 
-Remote Supervisor approval: **CP4**.
+Remote Supervisor approval: **CP5**.
 
 Published CP2 implementation Head:
 
@@ -341,6 +341,17 @@ Non-blocking limitation:
 
 - generated families deliberately use templated variations. `tag_minimums` proves structural family coverage, not semantic diversity or live-model robustness. Future live/candidate comparison and broader semantic diversity require a separately scoped Evaluation Issue; Candidate / Prompt comparison remains deferred to #023.
 
-Next authorized action: **CP5 — Knowledge / documentation**.
+## CP5 Knowledge / Documentation
+
+Result: **completed**.
+
+- Reused and updated the existing Notion Engineering Encyclopedia entry `Offline LLM Evaluation：Versioned Dataset、Prompt Fingerprint、Deterministic Scorer 與 Safety Regression`; no duplicate Knowledge page was created.
+- Added reusable guidance for bounded `tag_minimums`, byte-stable deterministic fixture generation, import-without-write behavior, and explicit `--write` / `--check` modes.
+- Documented the boundary between structural family coverage, scorer-fixture correctness, semantic diversity, Candidate quality, and live-model robustness.
+- Documented that Tool-choice Eval validates decision/name/arguments but does not execute Tools or prove downstream Human Approval behavior.
+- Repository Eval documentation already records V2 suites, deterministic reproduction commands, inert security data, and baseline interpretation.
+- The Issue-specific Work Log will be finalized after CP6 so it can contain immutable PR, merge, and exact-Head evidence.
+
+Next authorized action: **CP6 — exact-Head delivery**.
 
 No later Checkpoint has started.
