@@ -1,6 +1,6 @@
 # Engineering Issue #022 — Expanded Evaluation Coverage
 
-<!-- codex-dispatch-supervisor-approved-through: CP5 -->
+<!-- codex-dispatch-supervisor-approved-through: CP6 -->
 <!-- codex-dispatch-write-allow: ["app/evaluation/schemas.py","app/evaluation/loader.py","scripts/generate_eval_suite_v2.py","evals/README.md","evals/suites/v2/**","evals/suites/security-v2/**","tests/test_evaluation_coverage.py","tests/test_evaluation_v2_baseline.py","tests/test_evaluation_generator.py","docs/issues/issue-022-expanded-evaluation.md"] -->
 
 ## Tracking
@@ -270,11 +270,11 @@ Do not mark CP3+ complete.
 - [x] CP3 — Full regression / determinism verification
 - [x] CP4 — Eval quality / safety review
 - [x] CP5 — Knowledge / documentation
-- [ ] CP6 — exact-Head delivery
+- [x] CP6 — exact-Head delivery
 
 ## Current State
 
-Remote Supervisor approval: **CP5**.
+Remote Supervisor approval: **CP6**.
 
 Published CP2 implementation Head:
 
@@ -352,6 +352,29 @@ Result: **completed**.
 - Repository Eval documentation already records V2 suites, deterministic reproduction commands, inert security data, and baseline interpretation.
 - The Issue-specific Work Log will be finalized after CP6 so it can contain immutable PR, merge, and exact-Head evidence.
 
-Next authorized action: **CP6 — exact-Head delivery**.
+## CP6 Exact-Head Delivery
 
-No later Checkpoint has started.
+Result: **completed**.
+
+Immutable Product candidate Head:
+
+`fe04c26081a91966da1433caaf55f89335417c2e`
+
+Final GitHub-hosted verification:
+
+- Backend Verification #196 / run `33752720558`: PASS — **501 passed, 1 warning**;
+- database recovery: PASS — **1 passed, 1 warning**;
+- Dispatcher Tests #160 / run `33752720666`: PASS — **87 passed**;
+- PostgreSQL + pgvector 0.8.6: PASS;
+- Alembic upgrade / downgrade / re-upgrade: PASS.
+
+Delivery:
+
+- Product PR #98: merged;
+- squash merge: `9ba720ea49bffa4f13fd1b7dc3c78ec34bc019e8`;
+- GitHub Issue #97: closed by the Product merge;
+- post-merge documentation reconciliation: PR #99;
+- `docs/PROJECT_STATE.md` records #022 completed and #023 Candidate / Prompt Comparison as next, not started;
+- root README records the expanded 120-case corpus and coverage controls.
+
+Engineering Issue #022 is complete. Engineering #023 has not started.
