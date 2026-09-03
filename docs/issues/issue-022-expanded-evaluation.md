@@ -1,6 +1,6 @@
 # Engineering Issue #022 — Expanded Evaluation Coverage
 
-<!-- codex-dispatch-supervisor-approved-through: CP1 -->
+<!-- codex-dispatch-supervisor-approved-through: CP3 -->
 <!-- codex-dispatch-write-allow: ["app/evaluation/schemas.py","app/evaluation/loader.py","scripts/generate_eval_suite_v2.py","evals/README.md","evals/suites/v2/**","evals/suites/security-v2/**","tests/test_evaluation_coverage.py","tests/test_evaluation_v2_baseline.py","tests/test_evaluation_generator.py","docs/issues/issue-022-expanded-evaluation.md"] -->
 
 ## Tracking
@@ -267,14 +267,14 @@ Do not mark CP3+ complete.
 - [x] CP0 — Existing Eval inventory / gap analysis
 - [x] CP1 — Expanded coverage architecture
 - [x] CP2 — Bounded corpus + coverage implementation
-- [ ] CP3 — Full regression / determinism verification
+- [x] CP3 — Full regression / determinism verification
 - [ ] CP4 — Eval quality / safety review
 - [ ] CP5 — Knowledge / documentation
 - [ ] CP6 — exact-Head delivery
 
 ## Current State
 
-Remote Supervisor approval: **CP2**.
+Remote Supervisor approval: **CP3**.
 
 Published CP2 implementation Head:
 
@@ -300,6 +300,25 @@ Host PowerShell exact-Head verification:
 
 The earlier Codex Sandbox exit `103` was isolated to Sandbox access to the Microsoft Store Python runtime. Host verification confirms the project virtual environment and dependencies are runnable.
 
-Next authorized action: **CP3 — full repository regression / determinism verification**.
+## CP3 Verification Evidence
+
+Exact verified Head:
+
+`d07a9aeb6ac7414f99115148622bd83b9ce4cd83`
+
+GitHub-hosted evidence:
+
+- Backend Verification #193 / run `33752097580`: **PASS**
+- Backend regression: **501 passed**
+- Database recovery: **1 passed**
+- Dispatcher Tests #157 / run `33752097566`: **87 passed**
+- PostgreSQL + pgvector 0.8.6: PASS
+- Alembic upgrade head: PASS
+- Alembic downgrade -1: PASS
+- Alembic re-upgrade head: PASS
+
+The local Host run reached 497 passed / 5 environment-dependent failures because local PostgreSQL was unavailable and Windows denied a read while an exclusive lock file was held. The same exact Remote Head passed the configured Linux/PostgreSQL verification, so no #022 Product regression is indicated.
+
+Next authorized action: **CP4 — Evaluation quality / safety review**.
 
 No later Checkpoint has started.
