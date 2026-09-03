@@ -1,6 +1,6 @@
 # Engineering Issue #022 — Expanded Evaluation Coverage
 
-<!-- codex-dispatch-supervisor-approved-through: CP3 -->
+<!-- codex-dispatch-supervisor-approved-through: CP4 -->
 <!-- codex-dispatch-write-allow: ["app/evaluation/schemas.py","app/evaluation/loader.py","scripts/generate_eval_suite_v2.py","evals/README.md","evals/suites/v2/**","evals/suites/security-v2/**","tests/test_evaluation_coverage.py","tests/test_evaluation_v2_baseline.py","tests/test_evaluation_generator.py","docs/issues/issue-022-expanded-evaluation.md"] -->
 
 ## Tracking
@@ -268,13 +268,13 @@ Do not mark CP3+ complete.
 - [x] CP1 — Expanded coverage architecture
 - [x] CP2 — Bounded corpus + coverage implementation
 - [x] CP3 — Full regression / determinism verification
-- [ ] CP4 — Eval quality / safety review
+- [x] CP4 — Eval quality / safety review
 - [ ] CP5 — Knowledge / documentation
 - [ ] CP6 — exact-Head delivery
 
 ## Current State
 
-Remote Supervisor approval: **CP3**.
+Remote Supervisor approval: **CP4**.
 
 Published CP2 implementation Head:
 
@@ -319,6 +319,28 @@ GitHub-hosted evidence:
 
 The local Host run reached 497 passed / 5 environment-dependent failures because local PostgreSQL was unavailable and Windows denied a read while an exclusive lock file was held. The same exact Remote Head passed the configured Linux/PostgreSQL verification, so no #022 Product regression is indicated.
 
-Next authorized action: **CP4 — Evaluation quality / safety review**.
+## CP4 Evaluation Quality / Safety Review
+
+Reviewed Head:
+
+`5687f168a97655843782236c6a48f63dcdd96d87`
+
+Result: **PASS — no blocking findings**.
+
+Verified:
+
+- all 120 cases map to declared RAG / Tool families and every manifest `tag_minimums` value is met exactly;
+- the loader enforces bounded, strict integer minimums and fails closed for missing or under-covered tags;
+- all security payloads are inert JSON fixture strings; the generator performs no shell, SQL, URL, Python, Tool, Approval, network, secret, or production-data execution;
+- unauthorized, invented-schema, and hidden-Tool proposals resolve to `direct_answer`; argument-injection and Approval-bypass pressure retain only the declared Tool plus exact synthetic `user_id` arguments;
+- Tool-choice fixtures do not execute the selected Tool and therefore cannot bypass the downstream Human Approval boundary;
+- Prompt IDs / SHA-256 fingerprints remain pinned to V1 and Product prompts/runtime are unchanged;
+- `baseline_results.jsonl` and its 100% score are explicitly documented as deterministic scorer fixtures, not evidence of live-model quality.
+
+Non-blocking limitation:
+
+- generated families deliberately use templated variations. `tag_minimums` proves structural family coverage, not semantic diversity or live-model robustness. Future live/candidate comparison and broader semantic diversity require a separately scoped Evaluation Issue; Candidate / Prompt comparison remains deferred to #023.
+
+Next authorized action: **CP5 — Knowledge / documentation**.
 
 No later Checkpoint has started.
