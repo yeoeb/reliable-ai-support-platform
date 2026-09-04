@@ -108,6 +108,23 @@ Supervisor-only state files are outside the Agent write allowlist.
 
 Authorized. Agent may implement only within the allowlist.
 
+Bounded implementation completed locally:
+
+- pinned all six generated V2 fixture paths to `text eol=lf`;
+- separated lock metadata writing from lock acquisition and covered metadata
+  through the already-owned handle;
+- removed the active-lock second-handle read from stale lock-file reuse coverage;
+- made local `succeeded` state without matching remote publication fail closed
+  with explicit Supervisor/operator reconciliation guidance;
+- preserved the no-op when matching remote publication evidence exists.
+
+Current state: the bounded CP2 implementation is complete; Dispatcher-owned
+publication and Supervisor review are pending. Attribute resolution and Diff
+hygiene checks pass. Focused Python verification was attempted but could not
+start because the repository virtual environments reference an unavailable
+Microsoft Store Python installation and the sandbox also denies direct and WSL
+interpreter execution. CP3 remains unauthorized.
+
 ## CP3 — Review and verification
 
 Not authorized until CP2 evidence is published and reviewed.
