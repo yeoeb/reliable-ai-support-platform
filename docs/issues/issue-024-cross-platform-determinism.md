@@ -1,5 +1,8 @@
 # Engineering Issue #024 — Cross-platform determinism and Watcher completion evidence
 
+<!-- codex-dispatch-supervisor-approved-through: CP1 -->
+<!-- codex-dispatch-write-allow: [".gitattributes","scripts/codex_watch.py","tests/test_codex_watch.py","tests/test_evaluation_generator.py","docs/issues/issue-024-cross-platform-determinism.md"] -->
+
 - GitHub Issue: #103
 - Branch: `feature/issue-024-cross-platform-determinism`
 - Base: `develop@c0c1d14f7b9d216f9d69d69255755f2469eac7a5`
