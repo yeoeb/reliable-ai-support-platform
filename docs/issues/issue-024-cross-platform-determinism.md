@@ -130,6 +130,26 @@ Authorized. Run the bounded regression and inspect the final Diff. Do not change
 Product, Database, Migration, Evaluation fixture semantics, scorer behavior, or
 CI architecture. Record exact commands and results.
 
+Verification evidence (Windows sandbox, 2026-09-04):
+
+- `python scripts/generate_eval_suite_v2.py --check`: **BLOCKED** before
+  script startup (exit `1`); `.venv` references an unavailable Microsoft Store
+  Python 3.11 installation.
+- `python -m pytest tests/test_codex_watch.py tests/test_evaluation_generator.py -q`:
+  **BLOCKED** before test collection (exit `1`) for the same interpreter issue.
+- `git check-attr text eol -- evals/suites/v2/suite.json evals/suites/v2/cases.jsonl evals/suites/v2/baseline_results.jsonl evals/suites/security-v2/suite.json evals/suites/security-v2/cases.jsonl evals/suites/security-v2/baseline_results.jsonl`:
+  **PASS**; every path resolves to `text: set` and `eol: lf`.
+- `git ls-files --eol -- evals/suites/v2/suite.json evals/suites/v2/cases.jsonl evals/suites/v2/baseline_results.jsonl evals/suites/security-v2/suite.json evals/suites/security-v2/cases.jsonl evals/suites/security-v2/baseline_results.jsonl`:
+  **PASS**; every path reports `i/lf`, `w/lf`, and `attr/text eol=lf`.
+- `git diff --check`: **PASS**.
+- `git diff c0c1d14f7b9d216f9d69d69255755f2469eac7a5..HEAD`:
+  inspected; no Product, Database, Migration, fixture-content, scorer, or CI
+  workflow implementation changed.
+
+Current state: CP3 cannot be reported as passed until the required Python
+commands execute successfully. No in-scope implementation failure was found or
+changed. CP4 remains unauthorized.
+
 ## CP4 — Merge readiness
 
 Not authorized.
