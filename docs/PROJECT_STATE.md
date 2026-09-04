@@ -1,6 +1,6 @@
 # Reliable AI Support Operations Platform — Project State
 
-Last verified: 2026-09-03
+Last verified: 2026-09-04
 
 ## Purpose
 
@@ -89,7 +89,8 @@ Engineering Issue ID #023 — Candidate / Prompt Comparison
 - Active Branch: `feature/issue-023-candidate-comparison`
 - CP0 Existing Comparison Gap Inventory: completed
 - CP1 Candidate / Prompt Comparison Architecture: completed and Supervisor-approved
-- Current Checkpoint: CP2 bounded comparison implementation
+- CP2 Bounded Comparison Implementation: completed and Supervisor-approved; Host focused verification passed with 48 tests
+- Current Checkpoint: CP3 Full Regression / Determinism Verification
 - Dependency baseline: #017 Offline LLM Evaluation, #018 AI Security Regression, and #022 Expanded Evaluation Coverage are complete
 - Current deterministic corpus: v2 = 80 cases; security-v2 = 40 cases; combined = 120
 - Comparison uses one Suite and two exactly reconciled normalized Candidate result files
