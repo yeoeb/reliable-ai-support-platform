@@ -10,7 +10,7 @@
 - Branch: `feature/issue-026-second-hardened-release`
 - Base Head: `f84deb1f8b8c331dc1830a9d9e627cb34c408a51`
 - Target version: `0.2.0`
-- Current checkpoint: CP3 exact-head verification
+- Current checkpoint: completed
 - Authorized through: CP6
 
 ## Assigned GitHub Issue contract snapshot
@@ -121,44 +121,93 @@ Completed on 2026-09-04.
 
 ## CP3 — Exact-head verification
 
-The final preparation Head will be verified by GitHub Actions after the Pull
-Request opens. Required checks:
+Completed.
 
-- Backend Verification
-- Dispatcher Tests
-- focused release/version tests inside the existing suites
+Preparation PR #110 verified exact Head
+`fb9a58c2e5cbf912034adc90cc9bac5531820af2`:
 
-CI evidence will be recorded in PR/Issue comments so the verified branch Head
-does not move.
+- Backend Verification #202 / run `33905982032`: PASS
+- database recovery: PASS
+- PostgreSQL + pgvector: PASS
+- Alembic upgrade / downgrade / re-upgrade: PASS
+- Dispatcher Tests #177 / run `33905982059`: PASS
+- version sources: project `0.2.0`, FastAPI `0.2.0`
 
-## CP4 — Review gate
+No branch commit followed the exact-head evidence.
 
-Supervisor review of the bounded diff found:
+## CP4 — Release review
 
-- version literals are consistent;
-- Product runtime behavior is unchanged;
-- release workflow and verifier are unchanged;
-- documentation does not overstate deployment, tagging, or platform controls;
-- no frozen surface outside the allowlist changed.
+Completed.
 
-Final acceptance remains contingent on exact-head CI.
+- Preparation PR #110 was clean/mergeable and merged to `develop` as
+  `443b4280dc335f5a3627441393b2a6353a75f1b5`.
+- Frozen develop Head:
+  `443b4280dc335f5a3627441393b2a6353a75f1b5`.
+- Frozen candidate tree:
+  `e6bca378fc880757bfdc40dda3d3e8533264cc32`.
+- Pre-release main:
+  `5428d31108fd908ab3b8d2d657a1db4915fccdd7`.
+- Merge-base:
+  `595a45f33a0b7cb1453695dc6f7bdb6ed3d8eccc`.
+- Main-only content diff from merge-base: empty.
+- Proposed tag identity `v0.2.0`: absent; no tag was created.
+- Release PR #111 was exactly same-repository `develop → main`.
 
 ## CP5 — Knowledge and documentation
 
-- Project state is synchronized to the active release-preparation checkpoint.
-- Existing release-process knowledge already covers the reusable mechanism; no
-  duplicate Knowledge entry is required.
-- A Work Log will be recorded after verified delivery.
+Completed.
 
-## CP6 — Delivery plan
+- Existing release-process documentation remains the reusable Source of Truth;
+  no duplicate Knowledge entry was created.
+- Final project state records repository-promotion evidence and preserves the
+  deployment/platform-control boundary.
+- A Work Log is recorded separately after verified delivery.
 
-After exact-head preparation CI passes:
+## CP6 — Exact-head delivery
 
-1. merge the preparation PR to `develop`;
-2. freeze the new `develop` Head and tree;
-3. open the exact same-repository `develop → main` Release PR;
-4. require Release Verification PASS;
-5. merge with merge commit;
-6. perform post-release parent/tree/content-neutrality reconciliation.
+Completed.
 
-No branch-changing commit may follow the exact-head preparation CI.
+Release Verification #2 / run `33906154568` passed for exact frozen Head
+`443b4280dc335f5a3627441393b2a6353a75f1b5`:
+
+- release-contract: PASS
+- Backend Verification: PASS
+- database recovery: PASS
+- Dispatcher Tests: PASS
+
+Release PR #111 remained clean/mergeable with Head equal to current `develop`
+and was merged using **merge commit**.
+
+Release merge:
+
+`ad743c6dc3746c41fafb32cffb7688da03f8d41b`
+
+Parents:
+
+- previous main: `5428d31108fd908ab3b8d2d657a1db4915fccdd7`
+- frozen develop: `443b4280dc335f5a3627441393b2a6353a75f1b5`
+
+Post-release proof:
+
+- main merge tree:
+  `e6bca378fc880757bfdc40dda3d3e8533264cc32`
+- frozen candidate tree:
+  `e6bca378fc880757bfdc40dda3d3e8533264cc32`
+- tree equality: PASS
+- `develop...main`: main ahead by two content-neutral release merge commits
+- file diff: empty
+
+Explicitly not performed:
+
+- Git tag creation
+- GitHub Release publication
+- production deployment or migration
+- package/container publication
+- traffic shift or rollback
+- Branch Protection or Ruleset mutation
+
+External platform-control debt remains:
+
+- main Branch Protection: disabled
+- develop Branch Protection: disabled
+- repository Rulesets: none
