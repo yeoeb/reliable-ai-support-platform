@@ -1,6 +1,6 @@
 # Engineering Issue #023 — Candidate / Prompt Comparison
 
-<!-- codex-dispatch-supervisor-approved-through: CP5 -->
+<!-- codex-dispatch-supervisor-approved-through: CP6 -->
 <!-- codex-dispatch-write-allow: ["app/evaluation/schemas.py","app/evaluation/comparison.py","app/evaluation/comparison_loader.py","app/evaluation/comparison_runner.py","evals/README.md","evals/comparisons/v2-reference.json","tests/test_evaluation_comparison.py","tests/test_evaluation_comparison_loader.py","tests/test_evaluation_comparison_runner.py","docs/issues/issue-023-candidate-comparison.md"] -->
 
 ## Tracking
@@ -173,32 +173,25 @@ Do not mark CP3+ complete.
 - [x] CP3 — Full regression / determinism verification
 - [x] CP4 — Comparison validity / safety review
 - [x] CP5 — Knowledge / documentation
-- [ ] CP6 — exact-Head delivery
+- [x] CP6 — exact-Head delivery
 
 ## Current State
 
-Remote Supervisor approval: **CP5**.
+Status: **completed**.
 
-CP2 implementation, CP3 verification, and CP4 review are complete.
+Delivery evidence:
 
-CP5 completed:
+- GitHub Issue: #100;
+- Product PR: #101;
+- exact verified Feature Head:
+  `633cbe2c3326670657d5e7a57201c2ad49342fef`;
+- Backend Verification #198 / run `33873126019`: **PASS**;
+- Dispatcher Tests #165 / run `33873125872`: **PASS**;
+- squash merge on `develop`:
+  `c10ddc26745b1977d27cfe9e55d36969d0c0821f`;
+- no Branch commit was added between exact-Head CI and Product merge;
+- reusable Knowledge was deduplicated into the existing Offline LLM Evaluation
+  and AI Coding Supervisor Workflow pages.
 
-- `evals/README.md` documents Candidate Comparison usage, provenance limits,
-  Safety gating, Path Boundary, reference-fixture meaning, and CLI exits;
-- existing Notion Offline LLM Evaluation Knowledge was updated with bounded
-  integer Policy design and deterministic LF/CRLF diagnostics;
-- existing Notion AI Coding Supervisor Workflow Knowledge was updated with
-  Agent success vs Verification Evidence and multi-surface state
-  reconciliation;
-- no duplicate Knowledge page was created;
-- Windows deterministic-fixture and lock-Test portability debt is recorded in
-  `docs/PROJECT_STATE.md`.
-
-CP5 is complete.
-
-Next authorized action: **CP6 — exact-Head delivery**.
-
-All Branch-changing Product, Test, and Repository documentation work is now
-complete. Create the Pull Request, verify GitHub Actions against the exact final
-Head, record evidence in GitHub comments without changing the Branch Head, and
-merge only that verified Head.
+All CP0–CP6 Checkpoints are complete. Remaining Windows LF/CRLF and mandatory
+lock portability items are recorded as separately scoped Control Plane debt.
