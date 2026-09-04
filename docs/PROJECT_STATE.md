@@ -41,6 +41,7 @@ It is intentionally concise and must stay synchronized with merged work.
 - #023 — Deterministic Candidate / Prompt Comparison
 - #024 — Cross-platform determinism and Watcher completion evidence
 - #025 — Portfolio README and reproducible demo guide
+- #026 — Second Hardened Release Promotion
 
 ## Current Workflow Infrastructure
 
@@ -61,22 +62,35 @@ The Dispatcher uses Stable `codex exec` as its local execution boundary. It does
 
 ## Current Stable Release State
 
-Repository version `0.1.0` completed its first hardened `develop → main` promotion.
+Repository version `0.2.0` completed its second hardened `develop → main`
+promotion.
 
 Release evidence:
 
-- Engineering Issue #021 / GitHub Issue #94: completed
-- Release PR #95: merged
-- frozen develop Head: `595a45f33a0b7cb1453695dc6f7bdb6ed3d8eccc`
-- frozen candidate tree: `1b3e3f59dbc142df96913f8f512fc839c88bc0ea`
-- Release Verification run `33652934391`: PASS
-- Backend regression: 482 passed
-- database recovery: PASS
-- Dispatcher regression: 87 passed
-- main release merge: `5428d31108fd908ab3b8d2d657a1db4915fccdd7`
+- Engineering Issue #026 / GitHub Issue #109: completed
+- version-preparation PR #110: merged
+- exact verified preparation Head:
+  `fb9a58c2e5cbf912034adc90cc9bac5531820af2`
+- preparation Backend Verification #202 / run `33905982032`: PASS
+- preparation Dispatcher Tests #177 / run `33905982059`: PASS
+- frozen develop Head:
+  `443b4280dc335f5a3627441393b2a6353a75f1b5`
+- frozen candidate tree:
+  `e6bca378fc880757bfdc40dda3d3e8533264cc32`
+- Release PR #111: merged
+- Release Verification #2 / run `33906154568`: PASS
+- release-contract, Backend, database recovery, and Dispatcher jobs: PASS
+- main release merge:
+  `ad743c6dc3746c41fafb32cffb7688da03f8d41b`
+- merge parents: previous main
+  `5428d31108fd908ab3b8d2d657a1db4915fccdd7` and frozen develop
+  `443b4280dc335f5a3627441393b2a6353a75f1b5`
 - main merge tree equals the frozen candidate tree
-- main-only release history is content-neutral
+- main-only release history is content-neutral; file diff is empty
 - no Git tag / GitHub Release / production deployment was performed
+
+The first hardened `0.1.0` release remains archived in Engineering Issue #021
+and `docs/issues/issue-021-first-hardened-release.md`.
 
 External platform-control debt remains:
 
@@ -141,21 +155,30 @@ Delivery evidence:
   version metadata remained unchanged
 
 Engineering Issue #026 — Second Hardened Release Promotion:
-**active at CP2 / version preparation**.
+**completed**.
+
+Delivery evidence:
 
 - GitHub Issue #109
-- branch: `feature/issue-026-second-hardened-release`
-- base: `f84deb1f8b8c331dc1830a9d9e627cb34c408a51`
-- target version: `0.2.0`
-- CP0/CP1 are complete; CP2 is authorized
-- release contract, Product behavior, dependencies, migrations, fixtures, and
-  workflows are frozen
+- version-preparation PR #110
+- Release PR #111
+- exact frozen develop Head:
+  `443b4280dc335f5a3627441393b2a6353a75f1b5`
+- Release Verification run `33906154568`: PASS
+- merge-commit release on `main`:
+  `ad743c6dc3746c41fafb32cffb7688da03f8d41b`
+- post-release main/candidate tree equality: PASS
+- main-only file diff: empty
+- repository version and FastAPI version: `0.2.0`
+
+No Engineering Issue is currently active. The planned Backend/AI safety
+practicum and portfolio-readiness sequence is complete and may be frozen at
+repository release `0.2.0`. Optional frontend, deployment, or live-benchmark
+work requires separately approved scope.
 
 Important: GitHub Issue/PR numbers are repository-wide platform sequence numbers and remain separate from Engineering Issue IDs.
 
-## Planned Product Sequence
-
-- #026 — second hardened `develop → main` release promotion
+## Optional Future Work
 - optional portfolio expansion — frontend and hosted demonstration only under separately approved scope
 - optional later Evaluation work — broader semantic diversity, recorded/live candidate evidence, latency, and cost only under separately approved scope
 - optional deployment/operations work — scheduled only when an environment and platform controls are defined
