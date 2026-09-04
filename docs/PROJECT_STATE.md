@@ -38,6 +38,7 @@ It is intentionally concise and must stay synchronized with merged work.
 - #020 — CI / Release Hardening foundation
 - #021 — First Hardened Release Promotion
 - #022 — Expanded Evaluation Coverage
+- #023 — Deterministic Candidate / Prompt Comparison
 
 ## Current Workflow Infrastructure
 
@@ -81,28 +82,26 @@ External platform-control debt remains:
 - develop Branch Protection: disabled
 - repository Rulesets: none
 
-## Current Product Engineering Issue
+## Latest Completed Product Engineering Issue
 
-Engineering Issue ID #023 — Candidate / Prompt Comparison
+Engineering Issue #023 — Candidate / Prompt Comparison: **completed**
 
-- GitHub tracking Issue: #100
-- Active Branch: `feature/issue-023-candidate-comparison`
-- CP0 Existing Comparison Gap Inventory: completed
-- CP1 Candidate / Prompt Comparison Architecture: completed and Supervisor-approved
-- CP2 Bounded Comparison Implementation: completed and Supervisor-approved; Host focused verification passed with 48 tests
-- CP3 Full Regression / Determinism Verification: completed and Supervisor-approved
-- CP4 Comparison Validity / Safety Review: completed and Supervisor-approved
-- CP5 Knowledge / Documentation: completed and Supervisor-approved
-- Current Checkpoint: CP6 exact-Head delivery
-- Dependency baseline: #017 Offline LLM Evaluation, #018 AI Security Regression, and #022 Expanded Evaluation Coverage are complete
-- Current deterministic corpus: v2 = 80 cases; security-v2 = 40 cases; combined = 120
-- Comparison uses one Suite and two exactly reconciled normalized Candidate result files
-- Candidate-declared Prompt fingerprints are preserved as provenance metadata and compared explicitly
-- Report must include metric deltas plus deterministic improved/regressed Case IDs
-- Static bounded policy must prevent Safety regressions from being hidden by aggregate movement
-- Existing scorer, single-Candidate runner, Product prompts/runtime, and workflows are frozen
-- Normal CI remains offline with no live Model, Tool, Approval, Database, or production-data execution
-- Broader semantic diversity and live-model robustness remain separately governed Evaluation debt
+Delivery evidence:
+
+- GitHub Issue #100
+- Product PR #101
+- verified Feature Head: `633cbe2c3326670657d5e7a57201c2ad49342fef`
+- Backend Verification #198 / run `33873126019`: PASS
+- Dispatcher Tests #165 / run `33873125872`: PASS
+- squash merge on `develop`: `c10ddc26745b1977d27cfe9e55d36969d0c0821f`
+- strict Comparison Manifest, same-Suite Candidate reconciliation, deterministic
+  deltas and Case transitions, bounded Safety-aware gate, Prompt provenance
+  metadata, root-contained loading, and CLI exit `0 / 1 / 2` are complete
+- no live Model, Tool, Approval, Database mutation, Product Prompt change, or
+  production-data execution was introduced
+
+No Product Engineering Issue is currently active. The next Issue requires a
+fresh CP0 / CP1 contract before implementation.
 
 Important: GitHub Issue/PR numbers are repository-wide platform sequence numbers and remain separate from Engineering Issue IDs.
 
