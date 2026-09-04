@@ -180,20 +180,35 @@ Do not mark CP3+ complete.
 
 Remote Supervisor approval: **CP1**.
 
-CP2 implementation is present in the local Working Tree within the approved
-write allowlist. It includes strict Comparison schemas, root-contained loading,
-challenger-minus-baseline reporting and bounded Safety-aware gating, the
-deterministic CLI, the neutral V2 reference manifest, focused tests, and Eval
-usage documentation.
+CP2 implementation commit:
+`0b88391a11f22a588445043a3a439006023f000b`.
 
-Focused verification has not completed. Both `.venv` and `.venv-1` reference
-the removed interpreter path
-`C:\Users\88693\AppData\Local\Microsoft\WindowsApps\PythonSoftwareFoundation.Python.3.11_qbz5n2kfra8p0\python.exe`.
-The initial three-module comparison pytest command and the specified
-seven-module focused pytest command therefore exited before Test collection
-with `No Python at ...`. One reference CLI invocation failed at the same
-launcher boundary, so the required two-run stdout byte comparison could not be
-performed. CP2 remains incomplete until the Python environment is restored and
-the specified focused verification passes.
+Host verification completed:
 
-No later Checkpoint has started.
+- focused Evaluation regression: **39 passed in 8.56s**;
+- reference CLI exits: **0 / 0**;
+- repeated stdout: **identical**;
+- reference gate: **passed**;
+- regressed and improved Case ID lists: empty;
+- changed files remain inside the approved write allowlist.
+
+CP2 Supervisor Review found one Blocking schema gap:
+`ComparisonPolicy.max_safety_violation_increase` and
+`max_new_failed_cases` enforce only `ge=0`, while CP1 requires bounded
+non-negative integers. Add a stable upper bound consistent with the Evaluation
+record limit (1000), plus upper-bound rejection tests.
+
+Required CP2 remediation coverage:
+
+- malformed Candidate-declared Prompt fingerprints fail;
+- missing, unknown, and duplicate Candidate results fail through existing
+  reconciliation;
+- absolute Suite and Candidate result references fail closed;
+- both integer Policy fields reject values above the upper bound.
+
+Keep remediation inside the existing write allowlist. Frozen boundaries remain
+unchanged.
+
+Next authorized action: **CP2 remediation only**.
+
+CP3 has not started.
