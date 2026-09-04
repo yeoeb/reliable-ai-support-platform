@@ -1,6 +1,6 @@
 # Engineering Issue #026 — Second Hardened Release Promotion
 
-<!-- codex-dispatch-supervisor-approved-through: CP2 -->
+<!-- codex-dispatch-supervisor-approved-through: CP6 -->
 <!-- codex-dispatch-write-allow: ["pyproject.toml","app/main.py","docs/PROJECT_STATE.md","docs/issues/issue-026-second-hardened-release.md"] -->
 
 ## Tracking
@@ -10,8 +10,8 @@
 - Branch: `feature/issue-026-second-hardened-release`
 - Base Head: `f84deb1f8b8c331dc1830a9d9e627cb34c408a51`
 - Target version: `0.2.0`
-- Current checkpoint: CP2 authorized
-- Authorized through: CP2
+- Current checkpoint: CP3 exact-head verification
+- Authorized through: CP6
 
 ## Assigned GitHub Issue contract snapshot
 
@@ -108,5 +108,57 @@ Completed and approved by Supervisor on 2026-09-04.
 
 ## CP2 — Version preparation
 
-Authorized. Implementation evidence will be recorded without advancing the
-Supervisor marker.
+Completed on 2026-09-04.
+
+- `pyproject.toml [project].version`: `0.1.0 → 0.2.0`.
+- Static FastAPI `version=` literal: `0.1.0 → 0.2.0`.
+- Project state marks #026 active without claiming release completion.
+- No behavior, dependency, migration, fixture, workflow, or release-contract
+  change was introduced.
+- Diff scope contains only the four allowlisted paths.
+- Static source inspection confirms exactly one project version and one FastAPI
+  version, both `0.2.0`.
+
+## CP3 — Exact-head verification
+
+The final preparation Head will be verified by GitHub Actions after the Pull
+Request opens. Required checks:
+
+- Backend Verification
+- Dispatcher Tests
+- focused release/version tests inside the existing suites
+
+CI evidence will be recorded in PR/Issue comments so the verified branch Head
+does not move.
+
+## CP4 — Review gate
+
+Supervisor review of the bounded diff found:
+
+- version literals are consistent;
+- Product runtime behavior is unchanged;
+- release workflow and verifier are unchanged;
+- documentation does not overstate deployment, tagging, or platform controls;
+- no frozen surface outside the allowlist changed.
+
+Final acceptance remains contingent on exact-head CI.
+
+## CP5 — Knowledge and documentation
+
+- Project state is synchronized to the active release-preparation checkpoint.
+- Existing release-process knowledge already covers the reusable mechanism; no
+  duplicate Knowledge entry is required.
+- A Work Log will be recorded after verified delivery.
+
+## CP6 — Delivery plan
+
+After exact-head preparation CI passes:
+
+1. merge the preparation PR to `develop`;
+2. freeze the new `develop` Head and tree;
+3. open the exact same-repository `develop → main` Release PR;
+4. require Release Verification PASS;
+5. merge with merge commit;
+6. perform post-release parent/tree/content-neutrality reconciliation.
+
+No branch-changing commit may follow the exact-head preparation CI.
