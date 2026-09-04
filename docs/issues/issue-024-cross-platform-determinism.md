@@ -1,13 +1,13 @@
 # Engineering Issue #024 — Cross-platform determinism and Watcher completion evidence
 
-<!-- codex-dispatch-supervisor-approved-through: CP5 -->
+<!-- codex-dispatch-supervisor-approved-through: CP6 -->
 <!-- codex-dispatch-write-allow: [".gitattributes","scripts/codex_watch.py","tests/test_codex_watch.py","tests/test_evaluation_generator.py","docs/issues/issue-024-cross-platform-determinism.md"] -->
 
 - GitHub Issue: #103
 - Branch: `feature/issue-024-cross-platform-determinism`
 - Base: `develop@c0c1d14f7b9d216f9d69d69255755f2469eac7a5`
-- Current checkpoint: CP6
-- Authorized through: CP5
+- Current checkpoint: completed
+- Authorized through: CP6
 - Owner model: Supervisor defines gates; Watcher Agent implements CP2/CP3.
 
 ## Assigned GitHub Issue contract snapshot
@@ -193,6 +193,19 @@ No duplicate Knowledge page was created.
 
 ## CP6 — Exact-head delivery
 
-Authorized. Finish all Repository documentation before opening the PR, then bind
-Backend Verification and Dispatcher Tests to one exact Feature Head. Record
-post-CI evidence in GitHub comments without mutating the verified Head.
+Status: **completed**.
+
+Delivery evidence:
+
+- Product PR: #104;
+- exact verified Feature Head:
+  `bbf1974aa34218ad9603fcd9e98a542b8ea2e154`;
+- Backend Verification #200 / run `33881260083`: **PASS**;
+- Dispatcher Tests #169 / run `33881260111`: **PASS**;
+- Windows Host focused verification: `27 passed in 0.61s`;
+- Windows Host Control Plane regression: `60 passed in 0.85s`;
+- squash merge on `develop`:
+  `84d1ee45f268d65c136180d4cdf4c5cfbb5f8be7`;
+- no Feature Branch commit was added after exact-head CI.
+
+All CP0–CP6 checkpoints are complete.
