@@ -121,12 +121,12 @@ Delivery evidence:
   contract fallback are complete
 
 Engineering Issue #025 — Portfolio README and reproducible demo guide:
-**active at CP3**.
+**active at CP5**.
 
 - GitHub Issue #106
 - branch: `feature/issue-025-portfolio-readiness`
 - base: `50558486c7cc5d429075f1ff4b7a8a36a06876ae`
-- CP2 is published and approved; documentation verification CP3 is authorized
+- CP3 verification and CP4 portfolio review passed; CP5 state synchronization is authorized
 - Product code, tests, dependencies, migrations, fixtures, workflows, and
   version metadata are frozen
 
