@@ -40,6 +40,7 @@ It is intentionally concise and must stay synchronized with merged work.
 - #022 — Expanded Evaluation Coverage
 - #023 — Deterministic Candidate / Prompt Comparison
 - #024 — Cross-platform determinism and Watcher completion evidence
+- #025 — Portfolio README and reproducible demo guide
 
 ## Current Workflow Infrastructure
 
@@ -121,21 +122,34 @@ Delivery evidence:
   contract fallback are complete
 
 Engineering Issue #025 — Portfolio README and reproducible demo guide:
-**active at CP6 / exact-head delivery**.
+**completed**.
+
+Delivery evidence:
 
 - GitHub Issue #106
-- branch: `feature/issue-025-portfolio-readiness`
-- base: `50558486c7cc5d429075f1ff4b7a8a36a06876ae`
-- CP5 is complete; CP6 exact-head PR/CI delivery is authorized
+- Product PR #107
+- exact verified Feature Head:
+  `cc328d2c8ca0a8936ee3d7dec9e3b1202fef8f38`
+- Dispatcher Tests #173 / run `33905381114`: PASS
+- squash merge on `develop`:
+  `d7fa7a1c8e2b571e7f07459945b4daa3fe158c65`
+- recruiter-readable README and reproducible Windows PowerShell demo guide are
+  complete
+- deterministic fake-provider/offline evidence is explicitly separated from
+  optional cost-bearing live-provider use and from production-readiness claims
 - Product code, tests, dependencies, migrations, fixtures, workflows, and
-  version metadata are frozen
+  version metadata remained unchanged
+
+No Engineering Issue is currently active. Engineering Issue #026 is the next
+bounded task and will perform the second hardened `develop → main` release
+promotion.
 
 Important: GitHub Issue/PR numbers are repository-wide platform sequence numbers and remain separate from Engineering Issue IDs.
 
 ## Planned Product Sequence
 
-- #025 — Portfolio README and reproducible local demo
 - #026 — second hardened `develop → main` release promotion
+- optional portfolio expansion — frontend and hosted demonstration only under separately approved scope
 - optional later Evaluation work — broader semantic diversity, recorded/live candidate evidence, latency, and cost only under separately approved scope
 - optional deployment/operations work — scheduled only when an environment and platform controls are defined
 

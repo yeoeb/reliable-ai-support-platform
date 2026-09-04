@@ -1,6 +1,6 @@
 # Engineering Issue #025 — Portfolio readiness
 
-<!-- codex-dispatch-supervisor-approved-through: CP5 -->
+<!-- codex-dispatch-supervisor-approved-through: CP6 -->
 <!-- codex-dispatch-write-allow: ["README.md","docs/PORTFOLIO_DEMO.md","docs/issues/issue-025-portfolio-readiness.md"] -->
 
 ## Tracking
@@ -9,8 +9,8 @@
 - GitHub Issue: #106
 - Branch: `feature/issue-025-portfolio-readiness`
 - Base Head: `50558486c7cc5d429075f1ff4b7a8a36a06876ae`
-- Current checkpoint: CP6
-- Authorized through: CP5
+- Current checkpoint: completed
+- Authorized through: CP6
 
 ## Assigned GitHub Issue contract snapshot
 
@@ -237,9 +237,19 @@ remain the canonical notes; no duplicate Knowledge page was created.
 
 ## CP6 — Exact-head delivery
 
-Authorized. Open the documentation PR, bind verification to one exact Feature
-Head, store post-CI evidence in GitHub comments, and merge only that verified
-Head.
+Status: **completed**.
+
+Delivery evidence:
+
+- Product documentation PR: #107;
+- exact verified Feature Head:
+  `cc328d2c8ca0a8936ee3d7dec9e3b1202fef8f38`;
+- Dispatcher Tests #173 / run `33905381114`: **PASS**;
+- squash merge on `develop`:
+  `d7fa7a1c8e2b571e7f07459945b4daa3fe158c65`;
+- no Feature Branch commit was added after exact-head CI.
+
+All CP0–CP6 checkpoints are complete.
 
 ## CP6 — Exact-head delivery
 
