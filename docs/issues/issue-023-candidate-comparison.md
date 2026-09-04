@@ -1,6 +1,6 @@
 # Engineering Issue #023 — Candidate / Prompt Comparison
 
-<!-- codex-dispatch-supervisor-approved-through: CP1 -->
+<!-- codex-dispatch-supervisor-approved-through: CP2 -->
 <!-- codex-dispatch-write-allow: ["app/evaluation/schemas.py","app/evaluation/comparison.py","app/evaluation/comparison_loader.py","app/evaluation/comparison_runner.py","evals/README.md","evals/comparisons/v2-reference.json","tests/test_evaluation_comparison.py","tests/test_evaluation_comparison_loader.py","tests/test_evaluation_comparison_runner.py","docs/issues/issue-023-candidate-comparison.md"] -->
 
 ## Tracking
@@ -169,8 +169,7 @@ Do not mark CP3+ complete.
 
 - [x] CP0 — Existing comparison-gap inventory
 - [x] CP1 — Candidate / Prompt comparison architecture
-- [ ] CP2 — Bounded comparison implementation (implemented locally;
-  focused verification blocked before collection by stale Python environment)
+- [x] CP2 — Bounded comparison implementation
 - [ ] CP3 — Full regression / determinism verification
 - [ ] CP4 — Comparison validity / safety review
 - [ ] CP5 — Knowledge / documentation
@@ -178,33 +177,29 @@ Do not mark CP3+ complete.
 
 ## Current State
 
-Remote Supervisor approval: **CP1**.
+Remote Supervisor approval: **CP2**.
 
-Initial CP2 implementation:
-`0b88391a11f22a588445043a3a439006023f000b`.
+Reviewed implementation lineage:
 
-Initial Host verification completed:
+- `0b88391a11f22a588445043a3a439006023f000b` — initial CP2 implementation;
+- `9624f72496d416b6337afee8a4aed3d8282a1501` — bounded integer Policy remediation;
+- `8121d4c7c89c3977b614f748f887e359da8ed3ff` — required Negative Test coverage;
+- `3a67f0558a8dd89c7ad48b40648ad8d45d6f5e26` — remediation execution note.
 
-- focused Evaluation regression: **39 passed in 8.56s**;
-- reference CLI exits: **0 / 0**;
-- repeated stdout: **identical**;
-- reference gate: **passed**;
-- regressed and improved Case ID lists: empty;
-- changed files remained inside the approved write allowlist.
+Host CP2 evidence:
 
-CP2 Supervisor Review identified an unbounded integer Policy gap and missing
-Negative Test coverage. Bounded Supervisor remediation is now present:
+- initial focused verification: **39 passed in 8.56s**;
+- process-level reference CLI exits: **0 / 0**;
+- process-level repeated stdout: **identical**;
+- reference gate: **passed** with empty transition lists;
+- post-remediation focused verification: **48 passed in 2.43s**;
+- focused CLI Test reruns and compares deterministic output at the remediated Head;
+- all changed paths are inside the approved write allowlist;
+- frozen scorer, single-Candidate runner, fixtures, Product runtime, migrations,
+  and workflows remain unchanged.
 
-- `9624f72496d416b6337afee8a4aed3d8282a1501` — both integer Policy
-  fields are capped at the 1000-record Evaluation boundary;
-- `8121d4c7c89c3977b614f748f887e359da8ed3ff` — upper-bound,
-  malformed Prompt fingerprint, absolute referenced path, and per-Candidate
-  missing/unknown/duplicate result reconciliation tests.
+CP2 is complete.
 
-All remediation paths remain inside the existing write allowlist. Frozen
-boundaries remain unchanged.
+Next authorized action: **CP3 — Full regression / determinism verification**.
 
-Next required action: rerun the specified CP2 focused verification and the
-two-run reference CLI check on the Host.
-
-CP2 remains pending until that evidence passes. CP3 has not started.
+CP4+ have not started.
