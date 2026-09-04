@@ -101,7 +101,7 @@ Delivery evidence:
   production-data execution was introduced
 
 Engineering Issue #024 — Cross-platform determinism and Watcher completion
-evidence: **active at CP4**.
+evidence: **active at CP5**.
 
 - GitHub Issue #103
 - branch: `feature/issue-024-cross-platform-determinism`
@@ -109,7 +109,7 @@ evidence: **active at CP4**.
 - CP2 publication: `85f848011f4960aa3ed2c6ccd72b328e48d09f80`
 - Windows focused verification: `27 passed in 0.61s`
 - Windows Control Plane regression: `60 passed in 0.85s`
-- CP3 is approved; CP4 merge-readiness review is authorized
+- CP4 is approved; CP5 knowledge synchronization is authorized
 - scope is limited to LF repository policy, cross-platform Watcher lock tests,
   and explicit handling of succeeded-without-publication state
 
