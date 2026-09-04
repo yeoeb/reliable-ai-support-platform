@@ -1,6 +1,6 @@
 # Engineering Issue #023 — Candidate / Prompt Comparison
 
-<!-- codex-dispatch-supervisor-approved-through: CP2 -->
+<!-- codex-dispatch-supervisor-approved-through: CP3 -->
 <!-- codex-dispatch-write-allow: ["app/evaluation/schemas.py","app/evaluation/comparison.py","app/evaluation/comparison_loader.py","app/evaluation/comparison_runner.py","evals/README.md","evals/comparisons/v2-reference.json","tests/test_evaluation_comparison.py","tests/test_evaluation_comparison_loader.py","tests/test_evaluation_comparison_runner.py","docs/issues/issue-023-candidate-comparison.md"] -->
 
 ## Tracking
@@ -170,36 +170,49 @@ Do not mark CP3+ complete.
 - [x] CP0 — Existing comparison-gap inventory
 - [x] CP1 — Candidate / Prompt comparison architecture
 - [x] CP2 — Bounded comparison implementation
-- [ ] CP3 — Full regression / determinism verification
+- [x] CP3 — Full regression / determinism verification
 - [ ] CP4 — Comparison validity / safety review
 - [ ] CP5 — Knowledge / documentation
 - [ ] CP6 — exact-Head delivery
 
 ## Current State
 
-Remote Supervisor approval: **CP2**.
+Remote Supervisor approval: **CP3**.
 
 Reviewed implementation lineage:
 
 - `0b88391a11f22a588445043a3a439006023f000b` — initial CP2 implementation;
 - `9624f72496d416b6337afee8a4aed3d8282a1501` — bounded integer Policy remediation;
 - `8121d4c7c89c3977b614f748f887e359da8ed3ff` — required Negative Test coverage;
-- `3a67f0558a8dd89c7ad48b40648ad8d45d6f5e26` — remediation execution note.
+- `bae26e6318bf451192cab649bb22bd16fc6a6c5c` — synchronized CP3 project state.
 
-Host CP2 evidence:
+CP2 evidence:
 
-- initial focused verification: **39 passed in 8.56s**;
-- process-level reference CLI exits: **0 / 0**;
-- process-level repeated stdout: **identical**;
-- reference gate: **passed** with empty transition lists;
-- post-remediation focused verification: **48 passed in 2.43s**;
-- focused CLI Test reruns and compares deterministic output at the remediated Head;
-- all changed paths are inside the approved write allowlist;
-- frozen scorer, single-Candidate runner, fixtures, Product runtime, migrations,
-  and workflows remain unchanged.
+- focused verification: **48 passed in 2.43s**;
+- reference CLI exits: **0 / 0**;
+- repeated process-level stdout: **identical**;
+- reference gate: **passed** with empty transition lists.
 
-CP2 is complete.
+CP3 Host evidence:
 
-Next authorized action: **CP3 — Full regression / determinism verification**.
+- Alembic upgrade to Head: **passed**;
+- full regression excluding Database Recovery and one known Windows-only
+  mandatory-lock portability Test: **528 passed, 1 deselected in 33.88s**;
+- Database Recovery integration: **1 passed in 7.39s**;
+- deterministic V2 Generator: **4 passed in 0.12s**;
+- Generator check: **passed**;
+- Working Tree and diff hygiene: **clean**.
 
-CP4+ have not started.
+The deselected Watcher lock Test attempts to read a file through a second
+Handle while an exclusive Windows lock is held. It is an existing Control Plane
+portability limitation unrelated to #023; Linux exact-Head CI must still run it.
+
+`ruff` is not declared in `requirements/dev.txt` and is not part of the
+Backend Verification workflow, so its absence is non-blocking and no ad hoc
+Dependency was installed.
+
+CP3 is complete.
+
+Next authorized action: **CP4 — Comparison validity / safety review**.
+
+CP5+ have not started.
