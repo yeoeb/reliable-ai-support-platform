@@ -1,6 +1,6 @@
 # Engineering Issue #025 — Portfolio readiness
 
-<!-- codex-dispatch-supervisor-approved-through: CP1 -->
+<!-- codex-dispatch-supervisor-approved-through: CP2 -->
 <!-- codex-dispatch-write-allow: ["README.md","docs/PORTFOLIO_DEMO.md","docs/issues/issue-025-portfolio-readiness.md"] -->
 
 ## Tracking
@@ -9,8 +9,8 @@
 - GitHub Issue: #106
 - Branch: `feature/issue-025-portfolio-readiness`
 - Base Head: `50558486c7cc5d429075f1ff4b7a8a36a06876ae`
-- Current checkpoint: CP2
-- Authorized through: CP1
+- Current checkpoint: CP3
+- Authorized through: CP2
 
 ## Assigned GitHub Issue contract snapshot
 
@@ -140,6 +140,14 @@ Required evidence:
 - generator check result when Python is available;
 - `git diff --check`.
 
+Supervisor CP2 review: **passed** at published commit
+`4625ba7727a7618b09086479da262cb2fbcfb4ff`.
+
+Independent review confirmed the documented Auth/RBAC, Knowledge, Retrieval/RAG,
+Agent, Approval, Metrics, health endpoints, request bodies, and Evaluation CLI
+match current source. README limitations preserve the distinction between
+application-contract evidence, synthetic fixtures, and live-model measurement.
+
 Local CP2 evidence (2026-09-04):
 
 - changed files: `README.md`, `docs/PORTFOLIO_DEMO.md`, and this execution
@@ -163,7 +171,10 @@ Local CP2 evidence (2026-09-04):
 
 ## CP3 — Verification
 
-Not authorized until CP2 is published and reviewed.
+Authorized. Re-check README and Demo claims against current routes, schemas,
+Evaluation CLI, repository paths, and release evidence. Run static Markdown/link
+and PowerShell syntax checks, `git diff --check`, and generator verification
+when the execution environment can start Python. Do not edit frozen surfaces.
 
 ## CP4 — Portfolio review
 
