@@ -120,15 +120,24 @@ Delivery evidence:
   succeeded-without-publication reconciliation, and audited offline Issue
   contract fallback are complete
 
-No Engineering Issue is currently active. The next Issue requires a fresh
-CP0 / CP1 contract before implementation.
+Engineering Issue #025 — Portfolio README and reproducible demo guide:
+**active at CP2**.
+
+- GitHub Issue #106
+- branch: `feature/issue-025-portfolio-readiness`
+- base: `50558486c7cc5d429075f1ff4b7a8a36a06876ae`
+- CP0 / CP1 are approved; documentation-only CP2 is authorized
+- Product code, tests, dependencies, migrations, fixtures, workflows, and
+  version metadata are frozen
 
 Important: GitHub Issue/PR numbers are repository-wide platform sequence numbers and remain separate from Engineering Issue IDs.
 
 ## Planned Product Sequence
 
-- later Evaluation work — broader semantic diversity, recorded/live candidate evidence, latency, and cost only under separately approved scope
-- deployment/operations work — scheduled when environment and platform controls are defined
+- #025 — Portfolio README and reproducible local demo
+- #026 — second hardened `develop → main` release promotion
+- optional later Evaluation work — broader semantic diversity, recorded/live candidate evidence, latency, and cost only under separately approved scope
+- optional deployment/operations work — scheduled only when an environment and platform controls are defined
 
 The Supervisor may refine this ordering when dependencies or design evidence justify it.
 
