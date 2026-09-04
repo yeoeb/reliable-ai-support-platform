@@ -1,14 +1,13 @@
 # Engineering Issue #024 — Cross-platform determinism and Watcher completion evidence
 
-<!-- codex-dispatch-supervisor-approved-through: CP1 -->
+<!-- codex-dispatch-supervisor-approved-through: CP2 -->
 <!-- codex-dispatch-write-allow: [".gitattributes","scripts/codex_watch.py","tests/test_codex_watch.py","tests/test_evaluation_generator.py","docs/issues/issue-024-cross-platform-determinism.md"] -->
-<!-- codex-dispatch-supervisor-rework: {"checkpoint":"CP2","attempt":1} -->
 
 - GitHub Issue: #103
 - Branch: `feature/issue-024-cross-platform-determinism`
 - Base: `develop@c0c1d14f7b9d216f9d69d69255755f2469eac7a5`
-- Current checkpoint: CP2
-- Authorized through: CP1
+- Current checkpoint: CP3
+- Authorized through: CP2
 - Owner model: Supervisor defines gates; Watcher Agent implements CP2/CP3.
 
 ## Assigned GitHub Issue contract snapshot
@@ -118,16 +117,18 @@ Bounded implementation completed locally:
   with explicit Supervisor/operator reconciliation guidance;
 - preserved the no-op when matching remote publication evidence exists.
 
-Current state: the bounded CP2 implementation is complete; Dispatcher-owned
-publication and Supervisor review are pending. Attribute resolution and Diff
-hygiene checks pass. Focused Python verification was attempted but could not
-start because the repository virtual environments reference an unavailable
-Microsoft Store Python installation and the sandbox also denies direct and WSL
-interpreter execution. CP3 remains unauthorized.
+Current state: CP2 is published at
+`85f848011f4960aa3ed2c6ccd72b328e48d09f80`. Supervisor Diff review confirms
+the changed paths remain inside the allowlist. Windows Host focused verification
+passed: `27 passed in 0.61s`; this suite includes the deterministic generator
+check path. Attribute resolution, zero-CR checkout inspection, and Diff hygiene
+also passed.
 
 ## CP3 — Review and verification
 
-Not authorized until CP2 evidence is published and reviewed.
+Authorized. Run the bounded regression and inspect the final Diff. Do not change
+Product, Database, Migration, Evaluation fixture semantics, scorer behavior, or
+CI architecture. Record exact commands and results.
 
 ## CP4 — Merge readiness
 
