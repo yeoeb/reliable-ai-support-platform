@@ -1,6 +1,6 @@
 # Engineering Issue #025 — Portfolio readiness
 
-<!-- codex-dispatch-supervisor-approved-through: CP2 -->
+<!-- codex-dispatch-supervisor-approved-through: CP3 -->
 <!-- codex-dispatch-write-allow: ["README.md","docs/PORTFOLIO_DEMO.md","docs/issues/issue-025-portfolio-readiness.md"] -->
 
 ## Tracking
@@ -9,8 +9,8 @@
 - GitHub Issue: #106
 - Branch: `feature/issue-025-portfolio-readiness`
 - Base Head: `50558486c7cc5d429075f1ff4b7a8a36a06876ae`
-- Current checkpoint: CP3
-- Authorized through: CP2
+- Current checkpoint: CP4
+- Authorized through: CP3
 
 ## Assigned GitHub Issue contract snapshot
 
@@ -204,11 +204,32 @@ Local CP3 evidence (2026-09-04):
 
 ## CP4 — Portfolio review
 
-Not authorized.
+Status: **passed**.
+
+Supervisor review confirmed:
+
+- the README leads with project value and maturity instead of a 750-line feature
+  inventory;
+- architecture and reliability boundaries are technically accurate;
+- all documented endpoints, request fields, CLI flags, paths, and test files
+  match current source;
+- default demonstration avoids live OpenAI calls;
+- optional live steps are visibly nondeterministic and cost-bearing;
+- no administrator credential, privilege bootstrap, or SQL grant was invented;
+- synthetic fixtures and fake-provider tests are not described as live-model
+  performance;
+- limitations explicitly exclude production deployment, uptime, scalability,
+  compliance, frontend, tenant isolation, four-eyes Approval, ANN/reranking,
+  distributed tracing, and enforced GitHub protection.
+
+CP3 passes on static/source evidence. Generator verification is inherited from
+the unchanged fixtures and prior exact-head CI; final PR CI must re-run the
+repository verification before merge.
 
 ## CP5 — Knowledge and completion
 
-Not authorized.
+Authorized. Synchronize Repository state and record only genuinely new reusable
+knowledge. Do not duplicate existing Evaluation or Supervisor Workflow notes.
 
 ## CP6 — Exact-head delivery
 
