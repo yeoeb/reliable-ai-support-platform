@@ -31,7 +31,7 @@ Before making changes:
 
 1. Read this file.
 2. Read `docs/PROJECT_STATE.md`.
-3. Read the assigned GitHub Issue.
+3. Read the assigned GitHub Issue. If GitHub is unreachable from the execution sandbox, a Supervisor-committed full Issue contract snapshot in the matching `docs/issues/` execution note may be used as the offline fallback. The snapshot must identify the Issue number, title, source URL, capture date, Goal, Scope, Acceptance Criteria, Non-goals, and Verification. Absence or ambiguity still fails closed.
 4. Read all files listed under Required Reading.
 5. Inspect relevant tests and current implementation.
 6. Produce a scoped plan for the current Checkpoint.
