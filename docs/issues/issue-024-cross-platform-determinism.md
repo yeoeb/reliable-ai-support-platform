@@ -1,13 +1,13 @@
 # Engineering Issue #024 — Cross-platform determinism and Watcher completion evidence
 
-<!-- codex-dispatch-supervisor-approved-through: CP3 -->
+<!-- codex-dispatch-supervisor-approved-through: CP4 -->
 <!-- codex-dispatch-write-allow: [".gitattributes","scripts/codex_watch.py","tests/test_codex_watch.py","tests/test_evaluation_generator.py","docs/issues/issue-024-cross-platform-determinism.md"] -->
 
 - GitHub Issue: #103
 - Branch: `feature/issue-024-cross-platform-determinism`
 - Base: `develop@c0c1d14f7b9d216f9d69d69255755f2469eac7a5`
-- Current checkpoint: CP4
-- Authorized through: CP3
+- Current checkpoint: CP5
+- Authorized through: CP4
 - Owner model: Supervisor defines gates; Watcher Agent implements CP2/CP3.
 
 ## Assigned GitHub Issue contract snapshot
@@ -157,10 +157,27 @@ evidence, CP3 passes.
 
 ## CP4 — Merge readiness
 
-Authorized for Supervisor review. Verify each Acceptance Criterion against
-implementation and test evidence, confirm the final changed-file set, and
-identify any remaining merge blocker.
+Status: **passed**.
+
+Acceptance mapping:
+
+- deterministic fixtures use six explicit `text eol=lf` rules;
+- Windows checkout reports `i/lf`, `w/lf`, and `eol=lf` for all six paths;
+- generator behavior is covered by the passing focused suite;
+- cross-process exclusion remains covered independently from metadata writing;
+- metadata is verified through the owned handle, avoiding Windows mandatory-lock
+  second-handle reads;
+- local `succeeded` without remote publication raises explicit reconciliation
+  error, while matching remote publication remains a no-op;
+- base-to-head review found no Product, Database, Migration, fixture-content,
+  scorer, or CI workflow change;
+- the Supervisor-authored `AGENTS.md` offline fallback requires a complete,
+  committed Issue snapshot and remains fail closed on absence or ambiguity.
+
+No merge-readiness defect was found. Final PR-head GitHub Actions evidence is
+still required before merge.
 
 ## CP5 — Knowledge and completion
 
-Not authorized.
+Authorized. Deduplicate reusable findings into existing Engineering Knowledge,
+then synchronize completion-ready Repository state before opening the PR.
