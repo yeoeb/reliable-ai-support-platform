@@ -100,8 +100,15 @@ Delivery evidence:
 - no live Model, Tool, Approval, Database mutation, Product Prompt change, or
   production-data execution was introduced
 
-No Product Engineering Issue is currently active. The next Issue requires a
-fresh CP0 / CP1 contract before implementation.
+Engineering Issue #024 — Cross-platform determinism and Watcher completion
+evidence: **active at CP2**.
+
+- GitHub Issue #103
+- branch: `feature/issue-024-cross-platform-determinism`
+- base: `c0c1d14f7b9d216f9d69d69255755f2469eac7a5`
+- CP0 / CP1 are approved; CP2 implementation is authorized
+- scope is limited to LF repository policy, cross-platform Watcher lock tests,
+  and explicit handling of succeeded-without-publication state
 
 Important: GitHub Issue/PR numbers are repository-wide platform sequence numbers and remain separate from Engineering Issue IDs.
 
