@@ -1,6 +1,6 @@
 # Reliable AI Support Operations Platform — Project State
 
-Last verified: 2026-09-03
+Last verified: 2026-09-04
 
 ## Purpose
 
@@ -81,17 +81,28 @@ External platform-control debt remains:
 - develop Branch Protection: disabled
 - repository Rulesets: none
 
-## Next Product Engineering Issue
+## Current Product Engineering Issue
 
 Engineering Issue ID #023 — Candidate / Prompt Comparison
 
-- Status: not started
-- Normal base Branch: `develop`
+- GitHub tracking Issue: #100
+- Active Branch: `feature/issue-023-candidate-comparison`
+- CP0 Existing Comparison Gap Inventory: completed
+- CP1 Candidate / Prompt Comparison Architecture: completed and Supervisor-approved
+- CP2 Bounded Comparison Implementation: completed and Supervisor-approved; Host focused verification passed with 48 tests
+- CP3 Full Regression / Determinism Verification: completed and Supervisor-approved
+- CP4 Comparison Validity / Safety Review: completed and Supervisor-approved
+- CP5 Knowledge / Documentation: completed and Supervisor-approved
+- Current Checkpoint: CP6 exact-Head delivery
 - Dependency baseline: #017 Offline LLM Evaluation, #018 AI Security Regression, and #022 Expanded Evaluation Coverage are complete
 - Current deterministic corpus: v2 = 80 cases; security-v2 = 40 cases; combined = 120
-- Candidate / Prompt comparison must preserve Prompt identity, exact Case/Result reconciliation, separate Safety gating, and offline-by-default CI
-- Exact comparison metadata, reporting semantics, acceptance thresholds, and write scope require fresh CP0/CP1 before implementation
-- Broader semantic diversity and live-model robustness remain separately governed Evaluation debt unless explicitly admitted into #023 scope
+- Comparison uses one Suite and two exactly reconciled normalized Candidate result files
+- Candidate-declared Prompt fingerprints are preserved as provenance metadata and compared explicitly
+- Report must include metric deltas plus deterministic improved/regressed Case IDs
+- Static bounded policy must prevent Safety regressions from being hidden by aggregate movement
+- Existing scorer, single-Candidate runner, Product prompts/runtime, and workflows are frozen
+- Normal CI remains offline with no live Model, Tool, Approval, Database, or production-data execution
+- Broader semantic diversity and live-model robustness remain separately governed Evaluation debt
 
 Important: GitHub Issue/PR numbers are repository-wide platform sequence numbers and remain separate from Engineering Issue IDs.
 
@@ -252,7 +263,14 @@ Response with Evidence
 
 ## Known Documentation Debt
 
-No project-state documentation debt is currently recorded.
+- Deterministic V2 Evaluation fixtures require LF bytes, but the Repository does
+  not yet pin those paths with `.gitattributes text eol=lf`; Windows Checkout
+  with `core.autocrlf=true` can therefore create false byte-drift failures.
+- `test_preexisting_unlocked_lock_file_is_reusable` reads a Watcher lock file
+  through a second Handle while the exclusive lock is held. This passes with
+  POSIX advisory locks but raises `PermissionError` with Windows mandatory
+  lock semantics; cross-platform lock metadata inspection needs a separately
+  scoped Control Plane fix.
 
 ## Supervisor Rule
 

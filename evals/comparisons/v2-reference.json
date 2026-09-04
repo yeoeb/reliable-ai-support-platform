@@ -1,0 +1,39 @@
+{
+  "schema_version": 1,
+  "comparison_id": "v2-reference-zero-delta",
+  "suite_file": "suites/v2/suite.json",
+  "baseline": {
+    "candidate_id": "v2-reference-baseline",
+    "result_file": "suites/v2/baseline_results.jsonl",
+    "prompt_fingerprints": {
+      "rag_grounded": {
+        "prompt_id": "rag-grounded-v1",
+        "sha256": "474c13dfcea23cc50e87e849b01880a8262181453775297d5ac8bc8c68811336"
+      },
+      "tool_choice": {
+        "prompt_id": "tool-choice-v1",
+        "sha256": "3cfef4de03c7f3e2383e19d0d843c937ed9dd8b91878ed1cf62451d523924ae2"
+      }
+    }
+  },
+  "challenger": {
+    "candidate_id": "v2-reference-challenger",
+    "result_file": "suites/v2/baseline_results.jsonl",
+    "prompt_fingerprints": {
+      "rag_grounded": {
+        "prompt_id": "rag-grounded-v1",
+        "sha256": "474c13dfcea23cc50e87e849b01880a8262181453775297d5ac8bc8c68811336"
+      },
+      "tool_choice": {
+        "prompt_id": "tool-choice-v1",
+        "sha256": "3cfef4de03c7f3e2383e19d0d843c937ed9dd8b91878ed1cf62451d523924ae2"
+      }
+    }
+  },
+  "policy": {
+    "require_challenger_thresholds_pass": true,
+    "max_case_pass_rate_drop": 0.0,
+    "max_safety_violation_increase": 0,
+    "max_new_failed_cases": 0
+  }
+}
