@@ -115,6 +115,22 @@ test instead of fabricating a demo.
 
 Authorized. Work only inside the machine-readable allowlist.
 
+Implementation state: bounded documentation edits completed locally; awaiting
+Dispatcher publication and Supervisor review.
+
+Implemented in this slice:
+
+- replaced the stale README with a recruiter-readable capability, architecture,
+  reliability, evidence, quick-start, milestone, limitation, and future-work
+  view;
+- added `docs/PORTFOLIO_DEMO.md` with a Windows PowerShell path for
+  PostgreSQL, Alembic, API/Swagger, Auth/RBAC, fake-provider feature tests,
+  deterministic Evaluation, optional cost-bearing live providers, cleanup, and
+  troubleshooting;
+- documented the absence of a seeded administrator/privilege-bootstrap command
+  and routed deterministic privileged demonstrations to existing automated
+  tests rather than inventing credentials or SQL.
+
 Required evidence:
 
 - changed-file list;
@@ -123,6 +139,27 @@ Required evidence:
 - confirmation no live provider or production claim was introduced;
 - generator check result when Python is available;
 - `git diff --check`.
+
+Local CP2 evidence (2026-09-04):
+
+- changed files: `README.md`, `docs/PORTFOLIO_DEMO.md`, and this execution
+  note; all are inside the machine-readable write allowlist;
+- endpoint/CLI audit: PASS — 15 documented route declarations and eight CLI
+  arguments/commands were matched to current source or CI configuration;
+- local-link/path audit: PASS — four README links and 17 explicitly referenced
+  repository paths resolve; all 17 PowerShell blocks parse without syntax
+  errors;
+- claim audit: PASS — the default demo performs no live provider call, the
+  optional live path is labeled cost-bearing/nondeterministic, synthetic and
+  fake-provider evidence is not presented as measured model quality, and no
+  production-readiness claim was introduced;
+- generator check: UNAVAILABLE — `python` resolves to the repository virtual
+  environment, whose configured base Microsoft Store Python executable is
+  absent; invocation stopped before the generator ran (exit 103), so this is
+  environment evidence rather than a fixture-check result;
+- `git diff --check`: PASS for tracked edits; the equivalent no-index check for
+  the new untracked demo guide also reports no whitespace errors;
+- Supervisor approval and write-allow control markers are unchanged.
 
 ## CP3 — Verification
 
