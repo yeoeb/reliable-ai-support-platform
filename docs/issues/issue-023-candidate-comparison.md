@@ -1,6 +1,6 @@
 # Engineering Issue #023 — Candidate / Prompt Comparison
 
-<!-- codex-dispatch-supervisor-approved-through: CP4 -->
+<!-- codex-dispatch-supervisor-approved-through: CP5 -->
 <!-- codex-dispatch-write-allow: ["app/evaluation/schemas.py","app/evaluation/comparison.py","app/evaluation/comparison_loader.py","app/evaluation/comparison_runner.py","evals/README.md","evals/comparisons/v2-reference.json","tests/test_evaluation_comparison.py","tests/test_evaluation_comparison_loader.py","tests/test_evaluation_comparison_runner.py","docs/issues/issue-023-candidate-comparison.md"] -->
 
 ## Tracking
@@ -172,51 +172,33 @@ Do not mark CP3+ complete.
 - [x] CP2 — Bounded comparison implementation
 - [x] CP3 — Full regression / determinism verification
 - [x] CP4 — Comparison validity / safety review
-- [ ] CP5 — Knowledge / documentation
+- [x] CP5 — Knowledge / documentation
 - [ ] CP6 — exact-Head delivery
 
 ## Current State
 
-Remote Supervisor approval: **CP4**.
+Remote Supervisor approval: **CP5**.
 
-CP2 implementation and remediation are complete. CP3 Host verification:
+CP2 implementation, CP3 verification, and CP4 review are complete.
 
-- focused Evaluation verification: **48 passed**;
-- full regression: **528 passed, 1 Windows-only Control Plane Test
-  deselected**;
-- Database Recovery: **1 passed**;
-- deterministic Generator: **4 passed** and `--check` passed;
-- Working Tree / diff hygiene: **clean**.
+CP5 completed:
 
-CP4 review against base
-`949d206c2c1b182c6bd45b53753f0086d9befd9b` completed:
+- `evals/README.md` documents Candidate Comparison usage, provenance limits,
+  Safety gating, Path Boundary, reference-fixture meaning, and CLI exits;
+- existing Notion Offline LLM Evaluation Knowledge was updated with bounded
+  integer Policy design and deterministic LF/CRLF diagnostics;
+- existing Notion AI Coding Supervisor Workflow Knowledge was updated with
+  Agent success vs Verification Evidence and multi-surface state
+  reconciliation;
+- no duplicate Knowledge page was created;
+- Windows deterministic-fixture and lock-Test portability debt is recorded in
+  `docs/PROJECT_STATE.md`.
 
-- 11 changed files, with Product/Test files inside the approved #023 scope and
-  Supervisor-owned project-state updates;
-- both Candidates reconcile independently against one loaded Suite;
-- aggregate, RAG, Tool, and Safety deltas use challenger-minus-baseline
-  semantics;
-- improved/regressed and Safety transition Case IDs are deterministically
-  sorted;
-- a newly failing Safety Case cannot be masked by aggregate or offsetting
-  Safety improvements;
-- Candidate-declared Prompt fingerprints are preserved as provenance and are
-  not represented as execution proof;
-- manifest and referenced paths fail closed outside the Evaluation root;
-- Policy fields are strict, typed, and bounded;
-- CLI emits one compact sorted JSON object and preserves exit `0 / 1 / 2`;
-- existing scorer, single-Candidate runner, fixtures, Product runtime,
-  migrations, and workflows remain unchanged.
+CP5 is complete.
 
-Non-blocking pre-existing portability debt:
+Next authorized action: **CP6 — exact-Head delivery**.
 
-- Windows Checkout may convert deterministic LF fixtures to CRLF unless the
-  Repository uses an LF policy or local `core.autocrlf=false`;
-- the Watcher lock Test reads an exclusively locked file through a second
-  Handle, which is incompatible with Windows mandatory lock semantics.
-
-CP4 is complete with no #023 Blocking finding.
-
-Next authorized action: **CP5 — Knowledge / documentation**.
-
-CP6 has not started.
+All Branch-changing Product, Test, and Repository documentation work is now
+complete. Create the Pull Request, verify GitHub Actions against the exact final
+Head, record evidence in GitHub comments without changing the Branch Head, and
+merge only that verified Head.
