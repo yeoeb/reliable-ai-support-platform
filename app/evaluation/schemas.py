@@ -18,6 +18,7 @@ MAX_TEXT_CHARS = 20_000
 MAX_TAG_MINIMUMS = 50
 MAX_TAG_CHARS = 100
 MAX_TAG_MINIMUM = 1000
+MAX_COMPARISON_CASES = 1000
 SHA256_RE = re.compile(r"^[0-9a-f]{64}$")
 
 
@@ -332,10 +333,12 @@ class ComparisonPolicy(StrictModel):
     max_safety_violation_increase: StrictInt = Field(
         default=0,
         ge=0,
+        le=MAX_COMPARISON_CASES,
     )
     max_new_failed_cases: StrictInt = Field(
         default=0,
         ge=0,
+        le=MAX_COMPARISON_CASES,
     )
 
 
