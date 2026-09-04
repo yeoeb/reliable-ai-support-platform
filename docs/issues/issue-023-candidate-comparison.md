@@ -180,35 +180,31 @@ Do not mark CP3+ complete.
 
 Remote Supervisor approval: **CP1**.
 
-CP2 implementation commit:
+Initial CP2 implementation:
 `0b88391a11f22a588445043a3a439006023f000b`.
 
-Host verification completed:
+Initial Host verification completed:
 
 - focused Evaluation regression: **39 passed in 8.56s**;
 - reference CLI exits: **0 / 0**;
 - repeated stdout: **identical**;
 - reference gate: **passed**;
 - regressed and improved Case ID lists: empty;
-- changed files remain inside the approved write allowlist.
+- changed files remained inside the approved write allowlist.
 
-CP2 Supervisor Review found one Blocking schema gap:
-`ComparisonPolicy.max_safety_violation_increase` and
-`max_new_failed_cases` enforce only `ge=0`, while CP1 requires bounded
-non-negative integers. Add a stable upper bound consistent with the Evaluation
-record limit (1000), plus upper-bound rejection tests.
+CP2 Supervisor Review identified an unbounded integer Policy gap and missing
+Negative Test coverage. Bounded Supervisor remediation is now present:
 
-Required CP2 remediation coverage:
+- `9624f72496d416b6337afee8a4aed3d8282a1501` — both integer Policy
+  fields are capped at the 1000-record Evaluation boundary;
+- `8121d4c7c89c3977b614f748f887e359da8ed3ff` — upper-bound,
+  malformed Prompt fingerprint, absolute referenced path, and per-Candidate
+  missing/unknown/duplicate result reconciliation tests.
 
-- malformed Candidate-declared Prompt fingerprints fail;
-- missing, unknown, and duplicate Candidate results fail through existing
-  reconciliation;
-- absolute Suite and Candidate result references fail closed;
-- both integer Policy fields reject values above the upper bound.
+All remediation paths remain inside the existing write allowlist. Frozen
+boundaries remain unchanged.
 
-Keep remediation inside the existing write allowlist. Frozen boundaries remain
-unchanged.
+Next required action: rerun the specified CP2 focused verification and the
+two-run reference CLI check on the Host.
 
-Next authorized action: **CP2 remediation only**.
-
-CP3 has not started.
+CP2 remains pending until that evidence passes. CP3 has not started.
