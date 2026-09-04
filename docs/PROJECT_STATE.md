@@ -140,9 +140,16 @@ Delivery evidence:
 - Product code, tests, dependencies, migrations, fixtures, workflows, and
   version metadata remained unchanged
 
-No Engineering Issue is currently active. Engineering Issue #026 is the next
-bounded task and will perform the second hardened `develop → main` release
-promotion.
+Engineering Issue #026 — Second Hardened Release Promotion:
+**active at CP2 / version preparation**.
+
+- GitHub Issue #109
+- branch: `feature/issue-026-second-hardened-release`
+- base: `f84deb1f8b8c331dc1830a9d9e627cb34c408a51`
+- target version: `0.2.0`
+- CP0/CP1 are complete; CP2 is authorized
+- release contract, Product behavior, dependencies, migrations, fixtures, and
+  workflows are frozen
 
 Important: GitHub Issue/PR numbers are repository-wide platform sequence numbers and remain separate from Engineering Issue IDs.
 
