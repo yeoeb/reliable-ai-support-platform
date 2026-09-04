@@ -1,13 +1,13 @@
 # Engineering Issue #024 — Cross-platform determinism and Watcher completion evidence
 
-<!-- codex-dispatch-supervisor-approved-through: CP2 -->
+<!-- codex-dispatch-supervisor-approved-through: CP3 -->
 <!-- codex-dispatch-write-allow: [".gitattributes","scripts/codex_watch.py","tests/test_codex_watch.py","tests/test_evaluation_generator.py","docs/issues/issue-024-cross-platform-determinism.md"] -->
 
 - GitHub Issue: #103
 - Branch: `feature/issue-024-cross-platform-determinism`
 - Base: `develop@c0c1d14f7b9d216f9d69d69255755f2469eac7a5`
-- Current checkpoint: CP3
-- Authorized through: CP2
+- Current checkpoint: CP4
+- Authorized through: CP3
 - Owner model: Supervisor defines gates; Watcher Agent implements CP2/CP3.
 
 ## Assigned GitHub Issue contract snapshot
@@ -146,13 +146,20 @@ Verification evidence (Windows sandbox, 2026-09-04):
   inspected; no Product, Database, Migration, fixture-content, scorer, or CI
   workflow implementation changed.
 
-Current state: CP3 cannot be reported as passed until the required Python
-commands execute successfully. No in-scope implementation failure was found or
-changed. CP4 remains unauthorized.
+Windows Host completed the missing Python verification on the published CP3
+state:
+
+- focused Watcher + generator suite: `27 passed in 0.61s`;
+- Dispatcher + Watcher + generator regression: `60 passed in 0.85s`.
+
+Together with the recorded attribute, checkout, Diff, and frozen-surface
+evidence, CP3 passes.
 
 ## CP4 — Merge readiness
 
-Not authorized.
+Authorized for Supervisor review. Verify each Acceptance Criterion against
+implementation and test evidence, confirm the final changed-file set, and
+identify any remaining merge blocker.
 
 ## CP5 — Knowledge and completion
 
