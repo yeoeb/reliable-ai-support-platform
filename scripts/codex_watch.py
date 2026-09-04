@@ -111,7 +111,12 @@ def next_write_checkpoint(
     ):
         status = issue_state.get("last_status")
         if status == "succeeded":
-            return None
+            raise DispatchError(
+                f"{checkpoint} is recorded locally as succeeded, "
+                "but the matching remote checkpoint publication "
+                "is missing. Supervisor/operator reconciliation "
+                "is required."
+            )
         if status == "failed":
             raise DispatchError(
                 f"{checkpoint} previously failed. "
@@ -188,6 +193,14 @@ def _try_lock_file(handle) -> None:
         ) from exc
 
 
+def _write_lock_metadata(handle) -> None:
+    handle.seek(0)
+    handle.truncate()
+    handle.write(str(os.getpid()))
+    handle.write("\n")
+    handle.flush()
+
+
 def _unlock_file(handle) -> None:
     if os.name == "nt":
         import msvcrt
@@ -238,11 +251,7 @@ def watcher_lock(
         _try_lock_file(handle)
         locked = True
 
-        handle.seek(0)
-        handle.truncate()
-        handle.write(str(os.getpid()))
-        handle.write("\n")
-        handle.flush()
+        _write_lock_metadata(handle)
 
         yield
 

@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+from collections import Counter
 from dataclasses import dataclass
 from pathlib import Path
 
@@ -189,6 +190,19 @@ def load_suite(manifest_path: str | Path) -> EvaluationSuite:
             )
         seen.add(case.case_id)
         cases.append(case)
+
+    tag_counts = Counter(
+        tag
+        for case in cases
+        for tag in case.tags
+    )
+    for tag, minimum in manifest.tag_minimums.items():
+        observed = tag_counts[tag]
+        if observed < minimum:
+            raise EvaluationInputError(
+                "Evaluation tag coverage below minimum: "
+                f"{tag} requires {minimum}, observed {observed}"
+            )
 
     return EvaluationSuite(
         manifest_path=path,

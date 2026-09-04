@@ -1,0 +1,6 @@
+evals/suites/v2/suite.json text eol=lf
+evals/suites/v2/cases.jsonl text eol=lf
+evals/suites/v2/baseline_results.jsonl text eol=lf
+evals/suites/security-v2/suite.json text eol=lf
+evals/suites/security-v2/cases.jsonl text eol=lf
+evals/suites/security-v2/baseline_results.jsonl text eol=lf

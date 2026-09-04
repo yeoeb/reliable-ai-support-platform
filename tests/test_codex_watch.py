@@ -1,4 +1,5 @@
 from contextlib import nullcontext
+import os
 from pathlib import Path
 import subprocess
 import sys
@@ -62,7 +63,7 @@ def make_context(
         ),
         (
             "CP1",
-            False,
+            True,
             {
                 "last_checkpoint": "CP2",
                 "last_status": "succeeded",
@@ -85,6 +86,21 @@ def test_next_write_checkpoint(
         )
         == expected
     )
+
+
+def test_succeeded_checkpoint_without_remote_publication_requires_reconciliation():
+    with pytest.raises(
+        DispatchError,
+        match="Supervisor/operator reconciliation is required",
+    ):
+        next_write_checkpoint(
+            approved_through="CP1",
+            issue_state={
+                "last_checkpoint": "CP2",
+                "last_status": "succeeded",
+            },
+            remote_checkpoint_done=False,
+        )
 
 
 def test_failed_checkpoint_is_not_retried():
@@ -126,6 +142,19 @@ def test_watcher_lock_blocks_duplicate_process(
     ).exists()
 
 
+def test_lock_metadata_is_written_through_owned_handle(
+    tmp_path,
+):
+    lock_path = tmp_path / "watch-009.lock"
+
+    with lock_path.open("a+", encoding="utf-8") as handle:
+        handle.write("stale-metadata\n")
+        watcher._write_lock_metadata(handle)
+        handle.seek(0)
+
+        assert handle.read() == f"{os.getpid()}\n"
+
+
 def test_preexisting_unlocked_lock_file_is_reusable(
     tmp_path,
 ):
@@ -140,12 +169,6 @@ def test_preexisting_unlocked_lock_file_is_reusable(
 
     with watcher_lock(repo, "009"):
         assert lock_path.exists()
-        assert (
-            lock_path.read_text(
-                encoding="utf-8"
-            ).strip()
-            == str(__import__("os").getpid())
-        )
 
     assert not lock_path.exists()
 

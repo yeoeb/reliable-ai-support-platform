@@ -4,10 +4,21 @@ import math
 import re
 from typing import Any, Literal
 
-from pydantic import BaseModel, ConfigDict, Field, model_validator
+from pydantic import (
+    BaseModel,
+    ConfigDict,
+    Field,
+    StrictBool,
+    StrictInt,
+    model_validator,
+)
 
 
 MAX_TEXT_CHARS = 20_000
+MAX_TAG_MINIMUMS = 50
+MAX_TAG_CHARS = 100
+MAX_TAG_MINIMUM = 1000
+MAX_COMPARISON_CASES = 1000
 SHA256_RE = re.compile(r"^[0-9a-f]{64}$")
 
 
@@ -47,6 +58,25 @@ class SuiteManifest(StrictModel):
     case_file: str = Field(min_length=1, max_length=300)
     thresholds: Thresholds
     prompt_fingerprints: PromptFingerprintSet
+    tag_minimums: dict[str, StrictInt] = Field(
+        default_factory=dict,
+        max_length=MAX_TAG_MINIMUMS,
+    )
+
+    @model_validator(mode="after")
+    def validate_tag_minimums(self) -> "SuiteManifest":
+        for tag, minimum in self.tag_minimums.items():
+            if not tag.strip() or len(tag) > MAX_TAG_CHARS:
+                raise ValueError(
+                    "tag minimum keys must be non-empty and at most "
+                    f"{MAX_TAG_CHARS} characters"
+                )
+            if minimum < 1 or minimum > MAX_TAG_MINIMUM:
+                raise ValueError(
+                    "tag minimum counts must be between 1 and "
+                    f"{MAX_TAG_MINIMUM}"
+                )
+        return self
 
 
 class RagSource(StrictModel):
@@ -276,3 +306,129 @@ class EvaluationReport(StrictModel):
         if not all(math.isfinite(value) for value in values):
             raise ValueError("evaluation metrics must be finite")
         return self
+
+
+class ComparisonCandidate(StrictModel):
+    candidate_id: str = Field(min_length=1, max_length=100)
+    result_file: str = Field(min_length=1, max_length=300)
+    prompt_fingerprints: PromptFingerprintSet
+
+    @model_validator(mode="after")
+    def validate_candidate_id(self) -> "ComparisonCandidate":
+        if self.candidate_id != self.candidate_id.strip():
+            raise ValueError(
+                "comparison candidate ID must be non-empty and trimmed"
+            )
+        return self
+
+
+class ComparisonPolicy(StrictModel):
+    require_challenger_thresholds_pass: StrictBool = True
+    max_case_pass_rate_drop: float = Field(
+        default=0.0,
+        strict=True,
+        ge=0.0,
+        le=1.0,
+    )
+    max_safety_violation_increase: StrictInt = Field(
+        default=0,
+        ge=0,
+        le=MAX_COMPARISON_CASES,
+    )
+    max_new_failed_cases: StrictInt = Field(
+        default=0,
+        ge=0,
+        le=MAX_COMPARISON_CASES,
+    )
+
+
+class ComparisonManifest(StrictModel):
+    schema_version: Literal[1]
+    comparison_id: str = Field(min_length=1, max_length=100)
+    suite_file: str = Field(min_length=1, max_length=300)
+    baseline: ComparisonCandidate
+    challenger: ComparisonCandidate
+    policy: ComparisonPolicy = Field(default_factory=ComparisonPolicy)
+
+    @model_validator(mode="after")
+    def validate_distinct_candidates(self) -> "ComparisonManifest":
+        if self.comparison_id != self.comparison_id.strip():
+            raise ValueError(
+                "comparison ID must be non-empty and trimmed"
+            )
+        if self.baseline.candidate_id == self.challenger.candidate_id:
+            raise ValueError("comparison candidate IDs must be distinct")
+        return self
+
+
+class AggregateMetricDeltas(StrictModel):
+    total_cases: int
+    passed_cases: int
+    case_pass_rate: float
+
+
+class RagMetricDeltas(StrictModel):
+    total: int
+    passed: int
+    answerability_accuracy: float
+    citation_validity_rate: float
+    required_citation_coverage_rate: float
+
+
+class ToolMetricDeltas(StrictModel):
+    total: int
+    passed: int
+    decision_accuracy: float
+    tool_name_accuracy: float
+    argument_exact_match_rate: float
+    unauthorized_tool_calls: int
+
+
+class ComparisonMetricDeltas(StrictModel):
+    aggregate: AggregateMetricDeltas
+    rag: RagMetricDeltas
+    tool: ToolMetricDeltas
+    safety_violations: int
+
+    @model_validator(mode="after")
+    def reject_non_finite_metrics(self) -> "ComparisonMetricDeltas":
+        values = [
+            self.aggregate.case_pass_rate,
+            self.rag.answerability_accuracy,
+            self.rag.citation_validity_rate,
+            self.rag.required_citation_coverage_rate,
+            self.tool.decision_accuracy,
+            self.tool.tool_name_accuracy,
+            self.tool.argument_exact_match_rate,
+        ]
+        if not all(math.isfinite(value) for value in values):
+            raise ValueError("comparison metric deltas must be finite")
+        return self
+
+
+class PromptChangeFlags(StrictModel):
+    rag_grounded: bool
+    tool_choice: bool
+
+
+class ComparisonGate(StrictModel):
+    passed: bool
+    reasons: list[str]
+
+
+class ComparisonReport(StrictModel):
+    schema_version: Literal[1] = 1
+    comparison_id: str
+    suite_id: str
+    baseline: EvaluationReport
+    challenger: EvaluationReport
+    baseline_prompt_fingerprints: PromptFingerprintSet
+    challenger_prompt_fingerprints: PromptFingerprintSet
+    prompt_changes: PromptChangeFlags
+    deltas: ComparisonMetricDeltas
+    regressed_case_ids: list[str]
+    improved_case_ids: list[str]
+    new_safety_violation_case_ids: list[str]
+    resolved_safety_violation_case_ids: list[str]
+    policy: ComparisonPolicy
+    gate: ComparisonGate

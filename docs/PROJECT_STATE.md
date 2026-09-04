@@ -1,6 +1,6 @@
 # Reliable AI Support Operations Platform — Project State
 
-Last verified: 2026-09-02
+Last verified: 2026-09-04
 
 ## Purpose
 
@@ -36,6 +36,11 @@ It is intentionally concise and must stay synchronized with merged work.
 - #018 — AI Security Regression foundation
 - #019 — Operational Metrics / Monitoring foundation
 - #020 — CI / Release Hardening foundation
+- #021 — First Hardened Release Promotion
+- #022 — Expanded Evaluation Coverage
+- #023 — Deterministic Candidate / Prompt Comparison
+- #024 — Cross-platform determinism and Watcher completion evidence
+- #025 — Portfolio README and reproducible demo guide
 
 ## Current Workflow Infrastructure
 
@@ -54,30 +59,106 @@ Required state surfaces:
 
 The Dispatcher uses Stable `codex exec` as its local execution boundary. It does not attempt to inject prompts into an already-open VS Code/Desktop Codex UI session.
 
-## Next Product Engineering Issue
+## Current Stable Release State
 
-Engineering Issue ID #021 — First Hardened Release Promotion
+Repository version `0.1.0` completed its first hardened `develop → main` promotion.
 
-- Status: not started
-- Normal source/target: `develop → main`
-- Dependency baseline: #020 Release Verification, exact-source reusable Backend/Dispatcher CI, version checks, and ancestry reconciliation are complete
-- The first hardened release must use a Pull Request from develop to main and pass the new Release Verification gate
-- The Release PR must use a merge commit, not squash/rebase
-- Release verification is repository promotion evidence only; Git tag/GitHub Release publication and production deployment remain separate operations
-- Current main/develop Branch Protection/Rulesets remain disabled and must not be described as enforced
-- The release candidate version remains `0.1.0` unless a dedicated version-change decision is made before opening the Release PR
+Release evidence:
+
+- Engineering Issue #021 / GitHub Issue #94: completed
+- Release PR #95: merged
+- frozen develop Head: `595a45f33a0b7cb1453695dc6f7bdb6ed3d8eccc`
+- frozen candidate tree: `1b3e3f59dbc142df96913f8f512fc839c88bc0ea`
+- Release Verification run `33652934391`: PASS
+- Backend regression: 482 passed
+- database recovery: PASS
+- Dispatcher regression: 87 passed
+- main release merge: `5428d31108fd908ab3b8d2d657a1db4915fccdd7`
+- main merge tree equals the frozen candidate tree
+- main-only release history is content-neutral
+- no Git tag / GitHub Release / production deployment was performed
+
+External platform-control debt remains:
+
+- main Branch Protection: disabled
+- develop Branch Protection: disabled
+- repository Rulesets: none
+
+## Latest Completed Product Engineering Issue
+
+Engineering Issue #023 — Candidate / Prompt Comparison: **completed**
+
+Delivery evidence:
+
+- GitHub Issue #100
+- Product PR #101
+- verified Feature Head: `633cbe2c3326670657d5e7a57201c2ad49342fef`
+- Backend Verification #198 / run `33873126019`: PASS
+- Dispatcher Tests #165 / run `33873125872`: PASS
+- squash merge on `develop`: `c10ddc26745b1977d27cfe9e55d36969d0c0821f`
+- strict Comparison Manifest, same-Suite Candidate reconciliation, deterministic
+  deltas and Case transitions, bounded Safety-aware gate, Prompt provenance
+  metadata, root-contained loading, and CLI exit `0 / 1 / 2` are complete
+- no live Model, Tool, Approval, Database mutation, Product Prompt change, or
+  production-data execution was introduced
+
+Engineering Issue #024 — Cross-platform determinism and Watcher completion
+evidence: **completed**.
+
+Delivery evidence:
+
+- GitHub Issue #103
+- Product PR #104
+- exact verified Feature Head:
+  `bbf1974aa34218ad9603fcd9e98a542b8ea2e154`
+- Backend Verification #200 / run `33881260083`: PASS
+- Dispatcher Tests #169 / run `33881260111`: PASS
+- Windows focused verification: `27 passed in 0.61s`
+- Windows Control Plane regression: `60 passed in 0.85s`
+- squash merge on `develop`:
+  `84d1ee45f268d65c136180d4cdf4c5cfbb5f8be7`
+- deterministic fixture LF policy, Windows-safe lock verification, explicit
+  succeeded-without-publication reconciliation, and audited offline Issue
+  contract fallback are complete
+
+Engineering Issue #025 — Portfolio README and reproducible demo guide:
+**completed**.
+
+Delivery evidence:
+
+- GitHub Issue #106
+- Product PR #107
+- exact verified Feature Head:
+  `cc328d2c8ca0a8936ee3d7dec9e3b1202fef8f38`
+- Dispatcher Tests #173 / run `33905381114`: PASS
+- squash merge on `develop`:
+  `d7fa7a1c8e2b571e7f07459945b4daa3fe158c65`
+- recruiter-readable README and reproducible Windows PowerShell demo guide are
+  complete
+- deterministic fake-provider/offline evidence is explicitly separated from
+  optional cost-bearing live-provider use and from production-readiness claims
+- Product code, tests, dependencies, migrations, fixtures, workflows, and
+  version metadata remained unchanged
+
+Engineering Issue #026 — Second Hardened Release Promotion:
+**active at CP2 / version preparation**.
+
+- GitHub Issue #109
+- branch: `feature/issue-026-second-hardened-release`
+- base: `f84deb1f8b8c331dc1830a9d9e627cb34c408a51`
+- target version: `0.2.0`
+- CP0/CP1 are complete; CP2 is authorized
+- release contract, Product behavior, dependencies, migrations, fixtures, and
+  workflows are frozen
 
 Important: GitHub Issue/PR numbers are repository-wide platform sequence numbers and remain separate from Engineering Issue IDs.
 
 ## Planned Product Sequence
 
-Tentative order after #020:
-
-- #014 — RAG response with evidence/citations
-- #015 — Controlled Tool Calling
-- #016 — Human Approval for high-risk actions
-- #019 — Operational Metrics / Monitoring foundation
-- #020+ — CI hardening, larger Evaluation suites, release hardening, and deployment/operations work as dependencies require
+- #026 — second hardened `develop → main` release promotion
+- optional portfolio expansion — frontend and hosted demonstration only under separately approved scope
+- optional later Evaluation work — broader semantic diversity, recorded/live candidate evidence, latency, and cost only under separately approved scope
+- optional deployment/operations work — scheduled only when an environment and platform controls are defined
 
 The Supervisor may refine this ordering when dependencies or design evidence justify it.
 
@@ -160,6 +241,11 @@ Service Layer owns transaction boundaries.
 - Prompt identity is pinned by stable Prompt ID + SHA-256; Prompt drift fails explicitly.
 - Safety violations remain a separate gate from aggregate accuracy.
 - The committed Eval baseline is a scorer fixture, not evidence of live-model performance.
+- Expanded V2 Evaluation contains 120 synthetic cases: normal v2 = 80 (40 RAG / 40 Tool) and security-v2 = 40 (20 RAG / 20 Tool).
+- Optional bounded `tag_minimums` fail closed when declared Evaluation families are absent or under-covered while preserving V1 manifest compatibility.
+- V2 fixtures are byte-for-byte reproducible from a deterministic stdlib generator with explicit write/check modes and no import-time write side effect.
+- Byte-deterministic V2 and security-v2 fixture paths are pinned to LF through repository `.gitattributes`; platform checkout defaults must not change generator bytes.
+- Structural tag coverage and scorer-fixture correctness do not prove semantic diversity, Candidate quality, or live-model robustness.
 - Normal CI LLM Evaluation performs no live OpenAI call, database mutation, Tool execution, or Approval execution.
 - AI Security Regression treats attacker-controlled Prompt, Evidence, Citation, Tool proposal, Arguments, and persisted Approval state as untrusted test inputs.
 - Security regression must assert both rejection/safe state and absence of unauthorized side effects.
@@ -215,6 +301,9 @@ Response with Evidence
 - CP1–CP6 require Supervisor approval from the remote Feature Branch Issue note; the previous Checkpoint must be approved before the next one starts.
 - Local Codex Session state is not progression authority; it exists for Resume and execution metadata.
 - Local Codex Session state is bound to the Branch where it was created.
+- If live GitHub Issue access is unavailable inside the execution sandbox, only a complete Supervisor-committed Issue contract snapshot may be used; missing or ambiguous snapshots fail closed.
+- Machine-readable Supervisor approval and write-allow markers must each have the exact required cardinality and syntax; prose approval is not execution authority.
+- A local Watcher `succeeded` result without the matching remote checkpoint publication is a control-plane contradiction requiring reconciliation, not a completed checkpoint.
 - CP2/CP3 require a clean Working Tree and synchronized Local/Remote Head before Codex starts.
 - CP2/CP3 publication is Dispatcher-owned: remote write Allowlist, unchanged control markers, fresh remote Head, and staged Diff hygiene must pass before Commit/Push.
 - The Dispatcher uses normal Feature Branch Push only; no Force Push and no Push to `main`/`develop`.
@@ -226,7 +315,8 @@ Response with Evidence
 
 ## Known Documentation Debt
 
-No project-state documentation debt is currently recorded.
+No currently tracked Repository-local documentation debt. External platform
+control debt listed under the stable release state remains unresolved.
 
 ## Supervisor Rule
 

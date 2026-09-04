@@ -23,7 +23,7 @@ configure_logging(settings.log_level)
 app = FastAPI(
     title="Reliable AI Support Operations Platform",
     description="Enterprise AI support backend",
-    version="0.1.0",
+    version="0.2.0",
 )
 
 app.add_middleware(RequestLoggingMiddleware)
