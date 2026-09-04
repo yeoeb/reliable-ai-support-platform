@@ -1,13 +1,13 @@
 # Engineering Issue #024 — Cross-platform determinism and Watcher completion evidence
 
-<!-- codex-dispatch-supervisor-approved-through: CP4 -->
+<!-- codex-dispatch-supervisor-approved-through: CP5 -->
 <!-- codex-dispatch-write-allow: [".gitattributes","scripts/codex_watch.py","tests/test_codex_watch.py","tests/test_evaluation_generator.py","docs/issues/issue-024-cross-platform-determinism.md"] -->
 
 - GitHub Issue: #103
 - Branch: `feature/issue-024-cross-platform-determinism`
 - Base: `develop@c0c1d14f7b9d216f9d69d69255755f2469eac7a5`
-- Current checkpoint: CP5
-- Authorized through: CP4
+- Current checkpoint: CP6
+- Authorized through: CP5
 - Owner model: Supervisor defines gates; Watcher Agent implements CP2/CP3.
 
 ## Assigned GitHub Issue contract snapshot
@@ -179,5 +179,20 @@ still required before merge.
 
 ## CP5 — Knowledge and completion
 
-Authorized. Deduplicate reusable findings into existing Engineering Knowledge,
-then synchronize completion-ready Repository state before opening the PR.
+Status: **passed**.
+
+Reusable findings were deduplicated into existing Notion Knowledge:
+
+- Offline LLM Evaluation: repository `.gitattributes text eol=lf`, CRLF
+  diagnosis, and byte-reproducibility checks;
+- AI Coding Supervisor Workflow: machine-readable marker cardinality,
+  `succeeded` versus publication evidence, control-plane contradiction handling,
+  and Supervisor-committed offline Issue contract snapshots.
+
+No duplicate Knowledge page was created.
+
+## CP6 — Exact-head delivery
+
+Authorized. Finish all Repository documentation before opening the PR, then bind
+Backend Verification and Dispatcher Tests to one exact Feature Head. Record
+post-CI evidence in GitHub comments without mutating the verified Head.
