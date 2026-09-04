@@ -176,6 +176,32 @@ Evaluation CLI, repository paths, and release evidence. Run static Markdown/link
 and PowerShell syntax checks, `git diff --check`, and generator verification
 when the execution environment can start Python. Do not edit frozen surfaces.
 
+Verification state: required CP3 checks completed locally; awaiting Dispatcher
+publication and Supervisor review.
+
+Local CP3 evidence (2026-09-04):
+
+- route/schema/source audit: PASS — 37 assertions matched current route prefixes,
+  decorators, permissions, and request-schema fields;
+- authorization/bootstrap audit: PASS — default `user` assignment and
+  `users:read` separation match source, and no seeded administrator or bootstrap
+  command exists;
+- Evaluation/path audit: PASS — six CLI assertions, 17 referenced repository
+  paths, and the 80 normal / 40 security V2 Case counts match;
+- release-evidence audit: PASS — seven README evidence statements match
+  `docs/PROJECT_STATE.md`;
+- Markdown/link audit: PASS — both files are valid UTF-8, heading levels and 20
+  fenced blocks are balanced, and all four local links resolve;
+- PowerShell audit: PASS — all 17 PowerShell blocks parse without syntax errors;
+- command provenance and claim-boundary audits: PASS — setup/Evaluation commands
+  match CI or canonical docs, the clone URL matches `origin`, and live-cost,
+  fake/synthetic evidence, bootstrap, and non-production limits remain explicit;
+- generator verification: UNAVAILABLE — the repository `.venv` points to a
+  missing Microsoft Store Python 3.11 base executable; no `python3`, `py`, or
+  `uv` fallback exists, and the generator did not start (exit 103);
+- pre-evidence working tree and `git diff --check`: PASS; verification made no
+  changes and no frozen surface was touched.
+
 ## CP4 — Portfolio review
 
 Not authorized.
