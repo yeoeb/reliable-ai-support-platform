@@ -2,6 +2,7 @@
 
 <!-- codex-dispatch-supervisor-approved-through: CP1 -->
 <!-- codex-dispatch-write-allow: [".gitattributes","scripts/codex_watch.py","tests/test_codex_watch.py","tests/test_evaluation_generator.py","docs/issues/issue-024-cross-platform-determinism.md"] -->
+<!-- codex-dispatch-supervisor-rework: {"checkpoint":"CP2","attempt":1} -->
 
 - GitHub Issue: #103
 - Branch: `feature/issue-024-cross-platform-determinism`
@@ -9,6 +10,39 @@
 - Current checkpoint: CP2
 - Authorized through: CP1
 - Owner model: Supervisor defines gates; Watcher Agent implements CP2/CP3.
+
+## Assigned GitHub Issue contract snapshot
+
+- Issue number: GitHub Issue #103 / Engineering Issue #024
+- Title: `[Issue #024] Harden cross-platform determinism and Watcher completion evidence`
+- Source: https://github.com/yeoeb/reliable-ai-support-platform/issues/103
+- Captured by Supervisor: 2026-09-04
+
+### Goal
+
+Eliminate the verified Windows-specific false failures and make Watcher completion state fail closed when publication evidence is missing.
+
+### Scope and acceptance criteria
+
+- force LF for deterministic V2 and security-v2 fixture files;
+- prove checkout bytes remain compatible with `generate_eval_suite_v2.py --check`;
+- preserve exclusive Watcher locking on Windows and POSIX;
+- test lock metadata without a second handle while an exclusive Windows lock is held;
+- explicitly reject local `succeeded` state without a matching remote checkpoint;
+- pass focused tests, Dispatcher Tests, and Backend Verification.
+
+### Non-goals
+
+- no Product API, Database, Migration, Evaluation scoring, fixture-content, or CI architecture changes;
+- no weakening of the actual file lock;
+- no automatic destructive state repair.
+
+### Verification
+
+- `python scripts/generate_eval_suite_v2.py --check`
+- `python -m pytest tests/test_codex_watch.py tests/test_evaluation_generator.py -q`
+- Windows host verification
+- existing GitHub Actions verification
 
 ## CP0 — Problem framing
 
