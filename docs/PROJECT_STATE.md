@@ -90,7 +90,8 @@ Engineering Issue ID #023 — Candidate / Prompt Comparison
 - CP0 Existing Comparison Gap Inventory: completed
 - CP1 Candidate / Prompt Comparison Architecture: completed and Supervisor-approved
 - CP2 Bounded Comparison Implementation: completed and Supervisor-approved; Host focused verification passed with 48 tests
-- Current Checkpoint: CP3 Full Regression / Determinism Verification
+- CP3 Full Regression / Determinism Verification: completed and Supervisor-approved
+- Current Checkpoint: CP4 Comparison Validity / Safety Review
 - Dependency baseline: #017 Offline LLM Evaluation, #018 AI Security Regression, and #022 Expanded Evaluation Coverage are complete
 - Current deterministic corpus: v2 = 80 cases; security-v2 = 40 cases; combined = 120
 - Comparison uses one Suite and two exactly reconciled normalized Candidate result files
