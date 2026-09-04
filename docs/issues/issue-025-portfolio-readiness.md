@@ -1,6 +1,6 @@
 # Engineering Issue #025 — Portfolio readiness
 
-<!-- codex-dispatch-supervisor-approved-through: CP3 -->
+<!-- codex-dispatch-supervisor-approved-through: CP5 -->
 <!-- codex-dispatch-write-allow: ["README.md","docs/PORTFOLIO_DEMO.md","docs/issues/issue-025-portfolio-readiness.md"] -->
 
 ## Tracking
@@ -9,8 +9,8 @@
 - GitHub Issue: #106
 - Branch: `feature/issue-025-portfolio-readiness`
 - Base Head: `50558486c7cc5d429075f1ff4b7a8a36a06876ae`
-- Current checkpoint: CP4
-- Authorized through: CP3
+- Current checkpoint: CP6
+- Authorized through: CP5
 
 ## Assigned GitHub Issue contract snapshot
 
@@ -228,8 +228,18 @@ repository verification before merge.
 
 ## CP5 — Knowledge and completion
 
-Authorized. Synchronize Repository state and record only genuinely new reusable
-knowledge. Do not duplicate existing Evaluation or Supervisor Workflow notes.
+Status: **passed**.
+
+This Issue reorganizes already-captured project facts into public portfolio
+documentation. It does not introduce a new reusable engineering mechanism.
+Existing Offline LLM Evaluation and AI Coding Supervisor Workflow Knowledge
+remain the canonical notes; no duplicate Knowledge page was created.
+
+## CP6 — Exact-head delivery
+
+Authorized. Open the documentation PR, bind verification to one exact Feature
+Head, store post-CI evidence in GitHub comments, and merge only that verified
+Head.
 
 ## CP6 — Exact-head delivery
 
