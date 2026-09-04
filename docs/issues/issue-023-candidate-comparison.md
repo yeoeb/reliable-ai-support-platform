@@ -1,6 +1,6 @@
 # Engineering Issue #023 — Candidate / Prompt Comparison
 
-<!-- codex-dispatch-supervisor-approved-through: CP3 -->
+<!-- codex-dispatch-supervisor-approved-through: CP4 -->
 <!-- codex-dispatch-write-allow: ["app/evaluation/schemas.py","app/evaluation/comparison.py","app/evaluation/comparison_loader.py","app/evaluation/comparison_runner.py","evals/README.md","evals/comparisons/v2-reference.json","tests/test_evaluation_comparison.py","tests/test_evaluation_comparison_loader.py","tests/test_evaluation_comparison_runner.py","docs/issues/issue-023-candidate-comparison.md"] -->
 
 ## Tracking
@@ -171,48 +171,52 @@ Do not mark CP3+ complete.
 - [x] CP1 — Candidate / Prompt comparison architecture
 - [x] CP2 — Bounded comparison implementation
 - [x] CP3 — Full regression / determinism verification
-- [ ] CP4 — Comparison validity / safety review
+- [x] CP4 — Comparison validity / safety review
 - [ ] CP5 — Knowledge / documentation
 - [ ] CP6 — exact-Head delivery
 
 ## Current State
 
-Remote Supervisor approval: **CP3**.
+Remote Supervisor approval: **CP4**.
 
-Reviewed implementation lineage:
+CP2 implementation and remediation are complete. CP3 Host verification:
 
-- `0b88391a11f22a588445043a3a439006023f000b` — initial CP2 implementation;
-- `9624f72496d416b6337afee8a4aed3d8282a1501` — bounded integer Policy remediation;
-- `8121d4c7c89c3977b614f748f887e359da8ed3ff` — required Negative Test coverage;
-- `bae26e6318bf451192cab649bb22bd16fc6a6c5c` — synchronized CP3 project state.
+- focused Evaluation verification: **48 passed**;
+- full regression: **528 passed, 1 Windows-only Control Plane Test
+  deselected**;
+- Database Recovery: **1 passed**;
+- deterministic Generator: **4 passed** and `--check` passed;
+- Working Tree / diff hygiene: **clean**.
 
-CP2 evidence:
+CP4 review against base
+`949d206c2c1b182c6bd45b53753f0086d9befd9b` completed:
 
-- focused verification: **48 passed in 2.43s**;
-- reference CLI exits: **0 / 0**;
-- repeated process-level stdout: **identical**;
-- reference gate: **passed** with empty transition lists.
+- 11 changed files, with Product/Test files inside the approved #023 scope and
+  Supervisor-owned project-state updates;
+- both Candidates reconcile independently against one loaded Suite;
+- aggregate, RAG, Tool, and Safety deltas use challenger-minus-baseline
+  semantics;
+- improved/regressed and Safety transition Case IDs are deterministically
+  sorted;
+- a newly failing Safety Case cannot be masked by aggregate or offsetting
+  Safety improvements;
+- Candidate-declared Prompt fingerprints are preserved as provenance and are
+  not represented as execution proof;
+- manifest and referenced paths fail closed outside the Evaluation root;
+- Policy fields are strict, typed, and bounded;
+- CLI emits one compact sorted JSON object and preserves exit `0 / 1 / 2`;
+- existing scorer, single-Candidate runner, fixtures, Product runtime,
+  migrations, and workflows remain unchanged.
 
-CP3 Host evidence:
+Non-blocking pre-existing portability debt:
 
-- Alembic upgrade to Head: **passed**;
-- full regression excluding Database Recovery and one known Windows-only
-  mandatory-lock portability Test: **528 passed, 1 deselected in 33.88s**;
-- Database Recovery integration: **1 passed in 7.39s**;
-- deterministic V2 Generator: **4 passed in 0.12s**;
-- Generator check: **passed**;
-- Working Tree and diff hygiene: **clean**.
+- Windows Checkout may convert deterministic LF fixtures to CRLF unless the
+  Repository uses an LF policy or local `core.autocrlf=false`;
+- the Watcher lock Test reads an exclusively locked file through a second
+  Handle, which is incompatible with Windows mandatory lock semantics.
 
-The deselected Watcher lock Test attempts to read a file through a second
-Handle while an exclusive Windows lock is held. It is an existing Control Plane
-portability limitation unrelated to #023; Linux exact-Head CI must still run it.
+CP4 is complete with no #023 Blocking finding.
 
-`ruff` is not declared in `requirements/dev.txt` and is not part of the
-Backend Verification workflow, so its absence is non-blocking and no ad hoc
-Dependency was installed.
+Next authorized action: **CP5 — Knowledge / documentation**.
 
-CP3 is complete.
-
-Next authorized action: **CP4 — Comparison validity / safety review**.
-
-CP5+ have not started.
+CP6 has not started.
