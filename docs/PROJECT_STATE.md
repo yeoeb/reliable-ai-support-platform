@@ -101,7 +101,7 @@ Delivery evidence:
   production-data execution was introduced
 
 Engineering Issue #024 — Cross-platform determinism and Watcher completion
-evidence: **active at CP5**.
+evidence: **active at CP6 / exact-head delivery**.
 
 - GitHub Issue #103
 - branch: `feature/issue-024-cross-platform-determinism`
@@ -109,7 +109,7 @@ evidence: **active at CP5**.
 - CP2 publication: `85f848011f4960aa3ed2c6ccd72b328e48d09f80`
 - Windows focused verification: `27 passed in 0.61s`
 - Windows Control Plane regression: `60 passed in 0.85s`
-- CP4 is approved; CP5 knowledge synchronization is authorized
+- CP5 is complete; CP6 exact-head PR/CI delivery is authorized
 - scope is limited to LF repository policy, cross-platform Watcher lock tests,
   and explicit handling of succeeded-without-publication state
 
@@ -205,6 +205,7 @@ Service Layer owns transaction boundaries.
 - Expanded V2 Evaluation contains 120 synthetic cases: normal v2 = 80 (40 RAG / 40 Tool) and security-v2 = 40 (20 RAG / 20 Tool).
 - Optional bounded `tag_minimums` fail closed when declared Evaluation families are absent or under-covered while preserving V1 manifest compatibility.
 - V2 fixtures are byte-for-byte reproducible from a deterministic stdlib generator with explicit write/check modes and no import-time write side effect.
+- Byte-deterministic V2 and security-v2 fixture paths are pinned to LF through repository `.gitattributes`; platform checkout defaults must not change generator bytes.
 - Structural tag coverage and scorer-fixture correctness do not prove semantic diversity, Candidate quality, or live-model robustness.
 - Normal CI LLM Evaluation performs no live OpenAI call, database mutation, Tool execution, or Approval execution.
 - AI Security Regression treats attacker-controlled Prompt, Evidence, Citation, Tool proposal, Arguments, and persisted Approval state as untrusted test inputs.
@@ -261,6 +262,9 @@ Response with Evidence
 - CP1–CP6 require Supervisor approval from the remote Feature Branch Issue note; the previous Checkpoint must be approved before the next one starts.
 - Local Codex Session state is not progression authority; it exists for Resume and execution metadata.
 - Local Codex Session state is bound to the Branch where it was created.
+- If live GitHub Issue access is unavailable inside the execution sandbox, only a complete Supervisor-committed Issue contract snapshot may be used; missing or ambiguous snapshots fail closed.
+- Machine-readable Supervisor approval and write-allow markers must each have the exact required cardinality and syntax; prose approval is not execution authority.
+- A local Watcher `succeeded` result without the matching remote checkpoint publication is a control-plane contradiction requiring reconciliation, not a completed checkpoint.
 - CP2/CP3 require a clean Working Tree and synchronized Local/Remote Head before Codex starts.
 - CP2/CP3 publication is Dispatcher-owned: remote write Allowlist, unchanged control markers, fresh remote Head, and staged Diff hygiene must pass before Commit/Push.
 - The Dispatcher uses normal Feature Branch Push only; no Force Push and no Push to `main`/`develop`.
@@ -272,14 +276,8 @@ Response with Evidence
 
 ## Known Documentation Debt
 
-- Deterministic V2 Evaluation fixtures require LF bytes, but the Repository does
-  not yet pin those paths with `.gitattributes text eol=lf`; Windows Checkout
-  with `core.autocrlf=true` can therefore create false byte-drift failures.
-- `test_preexisting_unlocked_lock_file_is_reusable` reads a Watcher lock file
-  through a second Handle while the exclusive lock is held. This passes with
-  POSIX advisory locks but raises `PermissionError` with Windows mandatory
-  lock semantics; cross-platform lock metadata inspection needs a separately
-  scoped Control Plane fix.
+No currently tracked Repository-local documentation debt. External platform
+control debt listed under the stable release state remains unresolved.
 
 ## Supervisor Rule
 
