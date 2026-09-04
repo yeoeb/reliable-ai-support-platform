@@ -39,6 +39,7 @@ It is intentionally concise and must stay synchronized with merged work.
 - #021 — First Hardened Release Promotion
 - #022 — Expanded Evaluation Coverage
 - #023 — Deterministic Candidate / Prompt Comparison
+- #024 — Cross-platform determinism and Watcher completion evidence
 
 ## Current Workflow Infrastructure
 
@@ -101,23 +102,31 @@ Delivery evidence:
   production-data execution was introduced
 
 Engineering Issue #024 — Cross-platform determinism and Watcher completion
-evidence: **active at CP6 / exact-head delivery**.
+evidence: **completed**.
+
+Delivery evidence:
 
 - GitHub Issue #103
-- branch: `feature/issue-024-cross-platform-determinism`
-- base: `c0c1d14f7b9d216f9d69d69255755f2469eac7a5`
-- CP2 publication: `85f848011f4960aa3ed2c6ccd72b328e48d09f80`
+- Product PR #104
+- exact verified Feature Head:
+  `bbf1974aa34218ad9603fcd9e98a542b8ea2e154`
+- Backend Verification #200 / run `33881260083`: PASS
+- Dispatcher Tests #169 / run `33881260111`: PASS
 - Windows focused verification: `27 passed in 0.61s`
 - Windows Control Plane regression: `60 passed in 0.85s`
-- CP5 is complete; CP6 exact-head PR/CI delivery is authorized
-- scope is limited to LF repository policy, cross-platform Watcher lock tests,
-  and explicit handling of succeeded-without-publication state
+- squash merge on `develop`:
+  `84d1ee45f268d65c136180d4cdf4c5cfbb5f8be7`
+- deterministic fixture LF policy, Windows-safe lock verification, explicit
+  succeeded-without-publication reconciliation, and audited offline Issue
+  contract fallback are complete
+
+No Engineering Issue is currently active. The next Issue requires a fresh
+CP0 / CP1 contract before implementation.
 
 Important: GitHub Issue/PR numbers are repository-wide platform sequence numbers and remain separate from Engineering Issue IDs.
 
 ## Planned Product Sequence
 
-- #023 — Candidate / Prompt Comparison
 - later Evaluation work — broader semantic diversity, recorded/live candidate evidence, latency, and cost only under separately approved scope
 - deployment/operations work — scheduled when environment and platform controls are defined
 
