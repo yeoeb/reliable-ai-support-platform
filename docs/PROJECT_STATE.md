@@ -92,7 +92,8 @@ Engineering Issue ID #023 — Candidate / Prompt Comparison
 - CP2 Bounded Comparison Implementation: completed and Supervisor-approved; Host focused verification passed with 48 tests
 - CP3 Full Regression / Determinism Verification: completed and Supervisor-approved
 - CP4 Comparison Validity / Safety Review: completed and Supervisor-approved
-- Current Checkpoint: CP5 Knowledge / Documentation
+- CP5 Knowledge / Documentation: completed and Supervisor-approved
+- Current Checkpoint: CP6 exact-Head delivery
 - Dependency baseline: #017 Offline LLM Evaluation, #018 AI Security Regression, and #022 Expanded Evaluation Coverage are complete
 - Current deterministic corpus: v2 = 80 cases; security-v2 = 40 cases; combined = 120
 - Comparison uses one Suite and two exactly reconciled normalized Candidate result files
@@ -262,7 +263,14 @@ Response with Evidence
 
 ## Known Documentation Debt
 
-No project-state documentation debt is currently recorded.
+- Deterministic V2 Evaluation fixtures require LF bytes, but the Repository does
+  not yet pin those paths with `.gitattributes text eol=lf`; Windows Checkout
+  with `core.autocrlf=true` can therefore create false byte-drift failures.
+- `test_preexisting_unlocked_lock_file_is_reusable` reads a Watcher lock file
+  through a second Handle while the exclusive lock is held. This passes with
+  POSIX advisory locks but raises `PermissionError` with Windows mandatory
+  lock semantics; cross-platform lock metadata inspection needs a separately
+  scoped Control Plane fix.
 
 ## Supervisor Rule
 
