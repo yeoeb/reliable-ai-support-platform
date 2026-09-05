@@ -2,12 +2,13 @@
 
 <!-- codex-dispatch-supervisor-approved-through: CP1 -->
 <!-- codex-dispatch-write-allow: ["app/services/demo_bootstrap.py","scripts/bootstrap_demo.py","scripts/start_product_demo.ps1","demo/knowledge/password-reset.md","demo/knowledge/vpn-access.md","demo/knowledge/escalation-policy.md","tests/test_demo_bootstrap.py","tests/test_product_demo_launcher.py","README.md","docs/PORTFOLIO_DEMO.md","docs/issues/issue-027-local-demo-bootstrap.md"] -->
+<!-- codex-dispatch-supervisor-rework: {"checkpoint":"CP2","attempt":1} -->
 
 - GitHub Issue: #113
 - Source: https://github.com/yeoeb/reliable-ai-support-platform/issues/113
 - Branch: `feature/issue-027-local-demo-bootstrap`
 - Base: `develop@eb45967ff41dbb55b6b8dc466980b772e74cd0b8`
-- Current checkpoint: CP2 authorized
+- Current checkpoint: CP2 rework attempt 1 authorized
 - Authorized through: CP1
 - Owner model: Supervisor defines gates; Watcher Agent implements CP2/CP3.
 
@@ -235,9 +236,15 @@ Dispatcher write allowlist.
 
 ## CP2 — Bounded implementation
 
-Authorized. Work only inside the machine-readable allowlist. Do not change the
-Supervisor markers. Implement the CP1 design and record exact changed paths and
-targeted evidence here. Do not commit or push; the Dispatcher owns publication.
+Rework attempt 1 is authorized after the initial CP2 execution stopped before
+editing because two Required Reading paths in this Supervisor-authored note were
+incorrect. The paths are now reconciled to `app/services/user.py`,
+`app/integrations/embeddings.py`, and `app/integrations/llm.py`. The initial
+attempt left the Working Tree clean and published no implementation checkpoint.
+
+Work only inside the machine-readable allowlist. Do not change the Supervisor
+markers. Implement the CP1 design and record exact changed paths and targeted
+evidence here. Do not commit or push; the Dispatcher owns publication.
 
 ## CP3 — Targeted verification
 
