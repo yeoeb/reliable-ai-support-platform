@@ -96,12 +96,13 @@ on test-only fixtures.
 - GitHub Issue #113 or this complete offline snapshot
 - `README.md`
 - `docs/PORTFOLIO_DEMO.md`
-- `app/services/users.py`
+- `app/services/user.py`
 - `app/services/auth.py`
 - `app/services/rbac.py`
 - `app/services/knowledge.py`
 - `app/services/embedding.py`
-- `app/integrations/openai_provider.py`
+- `app/integrations/embeddings.py`
+- `app/integrations/llm.py`
 - `scripts/start_codex_watch.ps1`
 - relevant Auth/RBAC/Knowledge/RAG/Approval tests
 
