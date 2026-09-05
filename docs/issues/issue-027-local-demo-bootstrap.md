@@ -1,15 +1,14 @@
 # Engineering Issue #027 — Local Demo Bootstrap and Operator CLI
 
-<!-- codex-dispatch-supervisor-approved-through: CP1 -->
+<!-- codex-dispatch-supervisor-approved-through: CP2 -->
 <!-- codex-dispatch-write-allow: ["app/services/demo_bootstrap.py","scripts/bootstrap_demo.py","scripts/start_product_demo.ps1","demo/knowledge/password-reset.md","demo/knowledge/vpn-access.md","demo/knowledge/escalation-policy.md","tests/test_demo_bootstrap.py","tests/test_product_demo_launcher.py","README.md","docs/PORTFOLIO_DEMO.md","docs/issues/issue-027-local-demo-bootstrap.md"] -->
-<!-- codex-dispatch-supervisor-rework: {"checkpoint":"CP2","attempt":1} -->
 
 - GitHub Issue: #113
 - Source: https://github.com/yeoeb/reliable-ai-support-platform/issues/113
 - Branch: `feature/issue-027-local-demo-bootstrap`
 - Base: `develop@eb45967ff41dbb55b6b8dc466980b772e74cd0b8`
-- Current checkpoint: CP2 rework attempt 1 authorized
-- Authorized through: CP1
+- Current checkpoint: CP3 authorized
+- Authorized through: CP2
 - Owner model: Supervisor defines gates; Watcher Agent implements CP2/CP3.
 
 ## Assigned GitHub Issue contract snapshot
@@ -242,8 +241,7 @@ incorrect. The paths are now reconciled to `app/services/user.py`,
 `app/integrations/embeddings.py`, and `app/integrations/llm.py`. The initial
 attempt left the Working Tree clean and published no implementation checkpoint.
 
-Status: **bounded implementation completed locally; focused pytest blocked by
-the local Python installation**.
+Status: **completed and published at `b0d7bdd8dc679dfcf2f4832fd36376af983020a2`; Windows Host verification is delegated to CP3**.
 
 Implemented paths:
 
@@ -294,9 +292,39 @@ same broken executable; `py`, `python3`, `uv`, and Docker are unavailable. No
 environment repair was attempted because `.venv` is outside the write
 allowlist. CP3 remains unexecuted and unauthorized.
 
+Supervisor CP2 review: **passed**.
+
+Review evidence:
+
+- base-to-Head comparison contains only the Supervisor-owned Project State
+  activation plus the eleven machine-allowlisted implementation/documentation
+  paths;
+- the Product launcher, bootstrap CLI, three seed documents, Service
+  orchestration, tests, and documentation are all present;
+- Password is read only through `getpass`; no Password/Token CLI option or
+  default secret exists;
+- Service and CLI reject non-development use before state-changing work;
+- existing accounts authenticate before admin reuse or explicit promotion;
+- default mode constructs no Embedding Provider; Live AI requires explicit
+  opt-in and configured `OPENAI_API_KEY`;
+- User, RBAC, Knowledge, Embedding, and Audit responsibilities remain delegated
+  to existing boundaries; no Schema, Migration, public API, Provider, workflow,
+  or Website change was made;
+- partial operations remain safely rerunnable through authenticated admin reuse
+  and content-addressed Knowledge/Embedding idempotency;
+- the focused tests are structurally aligned with the contract, but actual
+  execution must occur on the Windows Host in CP3.
+
 ## CP3 — Targeted verification
 
-Not authorized. Await Supervisor review of the published CP2 checkpoint.
+Authorized. Run the focused bootstrap/launcher suite first, then the relevant
+Auth/RBAC/Audit/Knowledge/Embedding/Retrieval/RAG/Approval regressions and the
+broad suite with PostgreSQL healthy. Validate PowerShell syntax, default/no-live
+behavior, secret scans, exact changed paths, and `git diff --check`.
+
+Fix only failures caused by the Issue #027 allowlisted implementation. Record
+exact commands and results. Stop on environment or regression failures and do
+not broaden Scope.
 
 ## CP4 — Diff and acceptance review
 
