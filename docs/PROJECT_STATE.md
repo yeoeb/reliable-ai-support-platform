@@ -1,6 +1,6 @@
 # Reliable AI Support Operations Platform — Project State
 
-Last verified: 2026-09-04
+Last verified: 2026-09-05
 
 ## Purpose
 
@@ -171,14 +171,25 @@ Delivery evidence:
 - main-only file diff: empty
 - repository version and FastAPI version: `0.2.0`
 
-No Engineering Issue is currently active. The planned Backend/AI safety
-practicum and portfolio-readiness sequence is complete and may be frozen at
-repository release `0.2.0`. Optional frontend, deployment, or live-benchmark
-work requires separately approved scope.
+## Active Engineering Issue
+
+Engineering Issue #027 — Local Demo Bootstrap and Operator CLI: **CP2 authorized**.
+
+Tracking:
+
+- GitHub Issue #113
+- Feature Branch: `feature/issue-027-local-demo-bootstrap`
+- CP0/CP1 completed by Supervisor on 2026-09-05
+- Goal: provide a development-only, one-command Windows PowerShell product
+  bootstrap for PostgreSQL, Alembic, local administrator creation, deterministic
+  Knowledge seeding, FastAPI startup, and optional explicitly enabled Live RAG
+- no Website, hosted deployment, production bootstrap, default password,
+  automatic Provider spending, RBAC semantic change, or Migration change
 
 Important: GitHub Issue/PR numbers are repository-wide platform sequence numbers and remain separate from Engineering Issue IDs.
 
 ## Optional Future Work
+- complete Engineering #027 before considering any additional Product surface
 - optional portfolio expansion — frontend and hosted demonstration only under separately approved scope
 - optional later Evaluation work — broader semantic diversity, recorded/live candidate evidence, latency, and cost only under separately approved scope
 - optional deployment/operations work — scheduled only when an environment and platform controls are defined
