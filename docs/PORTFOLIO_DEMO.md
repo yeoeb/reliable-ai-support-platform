@@ -32,26 +32,33 @@ The example `.env` is ready for an isolated local demo. Change its PostgreSQL
 password and `JWT_SECRET_KEY` before using the project beyond that disposable
 environment. Leave `OPENAI_API_KEY` empty for the default path.
 
-## 3. Start PostgreSQL and run Alembic
+## 3. Start the product demo
 
 ```powershell
-docker compose up -d --wait postgres
-docker compose ps
-python -m alembic upgrade head
+powershell -ExecutionPolicy Bypass -File scripts/start_product_demo.ps1
 ```
 
-Expected: PostgreSQL 16 with pgvector is healthy and Alembic reaches head.
+This is the primary entry point. The launcher verifies Docker, the repository
+virtual-environment interpreter, `.env`, Alembic, and the three fixed demo
+Knowledge files. It refuses an existing non-development `APP_ENV`, starts the
+PostgreSQL service, applies migrations, and then prompts for an administrator
+email and password. The password is read without echo and is never accepted as
+a command argument.
 
-## 4. Start and check the API
-
-In the current terminal:
+A new identity is created through the existing password-hashing and User
+service, receives the `admin` role through the audited RBAC service, and owns
+the Knowledge ingestion Audit events. Re-running with the same authenticated
+administrator reuses the identity and content-addressed documents. An existing
+non-admin is refused unless the operator explicitly uses `-PromoteExisting`
+and successfully authenticates that account:
 
 ```powershell
-python -m uvicorn app.main:app --reload
+powershell -ExecutionPolicy Bypass -File scripts/start_product_demo.ps1 `
+  -PromoteExisting
 ```
 
-Keep it running. In a second PowerShell terminal, return to the repository
-root and run:
+The launcher leaves FastAPI running in the foreground. In a second PowerShell
+terminal, return to the repository root and run:
 
 ```powershell
 .\.venv\Scripts\Activate.ps1
@@ -80,7 +87,12 @@ network layer.
 
 ```powershell
 $email = "portfolio.$([DateTimeOffset]::UtcNow.ToUnixTimeSeconds())@example.com"
-$password = "local-demo-password"
+$securePassword = Read-Host "Temporary test-user password" -AsSecureString
+$credential = [System.Management.Automation.PSCredential]::new(
+  $email,
+  $securePassword
+)
+$password = $credential.GetNetworkCredential().Password
 
 $newUser = Invoke-RestMethod `
   -Method Post `
@@ -105,6 +117,7 @@ $headers = @{ Authorization = "Bearer $($login.access_token)" }
 $me = Invoke-RestMethod -Uri "$baseUrl/auth/me" -Headers $headers
 $newUser
 $me
+Remove-Variable password
 ```
 
 The public response contains neither the password nor its hash. JWT establishes
@@ -133,10 +146,13 @@ protected request by default.
 
 ## 8. Demonstrate AI boundaries without a live provider
 
-The repository seeds roles and permissions, but it does not seed an
-administrator user or provide a privilege-bootstrap CLI. This guide does not
-fabricate an admin credential or ad hoc SQL grant. Existing API/service tests
-provide the reproducible privileged demonstration with fake providers:
+The default launcher path seeds three deterministic Markdown documents and
+makes no Provider calls. Because the documents have no vectors in this mode,
+live Retrieval/RAG requests are not claimed to work. The local administrator
+can still use authenticated Auth/RBAC/Audit/Knowledge/Tool/Approval APIs.
+
+Existing API/service tests provide a reproducible AI-boundary demonstration
+with fake providers:
 
 ```powershell
 python -m pytest -q `
@@ -191,41 +207,37 @@ verification. Before starting the API, set a valid key in `.env`:
 OPENAI_API_KEY=<your key>
 ```
 
-Restart Uvicorn after changing `.env`. Never expose the key in commands,
-logs, screenshots, source files, or Git history.
-
-Live routes require authorized state. Because the repository provides no
-default administrator or bootstrap command, this path assumes an operator has
-separately provisioned a suitable identity:
+Never expose the key in commands, logs, screenshots, source files, or Git
+history. Start the demo with explicit opt-in:
 
 ```powershell
-$adminToken = Read-Host "Authorized bearer token"
+powershell -ExecutionPolicy Bypass -File scripts/start_product_demo.ps1 `
+  -EnableLiveAi
+```
+
+The bootstrap validates that a key is configured before database or Provider
+work, then creates embeddings for the three seeded documents through the
+existing embedding service. Provider requests can incur cost and are
+nondeterministic. The launcher never enables them implicitly.
+
+After the API starts, sign in through `POST /auth/login` in Swagger using the
+administrator email and the password entered interactively. Copy the returned
+token into Swagger's **Authorize** dialog, or read it interactively for the
+PowerShell examples:
+
+```powershell
+$secureAdminToken = Read-Host "Authorized bearer token" -AsSecureString
+$tokenCredential = [System.Management.Automation.PSCredential]::new(
+  "token",
+  $secureAdminToken
+)
+$adminToken = $tokenCredential.GetNetworkCredential().Password
 $adminHeaders = @{ Authorization = "Bearer $adminToken" }
 ```
 
-With `knowledge:manage`, ingest synthetic content and create embeddings:
-
-```powershell
-$document = Invoke-RestMethod `
-  -Method Post `
-  -Uri "$baseUrl/admin/knowledge/documents" `
-  -Headers $adminHeaders `
-  -ContentType "application/json" `
-  -Body (@{
-    title = "Synthetic return policy"
-    source_type = "markdown"
-    source_name = "portfolio-demo.md"
-    content = "# Returns`nSynthetic demo orders may be returned within 30 days."
-  } | ConvertTo-Json)
-
-$embedding = Invoke-RestMethod `
-  -Method Post `
-  -Uri "$baseUrl/admin/knowledge/documents/$($document.id)/embeddings" `
-  -Headers $adminHeaders
-$embedding
-```
-
-With `knowledge:read`, run exact retrieval and grounded generation:
+The seeded documents are already ingested and embedded. With the authenticated
+administrator, exercise exact Retrieval and grounded RAG using the existing
+endpoints:
 
 ```powershell
 $search = Invoke-RestMethod `
@@ -234,7 +246,7 @@ $search = Invoke-RestMethod `
   -Headers $adminHeaders `
   -ContentType "application/json" `
   -Body (@{
-    query = "When may a synthetic demo order be returned?"
+    query = "When should a suspected account takeover be escalated?"
     top_k = 5
     min_similarity = 0.0
   } | ConvertTo-Json)
@@ -245,7 +257,7 @@ $answer = Invoke-RestMethod `
   -Headers $adminHeaders `
   -ContentType "application/json" `
   -Body (@{
-    question = "When may a synthetic demo order be returned?"
+    question = "When should a suspected account takeover be escalated?"
     top_k = 5
     min_similarity = 0.0
   } | ConvertTo-Json)

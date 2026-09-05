@@ -242,9 +242,57 @@ incorrect. The paths are now reconciled to `app/services/user.py`,
 `app/integrations/embeddings.py`, and `app/integrations/llm.py`. The initial
 attempt left the Working Tree clean and published no implementation checkpoint.
 
-Work only inside the machine-readable allowlist. Do not change the Supervisor
-markers. Implement the CP1 design and record exact changed paths and targeted
-evidence here. Do not commit or push; the Dispatcher owns publication.
+Status: **bounded implementation completed locally; focused pytest blocked by
+the local Python installation**.
+
+Implemented paths:
+
+- `app/services/demo_bootstrap.py`
+- `scripts/bootstrap_demo.py`
+- `scripts/start_product_demo.ps1`
+- `demo/knowledge/password-reset.md`
+- `demo/knowledge/vpn-access.md`
+- `demo/knowledge/escalation-policy.md`
+- `tests/test_demo_bootstrap.py`
+- `tests/test_product_demo_launcher.py`
+- `README.md`
+- `docs/PORTFOLIO_DEMO.md`
+- `docs/issues/issue-027-local-demo-bootstrap.md`
+
+Bounded implementation evidence:
+
+- development-only guards exist in both the Service and CLI; the launcher
+  validates either process `APP_ENV` or the single `.env` setting before any
+  state-changing command;
+- the CLI accepts no password/token argument and reads the administrator
+  password through `getpass` only;
+- new identities use `UserService` and audited `RBACService`; existing
+  identities must authenticate before exact `admin` membership is reused or an
+  explicitly opted-in promotion is attempted;
+- the three fixed Markdown files are loaded from a root-contained directory and
+  ingested through `KnowledgeService` with stable source names;
+- no embedding Provider is constructed in default mode; explicit Live AI
+  refuses a missing key before prompting for a secret or touching the database,
+  then uses the existing `EmbeddingService`;
+- the PowerShell launcher pins `.venv\Scripts\python.exe`, checks prerequisites,
+  starts PostgreSQL, applies Alembic, invokes bootstrap, prints bounded local
+  URLs, and keeps Uvicorn in the foreground;
+- native PowerShell `[scriptblock]::Create(...)`: PASS;
+- launcher structure/default-secret scan: PASS;
+- machine allowlist write-set check: PASS;
+- `git diff --check`: PASS.
+
+Focused test command attempted:
+
+```text
+.\.venv\Scripts\python.exe -m pytest tests/test_demo_bootstrap.py tests/test_product_demo_launcher.py -q
+```
+
+It could not start because `.venv\Scripts\python.exe` points to a removed
+Windows Store Python 3.11 installation. The `python` command resolves to the
+same broken executable; `py`, `python3`, `uv`, and Docker are unavailable. No
+environment repair was attempted because `.venv` is outside the write
+allowlist. CP3 remains unexecuted and unauthorized.
 
 ## CP3 — Targeted verification
 

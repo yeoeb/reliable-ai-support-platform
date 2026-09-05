@@ -4,10 +4,10 @@ A backend portfolio project for AI-assisted support workflows that remain
 testable, permission-aware, auditable, and fail-closed when model or
 infrastructure behavior is unreliable.
 
-**Maturity:** version `0.1.0` is a hardened local-development reference
-implementation, not a hosted production service. Engineering Issues #001-#024
-are implemented, including deterministic candidate comparison and
-cross-platform evaluation-fixture verification.
+**Maturity:** version `0.2.0` is a hardened local-development reference
+implementation, not a hosted production service. It includes a
+development-only operator bootstrap; it does not create production identities
+or provide hosted deployment.
 
 ## What it demonstrates
 
@@ -103,13 +103,30 @@ python -m venv .venv
 python -m pip install -r requirements/dev.txt
 
 Copy-Item .env.example .env
-docker compose up -d --wait postgres
-python -m alembic upgrade head
-python -m uvicorn app.main:app --reload
+powershell -ExecutionPolicy Bypass -File scripts/start_product_demo.ps1
 ```
 
-Open <http://127.0.0.1:8000/docs>. `OPENAI_API_KEY` is not required for
-startup, the local identity flow, or deterministic offline verification.
+The launcher requires the repository `.venv`, Docker Desktop, `.env`, and
+PowerShell. It starts PostgreSQL, applies Alembic migrations, interactively
+prompts for the local administrator email and password, seeds deterministic
+demo Knowledge, and starts FastAPI in the foreground. It refuses a
+non-development `APP_ENV`. Stop FastAPI with `Ctrl+C`.
+
+Open <http://127.0.0.1:8000/docs>. `OPENAI_API_KEY` is not required for the
+default path, and no Provider call is made. Health, identity, RBAC, Audit,
+Knowledge ingestion, Tool, Approval, and metrics surfaces remain available.
+Retrieval and grounded RAG require embeddings, so live AI is available only
+through the explicit, potentially cost-bearing launcher option:
+
+```powershell
+powershell -ExecutionPolicy Bypass -File scripts/start_product_demo.ps1 `
+  -EnableLiveAi
+```
+
+Set a valid `OPENAI_API_KEY` in `.env` first. The key and administrator
+password are never accepted as command arguments or printed. If the email
+already belongs to a non-admin, the bootstrap refuses promotion by default;
+after verifying ownership of that account, explicitly add `-PromoteExisting`.
 
 Follow [`docs/PORTFOLIO_DEMO.md`](docs/PORTFOLIO_DEMO.md) for the exact
 health, Swagger, Auth/RBAC, bounded AI demonstration, offline evaluation,
@@ -146,8 +163,9 @@ Evaluation formats and exit codes are in
    Tool Calling, and durable Human Approval (#011-#016).
 3. Offline evaluation, adversarial AI security regression, operational
    metrics, CI/release hardening, and the first hardened release (#017-#021).
-4. Expanded evaluation coverage, Candidate / Prompt Comparison, and
-   cross-platform determinism/Watcher completion evidence (#022-#024).
+4. Expanded evaluation coverage, Candidate / Prompt Comparison,
+   cross-platform determinism/Watcher completion evidence, portfolio guidance,
+   and the second hardened release (#022-#026).
 
 ## Limitations and optional future work
 
